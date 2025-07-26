@@ -48,5 +48,19 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.8.3"
+  },
+  "overrides": {
+    "@ngrx/store": {
+      "@angular/core": "$@angular/core"
+    },
+    "@ngrx/effects": {
+      "@angular/core": "$@angular/core"
+    },
+    "@ngrx/entity": {
+      "@angular/core": "$@angular/core"
+    },
+    "@ngrx/store-devtools": {
+      "@angular/core": "$@angular/core"
+    }
   }
 }
