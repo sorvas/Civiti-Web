@@ -20,7 +20,8 @@ export const routes: Routes = [
   {
     path: 'issue/:id',
     loadComponent: () => import('./components/issue-detail/issue-detail.component').then(m => m.IssueDetailComponent),
-    data: { animation: 'DetailPage' }
+    // Skip prerendering for dynamic routes with parameters
+    data: { animation: 'DetailPage', renderMode: 'client' }
   },
   // Fallback route
   {

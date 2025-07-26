@@ -1,7 +1,7 @@
 <div class="email-modal-container">
   <h2 mat-dialog-title class="text-oxford-blue font-semibold text-xl mb-4">
     <mat-icon class="mr-2 text-orange-web">email</mat-icon>
-    Email către {{ authority?.name }}
+    Email către {{ authority.name }}
   </h2>
 
   <mat-dialog-content class="max-h-96 overflow-y-auto">
@@ -73,12 +73,12 @@
       <div class="mb-3">
         <div class="flex items-center justify-between">
           <strong class="text-oxford-blue">Către:</strong>
-          <button mat-icon-button (click)="copyToClipboard(authority?.email || '')" 
+          <button mat-icon-button (click)="copyToClipboard(authority.email || '')" 
                   matTooltip="Copiază adresa email">
             <mat-icon class="text-orange-web">content_copy</mat-icon>
           </button>
         </div>
-        <p class="text-sm text-oxford-blue opacity-75 mt-1">{{ authority?.email }}</p>
+        <p class="text-sm text-oxford-blue opacity-75 mt-1">{{ authority.email }}</p>
       </div>
 
       <!-- Email Subject -->
