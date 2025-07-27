@@ -16,13 +16,14 @@ import {
 } from '@angular/platform-browser';
 import { reducers } from './store/app.reducers';
 import { IssueEffects } from './store/issues/issue.effects';
+import { LocationEffects } from './store/location/location.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
     provideStore(reducers),
-    provideEffects([IssueEffects]),
+    provideEffects([IssueEffects, LocationEffects]),
     provideStoreDevtools({
       maxAge: 25,
       logOnly: !isDevMode(),

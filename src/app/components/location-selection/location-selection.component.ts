@@ -217,11 +217,8 @@ export class LocationSelectionComponent implements OnInit {
         district: this._sanitizer.sanitizeUrlParam(rawData.district || '')
       };
       
-      // Dispatch action to store location in state
+      // Dispatch action to store location in state (effects will handle storage)
       this._store.dispatch(LocationActions.setLocation(selectedLocation));
-      
-      // Store selection in session storage for consistency
-      sessionStorage.setItem('civica-location', JSON.stringify(selectedLocation));
       
       // Navigate to issues list
       this._router.navigate(['/issues']);
