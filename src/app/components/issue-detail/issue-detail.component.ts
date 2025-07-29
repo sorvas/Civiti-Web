@@ -96,22 +96,25 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         const issueId = this._route.snapshot.paramMap.get('id');
         if (issueId) {
             this._store.dispatch(IssueActions.loadIssue({ id: issueId }));
-            // Set map as loaded immediately since Angular Google Maps handles loading
-            this.isMapLoaded = true;
-            
-            // Get issue data and geocode address
-            this.issue$.pipe(take(1)).subscribe(issue => {
-                if (issue) {
-                    // Update marker options with issue title
-                    this.markerOptions = {
-                        ...this.markerOptions,
-                        title: issue.title
-                    };
-                    // Delay geocoding to ensure map is ready
-                    setTimeout(() => {
+            // Wait for Google Maps API to load
+            this.checkGoogleMapsLoaded().then(() => {
+                this.isMapLoaded = true;
+                
+                // Get issue data and geocode address
+                this.issue$.pipe(take(1)).subscribe(issue => {
+                    if (issue) {
+                        // Update marker options with issue title
+                        this.markerOptions = {
+                            ...this.markerOptions,
+                            title: issue.title
+                        };
+                        // Geocode the address
                         this.geocodeAddress(issue.location.address);
-                    }, 1000);
-                }
+                    }
+                });
+            }).catch(error => {
+                console.error('Failed to load Google Maps:', error);
+                this.mapLoadError = true;
             });
         } else {
             this.goBack();
@@ -248,6 +251,32 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         this._router.navigate(['/issues']);
     }
 
+    private checkGoogleMapsLoaded(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            // Only check in browser
+            if (!isPlatformBrowser(this._platformId)) {
+                resolve();
+                return;
+            }
+
+            let attempts = 0;
+            const maxAttempts = 20; // 10 seconds max wait
+
+            const checkInterval = setInterval(() => {
+                attempts++;
+                
+                // Check if Google Maps is loaded
+                if (typeof google !== 'undefined' && google.maps && google.maps.Map) {
+                    clearInterval(checkInterval);
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    reject(new Error('Google Maps API failed to load after 10 seconds'));
+                }
+            }, 500);
+        });
+    }
+
     private geocodeAddress(address: string): void {
         if (!isPlatformBrowser(this._platformId) || !address) {
             return;
@@ -255,6 +284,14 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
         // Check if we've already geocoded this address
         if (this._geocodedAddress === address) {
+            return;
+        }
+
+        // Check if Google Maps API is loaded
+        if (typeof google === 'undefined' || !google.maps || !google.maps.Geocoder) {
+            console.warn('Google Maps API not yet loaded, retrying...');
+            // Retry after a delay
+            setTimeout(() => this.geocodeAddress(address), 500);
             return;
         }
 
