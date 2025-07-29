@@ -10,7 +10,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { take, filter, takeUntil } from 'rxjs/operators';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
@@ -50,9 +50,10 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     private _lightbox: any;
     private _geocodedAddress: string | null = null;
     private _destroy$ = new Subject<void>();
-    private _dialogSubscription?: Subscription;
     private _geocodeRetryCount = 0;
     private readonly _maxGeocodeRetries = 10;
+    private _geocodeTimeoutId?: number;
+    private _galleryTimeoutId?: number;
     
     @ViewChild('infoWindow') infoWindow!: MapInfoWindow;
     @ViewChild('markerElement') markerElement!: MapMarker;
@@ -92,7 +93,15 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
                 takeUntil(this._destroy$)
             ).subscribe(issue => {
                 if (issue && this._lightbox) {
-                    setTimeout(() => this.refreshGallery(), 100);
+                    // Clear any existing timeout
+                    if (this._galleryTimeoutId) {
+                        clearTimeout(this._galleryTimeoutId);
+                    }
+                    this._galleryTimeoutId = setTimeout(() => {
+                        if (!this._destroy$.closed) {
+                            this.refreshGallery();
+                        }
+                    }, 100) as any;
                 }
             });
         }
@@ -135,20 +144,6 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             this.initializeGallery();
         }
         
-        // Debug marker and info window elements
-        setTimeout(() => {
-            if (this.markerElement) {
-                console.log('Marker element available:', this.markerElement);
-            } else {
-                console.log('Marker element not available');
-            }
-            if (this.infoWindow) {
-                console.log('Info window available:', this.infoWindow);
-                console.log('Info window methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.infoWindow)));
-            } else {
-                console.log('Info window not available');
-            }
-        }, 2000);
     }
 
     ngOnDestroy(): void {
@@ -156,9 +151,12 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         this._destroy$.next();
         this._destroy$.complete();
         
-        // Clean up dialog subscription
-        if (this._dialogSubscription) {
-            this._dialogSubscription.unsubscribe();
+        // Clear all pending timeouts
+        if (this._geocodeTimeoutId) {
+            clearTimeout(this._geocodeTimeoutId);
+        }
+        if (this._galleryTimeoutId) {
+            clearTimeout(this._galleryTimeoutId);
         }
         
         // Clean up the lightbox instance
@@ -211,7 +209,10 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         });
 
         // Refresh issue data after modal closes to update email count
-        this._dialogSubscription = dialogRef.afterClosed().subscribe(() => {
+        // Using take(1) to automatically unsubscribe after the first emission
+        dialogRef.afterClosed().pipe(
+            take(1)
+        ).subscribe(() => {
             this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));
         });
     }
@@ -321,7 +322,18 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             console.warn(`Google Maps API not yet loaded, retrying... (attempt ${this._geocodeRetryCount}/${this._maxGeocodeRetries})`);
             // Retry after a delay with exponential backoff
             const delay = Math.min(500 * Math.pow(1.5, this._geocodeRetryCount - 1), 5000);
-            setTimeout(() => this.geocodeAddress(address), delay);
+            
+            // Clear any existing timeout before setting a new one
+            if (this._geocodeTimeoutId) {
+                clearTimeout(this._geocodeTimeoutId);
+            }
+            
+            this._geocodeTimeoutId = setTimeout(() => {
+                // Check if component is still alive before calling geocodeAddress
+                if (!this._destroy$.closed) {
+                    this.geocodeAddress(address);
+                }
+            }, delay) as any;
             return;
         }
         
@@ -380,7 +392,18 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             
             // Retry after a delay with exponential backoff
             const delay = Math.min(1000 * Math.pow(1.5, this._geocodeRetryCount - 1), 5000);
-            setTimeout(() => this.geocodeAddress(address), delay);
+            
+            // Clear any existing timeout before setting a new one
+            if (this._geocodeTimeoutId) {
+                clearTimeout(this._geocodeTimeoutId);
+            }
+            
+            this._geocodeTimeoutId = setTimeout(() => {
+                // Check if component is still alive before calling geocodeAddress
+                if (!this._destroy$.closed) {
+                    this.geocodeAddress(address);
+                }
+            }, delay) as any;
         }
     }
 
