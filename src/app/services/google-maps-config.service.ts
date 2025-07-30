@@ -71,13 +71,33 @@ export class GoogleMapsConfigService {
     }
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geocoding&loading=async`;
+    // Use the newer loading parameter that Angular Google Maps expects
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async`;
     script.async = true;
     script.defer = true;
 
-    script.onload = () => {
-      console.log('Google Maps script loaded successfully');
-      resolve();
+    script.onload = async () => {
+      console.log('Google Maps script loaded, initializing libraries...');
+      
+      // Load required libraries using the new API
+      if ((window as any).google && (window as any).google.maps && (window as any).google.maps.importLibrary) {
+        try {
+          await Promise.all([
+            (window as any).google.maps.importLibrary('maps'),
+            (window as any).google.maps.importLibrary('places'),
+            (window as any).google.maps.importLibrary('geocoding')
+          ]);
+          console.log('Google Maps libraries loaded successfully');
+          resolve();
+        } catch (error) {
+          console.error('Failed to load Google Maps libraries:', error);
+          reject(new Error('Failed to load Google Maps libraries'));
+        }
+      } else {
+        // Fallback for older API
+        console.log('Using legacy Google Maps API');
+        resolve();
+      }
     };
     
     script.onerror = () => {

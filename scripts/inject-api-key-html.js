@@ -31,6 +31,14 @@ function findAndReplace(dir) {
         content = content.replace(/YOUR_DEVELOPMENT_API_KEY/g, googleMapsApiKey);
         fs.writeFileSync(fullPath, content, 'utf8');
         console.log('✓ Replaced API key in HTML');
+      } else if (content.includes('key: "') && content.includes('v: "weekly"')) {
+        // Handle the inline loader format
+        content = content.replace(
+          /key: "[^"]*"/,
+          `key: "${googleMapsApiKey}"`
+        );
+        fs.writeFileSync(fullPath, content, 'utf8');
+        console.log('✓ Replaced API key in inline loader');
       }
     }
   });

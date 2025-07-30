@@ -282,12 +282,33 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         }
 
         try {
-            // Load Google Maps script dynamically
-            await this._googleMapsConfig.loadGoogleMapsScript();
+            // Wait for Google Maps to be loaded (it's loaded in index.html)
+            await this.waitForGoogleMaps();
         } catch (error) {
             console.error('Error initializing Google Maps:', error);
             throw error;
         }
+    }
+
+    private waitForGoogleMaps(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            let attempts = 0;
+            const maxAttempts = 20;
+
+            const check = () => {
+                if (typeof google !== 'undefined' && google.maps) {
+                    console.log('Google Maps is ready');
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    reject(new Error('Google Maps failed to load'));
+                } else {
+                    attempts++;
+                    setTimeout(check, 500);
+                }
+            };
+
+            check();
+        });
     }
 
 

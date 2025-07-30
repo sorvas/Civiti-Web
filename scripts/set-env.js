@@ -83,6 +83,16 @@ export const googleMapsConfig = {
     fs.writeFileSync(srcIndexPath, updatedContent, 'utf8');
     console.log('✓ Updated src/index.html for development');
     console.log('IMPORTANT: Remember to run "npm run restore-placeholder" before committing!');
+  } else if (srcContent.includes('key: "') && srcContent.includes('v: "weekly"')) {
+    // Handle the inline loader format
+    const updatedContent = srcContent.replace(
+      /key: "[^"]*"/,
+      `key: "${googleMapsApiKey}"`
+    );
+    
+    fs.writeFileSync(srcIndexPath, updatedContent, 'utf8');
+    console.log('✓ Updated Google Maps API key in src/index.html for development');
+    console.log('IMPORTANT: Remember to run "npm run restore-placeholder" before committing!');
   }
 } else if (process.argv.includes('--restore')) {
   // Special mode to restore the placeholders
@@ -91,10 +101,10 @@ export const googleMapsConfig = {
   // Restore HTML
   let srcContent = fs.readFileSync(srcIndexPath, 'utf8');
   
-  // Replace both in script tag and meta tag
+  // Replace in inline loader
   let restoredContent = srcContent.replace(
-    /key=([^&"]+)/,
-    'key=YOUR_DEVELOPMENT_API_KEY'
+    /key: "[^"]*"/,
+    'key: "YOUR_DEVELOPMENT_API_KEY"'
   );
   
   // Also restore in meta tag
