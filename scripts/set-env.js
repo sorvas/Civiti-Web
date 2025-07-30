@@ -89,44 +89,53 @@ if (isDevelopment) {
   // For production builds, find and replace in all index.html files
   console.log('Production build mode - searching for index.html files...');
   
-  const { execSync } = require('child_process');
-  
-  try {
-    // Use find command to locate all index.html files in dist
-    const findCommand = process.platform === 'win32' 
-      ? 'dir /s /b dist\\*.html | findstr index.html'
-      : 'find dist -name "index.html" -type f 2>/dev/null || true';
+  // Recursive function to find all index.html files
+  function findIndexFiles(dir) {
+    let results = [];
     
-    const files = execSync(findCommand, { encoding: 'utf8' })
-      .split('\n')
-      .filter(file => file.trim());
-    
-    if (files.length === 0) {
-      console.warn('No index.html files found in dist directory');
-      console.warn('This might be normal if running before the build completes');
-      return;
+    if (!fs.existsSync(dir)) {
+      return results;
     }
     
-    console.log(`Found ${files.length} index.html file(s)`);
+    const files = fs.readdirSync(dir);
     
-    files.forEach(file => {
-      const filePath = file.trim();
-      if (filePath && fs.existsSync(filePath)) {
-        console.log(`Processing: ${filePath}`);
-        let content = fs.readFileSync(filePath, 'utf8');
-        
-        if (content.includes('YOUR_DEVELOPMENT_API_KEY')) {
-          content = content.replace(/YOUR_DEVELOPMENT_API_KEY/g, googleMapsApiKey);
-          fs.writeFileSync(filePath, content, 'utf8');
-          console.log(`✓ API key injected`);
-        } else {
-          console.log(`  - Skipped (no placeholder found)`);
-        }
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      
+      if (stat.isDirectory()) {
+        // Recursively search subdirectories
+        results = results.concat(findIndexFiles(filePath));
+      } else if (file === 'index.html') {
+        // Only match files named exactly 'index.html'
+        results.push(filePath);
       }
-    });
+    }
     
-  } catch (error) {
-    console.error('Error during API key injection:', error.message);
-    // Don't exit with error - this might run before files exist
+    return results;
   }
+  
+  const distDir = path.join(__dirname, '../dist');
+  const indexFiles = findIndexFiles(distDir);
+  
+  if (indexFiles.length === 0) {
+    console.warn('No index.html files found in dist directory');
+    console.warn('This might be normal if running before the build completes');
+    return;
+  }
+  
+  console.log(`Found ${indexFiles.length} index.html file(s)`);
+  
+  indexFiles.forEach(filePath => {
+    console.log(`Processing: ${filePath}`);
+    let content = fs.readFileSync(filePath, 'utf8');
+    
+    if (content.includes('YOUR_DEVELOPMENT_API_KEY')) {
+      content = content.replace(/YOUR_DEVELOPMENT_API_KEY/g, googleMapsApiKey);
+      fs.writeFileSync(filePath, content, 'utf8');
+      console.log(`✓ API key injected`);
+    } else {
+      console.log(`  - Skipped (no placeholder found)`);
+    }
+  });
 }
