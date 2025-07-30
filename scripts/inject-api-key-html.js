@@ -4,12 +4,17 @@ const path = require('path');
 // Get the API key from environment
 const googleMapsApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
+console.log('Post-build HTML API key injection...');
+console.log('Current working directory:', process.cwd());
+console.log('Script directory:', __dirname);
+
 if (!googleMapsApiKey) {
   console.error('ERROR: VITE_GOOGLE_MAPS_API_KEY is not set!');
+  console.error('Environment variables available:', Object.keys(process.env).filter(k => k.includes('GOOGLE') || k.includes('VITE')));
   process.exit(1);
 }
 
-console.log('Post-build HTML API key injection...');
+console.log('API key found (length):', googleMapsApiKey.length);
 
 // Simple recursive search for HTML files
 function findAndReplace(dir) {
@@ -58,5 +63,38 @@ function findAndReplace(dir) {
 }
 
 // Start from dist directory
-findAndReplace('dist');
+const possibleDistDirs = [
+  'dist',
+  path.join(process.cwd(), 'dist'),
+  path.join(process.cwd(), 'dist/Civica'),
+  path.join(process.cwd(), 'dist/Civica/browser'),
+  path.join(process.cwd(), '.vercel/output/static'),
+  path.join(process.cwd(), '.vercel/output')
+];
+
+console.log('Searching for dist directories...');
+let foundAny = false;
+
+for (const distDir of possibleDistDirs) {
+  if (fs.existsSync(distDir)) {
+    console.log(`Found directory: ${distDir}`);
+    
+    // List contents for debugging
+    try {
+      const items = fs.readdirSync(distDir);
+      console.log(`  Contents: ${items.slice(0, 10).join(', ')}${items.length > 10 ? '...' : ''}`);
+    } catch (e) {
+      console.log(`  Could not read directory: ${e.message}`);
+    }
+    
+    findAndReplace(distDir);
+    foundAny = true;
+  }
+}
+
+if (!foundAny) {
+  console.error('WARNING: No dist directories found!');
+  console.error('Searched in:', possibleDistDirs);
+}
+
 console.log('HTML injection complete!');
