@@ -9,45 +9,17 @@ if (!googleMapsApiKey) {
   process.exit(1);
 }
 
-console.log('API key found, searching for index.html files...');
+console.log('Pre-build API key injection...');
 
-// Also update the TypeScript config file if it exists
+// Update the TypeScript config file BEFORE build
 const configPath = path.join(__dirname, '../src/environments/google-maps-config.ts');
-if (fs.existsSync(configPath)) {
-  console.log('Updating google-maps-config.ts...');
-  const configContent = `// This file is auto-generated during build
+console.log('Updating google-maps-config.ts...');
+const configContent = `// This file is auto-generated during build
 export const googleMapsConfig = {
   apiKey: '${googleMapsApiKey}'
 };`;
-  fs.writeFileSync(configPath, configContent, 'utf8');
-  console.log('✓ Updated config file');
-}
+fs.writeFileSync(configPath, configContent, 'utf8');
+console.log('✓ Updated config file');
 
-// Simple recursive search for HTML files
-function findAndReplace(dir) {
-  if (!fs.existsSync(dir)) return;
-  
-  const items = fs.readdirSync(dir);
-  
-  items.forEach(item => {
-    const fullPath = path.join(dir, item);
-    const stat = fs.statSync(fullPath);
-    
-    if (stat.isDirectory()) {
-      findAndReplace(fullPath);
-    } else if (item === 'index.html') {
-      console.log(`Found: ${fullPath}`);
-      let content = fs.readFileSync(fullPath, 'utf8');
-      
-      if (content.includes('YOUR_DEVELOPMENT_API_KEY')) {
-        content = content.replace(/YOUR_DEVELOPMENT_API_KEY/g, googleMapsApiKey);
-        fs.writeFileSync(fullPath, content, 'utf8');
-        console.log('✓ Replaced API key in HTML');
-      }
-    }
-  });
-}
-
-// Start from dist directory
-findAndReplace('dist');
-console.log('Done!');
+// We'll need a separate post-build script for HTML files
+console.log('TypeScript config ready for build!');
