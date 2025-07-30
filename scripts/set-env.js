@@ -115,12 +115,31 @@ if (isDevelopment) {
     return results;
   }
   
-  const distDir = path.join(__dirname, '../dist');
-  const indexFiles = findIndexFiles(distDir);
+  // Try multiple possible dist locations
+  const possibleDistDirs = [
+    path.join(__dirname, '../dist'),
+    path.join(process.cwd(), 'dist'),
+    '/vercel/path0/dist',
+    '/vercel/path0/dist/Civica',
+    '/vercel/path0/dist/Civica/browser'
+  ];
+  
+  let indexFiles = [];
+  
+  for (const distDir of possibleDistDirs) {
+    if (fs.existsSync(distDir)) {
+      console.log(`Checking directory: ${distDir}`);
+      const found = findIndexFiles(distDir);
+      indexFiles = indexFiles.concat(found);
+    }
+  }
+  
+  // Remove duplicates
+  indexFiles = [...new Set(indexFiles)];
   
   if (indexFiles.length === 0) {
-    console.warn('No index.html files found in dist directory');
-    console.warn('This might be normal if running before the build completes');
+    console.warn('No index.html files found in any dist directory');
+    console.warn('Searched in:', possibleDistDirs);
     return;
   }
   
