@@ -35,9 +35,10 @@ fs.writeFileSync(configPath, configContent, 'utf8');
 console.log('✓ Updated config file');
 
 // ALSO update the source index.html BEFORE build
+// NOTE: This will be restored by the postbuild script to prevent accidental commits
 const srcIndexPath = path.join(__dirname, '../src/index.html');
 if (fs.existsSync(srcIndexPath)) {
-  console.log('Updating src/index.html...');
+  console.log('Updating src/index.html (will be restored after build)...');
   let htmlContent = fs.readFileSync(srcIndexPath, 'utf8');
   let modified = false;
   
