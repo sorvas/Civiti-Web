@@ -18,10 +18,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-    <!-- Simple Google Maps loader -->
-    <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=YOUR_DEVELOPMENT_API_KEY&libraries=places,geocoding&callback=initMap&loading=async">
-    </script>
+    <!-- Define callbacks before loading Google Maps -->
     <script>
       // Initialize callback
       window.initMap = function() {
@@ -35,6 +32,10 @@
       window.gm_authFailure = function() {
         console.error('Google Maps authentication failed. Please check your API key and restrictions.');
       };
+    </script>
+    <!-- Load Google Maps after callbacks are defined -->
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_DEVELOPMENT_API_KEY&libraries=places,geocoding&callback=initMap&loading=async">
     </script>
   </head>
   <body>
