@@ -13,6 +13,9 @@
 // Include Angular Material core
 @include mat.core();
 
+// NG-ZORRO theme is loaded separately in angular.json
+// Custom overrides are applied below
+
 // Define Civica CSS Variables (from Colour-Scheme.md)
 :root {
   /* Primary Colors - HEX */
@@ -431,5 +434,113 @@ body {
   .gslide-description {
     background: var(--white);
     border-top: 3px solid var(--orange-web);
+  }
+}
+
+// NG-ZORRO Global Overrides for Civica Theme
+.ant-btn-primary {
+  background-color: var(--orange-web) !important;
+  border-color: var(--orange-web) !important;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  
+  &:hover, &:focus {
+    background: var(--gradient-cta) !important;
+    border-color: var(--orange-web) !important;
+  }
+  
+  &[disabled] {
+    background-color: var(--platinum) !important;
+    border-color: var(--platinum) !important;
+    color: var(--oxford-blue) !important;
+    opacity: 0.6;
+  }
+}
+
+.ant-btn-default {
+  color: var(--oxford-blue) !important;
+  border-color: var(--platinum) !important;
+  
+  &:hover {
+    color: var(--orange-web) !important;
+    border-color: var(--orange-web) !important;
+  }
+}
+
+// NG-ZORRO Card styling
+.ant-card {
+  border-color: var(--platinum) !important;
+  
+  .ant-card-head {
+    color: var(--oxford-blue);
+    border-bottom-color: var(--platinum);
+    
+    .ant-card-head-title {
+      color: var(--oxford-blue);
+      font-weight: 600;
+    }
+  }
+  
+  &:hover {
+    box-shadow: var(--card-hover-shadow);
+  }
+}
+
+// NG-ZORRO Form styling
+.ant-form-item-label > label {
+  color: var(--oxford-blue) !important;
+  font-weight: 600;
+  
+  &.ant-form-item-required::before {
+    color: var(--orange-web) !important;
+  }
+}
+
+// NG-ZORRO Tag styling (for email counter)
+.ant-tag {
+  &.email-counter-tag {
+    background-color: var(--orange-web) !important;
+    color: var(--white) !important;
+    border: none !important;
+    font-weight: 800;
+    font-size: var(--text-xl);
+    padding: 4px 16px;
+    height: auto;
+  }
+}
+
+// NG-ZORRO Modal styling
+.ant-modal {
+  .ant-modal-header {
+    background-color: var(--white);
+    border-bottom-color: var(--platinum);
+    
+    .ant-modal-title {
+      color: var(--oxford-blue);
+      font-weight: 600;
+      font-size: var(--text-xl);
+    }
+  }
+  
+  .ant-modal-footer {
+    border-top-color: var(--platinum);
+  }
+}
+
+// NG-ZORRO Message styling
+.ant-message {
+  .ant-message-notice-content {
+    .ant-message-success {
+      .anticon {
+        color: var(--color-success);
+      }
+    }
+    
+    .ant-message-error {
+      .anticon {
+        color: var(--color-error);
+      }
+    }
   }
 }

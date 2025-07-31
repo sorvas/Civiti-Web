@@ -1,14 +1,20 @@
 import { Component, inject, OnInit, OnDestroy, AfterViewInit, PLATFORM_ID, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzBadgeModule } from 'ng-zorro-antd/badge';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { take, filter, takeUntil } from 'rxjs/operators';
@@ -25,14 +31,20 @@ import { GoogleMapsConfigService } from '../../services/google-maps-config.servi
     standalone: true,
     imports: [
         CommonModule,
-        MatCardModule,
-        MatButtonModule,
-        MatIconModule,
-        MatChipsModule,
-        MatToolbarModule,
-        MatDialogModule,
-        MatTabsModule,
-        MatExpansionModule,
+        NzCardModule,
+        NzButtonModule,
+        NzIconModule,
+        NzTagModule,
+        NzPageHeaderModule,
+        NzModalModule,
+        NzTabsModule,
+        NzCollapseModule,
+        NzSpaceModule,
+        NzBadgeModule,
+        NzGridModule,
+        NzDividerModule,
+        NzTypographyModule,
+        NzToolTipModule,
         GoogleMap,
         MapMarker,
         MapInfoWindow,
@@ -44,7 +56,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     private _route = inject(ActivatedRoute);
     private _router = inject(Router);
     private _store = inject(Store<AppState>);
-    private _dialog = inject(MatDialog);
+    private _modal = inject(NzModalService);
     private _platformId = inject(PLATFORM_ID);
     private _cdr = inject(ChangeDetectorRef);
     private _imageErrorCount: Map<string, number> = new Map();
@@ -204,17 +216,33 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openEmailModal(authority: Authority, issue: Issue): void {
-        const dialogRef = this._dialog.open(EmailModalComponent, {
-            width: '800px',
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            disableClose: false,
-            data: { issue, authority }
+        const modalRef = this._modal.create({
+            nzTitle: `Email către ${authority.name}`,
+            nzContent: EmailModalComponent,
+            nzData: { issue, authority },
+            nzWidth: 800,
+            nzMaskClosable: true,
+            nzFooter: [
+                {
+                    label: 'Anulează',
+                    onClick: () => modalRef.close(false)
+                },
+                {
+                    label: 'Trimite Email',
+                    type: 'primary',
+                    disabled: (componentInstance) => !componentInstance?.emailForm?.valid,
+                    onClick: (componentInstance) => {
+                        if (componentInstance?.emailForm?.valid) {
+                            componentInstance.openEmailClient();
+                        }
+                    }
+                }
+            ],
+            nzIconType: 'mail'
         });
 
         // Refresh issue data after modal closes to update email count
-        // Using take(1) to automatically unsubscribe after the first emission
-        dialogRef.afterClosed().pipe(
+        modalRef.afterClose.pipe(
             take(1)
         ).subscribe(() => {
             this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));

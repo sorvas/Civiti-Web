@@ -1,43 +1,40 @@
 <div class="min-h-screen bg-background">
   <!-- Header -->
-  <mat-toolbar class="navbar shadow-md">
-    <button mat-icon-button (click)="goBack()" class="text-white">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <span class="text-white font-semibold flex-1 text-center">
-      Detalii Problemă
-    </span>
-    <mat-icon class="text-orange-web">report_problem</mat-icon>
-  </mat-toolbar>
+  <nz-page-header class="navbar shadow-md" (nzBack)="goBack()">
+    <nz-page-header-title>Detalii Problemă</nz-page-header-title>
+    <nz-page-header-extra>
+      <i nz-icon nzType="warning" class="text-orange-web text-xl"></i>
+    </nz-page-header-extra>
+  </nz-page-header>
 
   <div class="container mx-auto p-4 max-w-6xl">
     <!-- Loading State -->
     <div *ngIf="isLoading$ | async" class="text-center py-12">
-      <mat-icon class="text-oxford-blue text-4xl mb-4 animate-spin">refresh</mat-icon>
+      <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
       <p class="text-oxford-blue">Se încarcă detaliile problemei...</p>
     </div>
 
     <!-- Issue Details -->
     <div *ngIf="(issue$ | async) as issue" class="space-y-6">
       <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <nz-row [nzGutter]="24">
         <!-- Left Column - Issue Details (2 cols) -->
-        <div class="lg:col-span-2 space-y-6">
-          <!-- Title and Status Card -->
-          <mat-card>
-            <mat-card-content class="p-6">
+        <nz-col [nzXs]="24" [nzLg]="16">
+          <div class="space-y-6">
+            <!-- Title and Status Card -->
+            <nz-card>
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1">
                   <h1 class="text-2xl font-bold text-oxford-blue mb-2">
-                    <mat-chip *ngIf="getUrgencyLevel(issue) === 'urgent'"
-                      class="priority-urgent text-xs font-bold mr-2">
+                    <nz-tag *ngIf="getUrgencyLevel(issue) === 'urgent'"
+                      nzColor="error" class="mr-2">
                       URGENT
-                    </mat-chip>{{ issue.title }}
+                    </nz-tag>{{ issue.title }}
                   </h1>
                   <div class="flex items-center gap-3">
-                    <mat-chip class="official-badge text-xs">
+                    <nz-tag [nzColor]="issue.status === 'open' ? 'warning' : issue.status === 'resolved' ? 'success' : 'processing'">
                       {{ getStatusText(issue.status) }}
-                    </mat-chip>
+                    </nz-tag>
                   </div>
                 </div>
                 <div class="text-right">
@@ -50,22 +47,21 @@
 
               <!-- Location -->
               <div class="flex items-center text-oxford-blue opacity-75 text-sm">
-                <mat-icon class="mr-2">place</mat-icon>
+                <i nz-icon nzType="environment" class="mr-2"></i>
                 {{ issue.location.address }}
               </div>
-            </mat-card-content>
-          </mat-card>
+            </nz-card>
 
-          <!-- Photos Gallery -->
-          <mat-card *ngIf="issue.photos && issue.photos.length > 0">
-            <mat-card-header>
-              <mat-card-title class="text-oxford-blue">
-                <mat-icon class="mr-2">photo_library</mat-icon>
-                Fotografii ({{ issue.photos.length }})
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Photos Gallery -->
+            <nz-card *ngIf="issue.photos && issue.photos.length > 0">
+              <nz-card-meta 
+                nzTitle="Fotografii ({{ issue.photos.length }})"
+                [nzAvatar]="photoIcon">
+              </nz-card-meta>
+              <ng-template #photoIcon>
+                <i nz-icon nzType="picture" class="text-oxford-blue"></i>
+              </ng-template>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                 <a *ngFor="let photo of issue.photos; let i = index" [href]="getPhotoUrl(photo)"
                   class="photo-gallery-item relative cursor-pointer group block"
                   [attr.data-glightbox]="'title: Fotografie ' + (i + 1) + '; description: ' + issue.title">
@@ -73,204 +69,198 @@
                     class="w-full h-40 object-cover rounded-lg" (error)="onImageError($event, i)">
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
                               transition-opacity rounded-lg flex items-center justify-center">
-                    <mat-icon class="text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                      zoom_in
-                    </mat-icon>
+                    <i nz-icon nzType="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
                   </div>
                 </a>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </nz-card>
 
-          <!-- Description Tabs -->
-          <mat-card>
-            <mat-card-content class="p-0">
-              <mat-tab-group animationDuration="0ms">
-                <mat-tab label="Situația Actuală">
+            <!-- Description Tabs -->
+            <nz-card>
+              <nz-tabset>
+                <nz-tab nzTitle="Situația Actuală">
                   <div class="p-6">
                     <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.currentSituation }}</p>
                   </div>
-                </mat-tab>
-                <mat-tab label="Rezultat Dorit">
+                </nz-tab>
+                <nz-tab nzTitle="Rezultat Dorit">
                   <div class="p-6">
                     <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.desiredOutcome }}</p>
                   </div>
-                </mat-tab>
-                <mat-tab label="Impact Comunitar">
+                </nz-tab>
+                <nz-tab nzTitle="Impact Comunitar">
                   <div class="p-6">
                     <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.communityImpact }}</p>
                   </div>
-                </mat-tab>
-              </mat-tab-group>
-            </mat-card-content>
-          </mat-card>
+                </nz-tab>
+              </nz-tabset>
+            </nz-card>
 
-          <!-- Location Map -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title class="text-oxford-blue">
-                <mat-icon class="mr-2">map</mat-icon>
-                Locație pe hartă
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <div *ngIf="!isMapLoaded && !mapLoadError" class="text-center py-8">
-                <mat-icon class="text-oxford-blue text-3xl mb-2 animate-spin">refresh</mat-icon>
-                <p class="text-oxford-blue opacity-75">Se încarcă harta...</p>
+            <!-- Location Map -->
+            <nz-card>
+              <nz-card-meta 
+                nzTitle="Locație pe hartă"
+                [nzAvatar]="mapIcon">
+              </nz-card-meta>
+              <ng-template #mapIcon>
+                <i nz-icon nzType="environment" class="text-oxford-blue"></i>
+              </ng-template>
+              <div class="mt-4">
+                <div *ngIf="!isMapLoaded && !mapLoadError" class="text-center py-8">
+                  <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-3xl mb-2"></i>
+                  <p class="text-oxford-blue opacity-75">Se încarcă harta...</p>
+                </div>
+                <div *ngIf="mapLoadError" class="text-center py-8">
+                  <i nz-icon nzType="close-circle" class="text-orange-web text-3xl mb-2"></i>
+                  <p class="text-oxford-blue font-semibold mb-2">Harta nu poate fi încărcată</p>
+                  <p class="text-oxford-blue opacity-75 text-sm">
+                    Verificați că ați configurat cheia API Google Maps în <code>src/environments/environment.ts</code>
+                  </p>
+                </div>
+                <google-map *ngIf="isMapLoaded && !mapLoadError" 
+                  height="400px" 
+                  width="100%" 
+                  [center]="mapCenter"
+                  [options]="mapOptions" 
+                  class="rounded-lg overflow-hidden shadow-inner">
+                  
+                  <map-marker 
+                    *ngIf="markerPosition"
+                    #markerElement 
+                    [position]="markerPosition"
+                    [options]="markerOptions"
+                    (mapClick)="openInfoWindow()">
+                  </map-marker>
+                  
+                  <map-info-window #infoWindow>
+                    <div class="p-3 max-w-xs">
+                      <h4 class="font-semibold text-oxford-blue mb-1">{{ issue.title }}</h4>
+                      <p class="text-sm text-oxford-blue opacity-75 mb-2">
+                        <i nz-icon nzType="environment" class="inline-block align-middle text-base mr-1"></i>
+                        {{ issue.location.address }}
+                      </p>
+                      <nz-tag>
+                        <i nz-icon nzType="mail" class="mr-1"></i>
+                        {{ issue.emailsSent }} email-uri trimise
+                      </nz-tag>
+                    </div>
+                  </map-info-window>
+                </google-map>
               </div>
-              <div *ngIf="mapLoadError" class="text-center py-8">
-                <mat-icon class="text-orange-web text-3xl mb-2">error_outline</mat-icon>
-                <p class="text-oxford-blue font-semibold mb-2">Harta nu poate fi încărcată</p>
-                <p class="text-oxford-blue opacity-75 text-sm">
-                  Verificați că ați configurat cheia API Google Maps în <code>src/environments/environment.ts</code>
-                </p>
-              </div>
-              <google-map *ngIf="isMapLoaded && !mapLoadError" 
-                height="400px" 
-                width="100%" 
-                [center]="mapCenter"
-                [options]="mapOptions" 
-                class="rounded-lg overflow-hidden shadow-inner">
-                
-                <map-marker 
-                  *ngIf="markerPosition"
-                  #markerElement 
-                  [position]="markerPosition"
-                  [options]="markerOptions"
-                  (mapClick)="openInfoWindow()">
-                </map-marker>
-                
-                <map-info-window #infoWindow>
-                  <div class="p-3 max-w-xs">
-                    <h4 class="font-semibold text-oxford-blue mb-1">{{ issue.title }}</h4>
-                    <p class="text-sm text-oxford-blue opacity-75 mb-2">
-                      <mat-icon class="inline-block align-middle text-base mr-1">place</mat-icon>
-                      {{ issue.location.address }}
-                    </p>
-                    <mat-chip class="text-xs">
-                      <mat-icon class="text-xs mr-1">email</mat-icon>
-                      {{ issue.emailsSent }} email-uri trimise
-                    </mat-chip>
-                  </div>
-                </map-info-window>
-              </google-map>
-            </mat-card-content>
-          </mat-card>
-        </div>
+            </nz-card>
+          </div>
+        </nz-col>
 
         <!-- Right Column - Actions and Authorities -->
-        <div class="space-y-6">
-          <!-- Email Counter Card - PROMINENT -->
-          <mat-card class="bg-orange-web-20 border-2 border-orange-web">
-            <mat-card-content class="p-6 text-center">
-              <mat-icon class="text-orange-web text-5xl mb-2">email</mat-icon>
-              <div class="email-counter-number text-orange-web font-bold mb-2">
-                {{ issue.emailsSent }}
+        <nz-col [nzXs]="24" [nzLg]="8">
+          <div class="space-y-6">
+            <!-- Email Counter Card - PROMINENT -->
+            <nz-card [nzBordered]="true" class="bg-orange-web-20 border-2 border-orange-web">
+              <div class="text-center">
+                <i nz-icon nzType="mail" class="text-orange-web text-5xl mb-2"></i>
+                <div class="email-counter-number text-orange-web font-bold mb-2">
+                  {{ issue.emailsSent }}
+                </div>
+                <p class="text-oxford-blue font-semibold">
+                  Email-uri trimise până acum
+                </p>
+                <p class="text-oxford-blue text-sm opacity-75 mt-2">
+                  Fiecare email contează! Ajută și tu prin trimiterea unui email către autorități.
+                </p>
               </div>
-              <p class="text-oxford-blue font-semibold">
-                Email-uri trimise până acum
-              </p>
-              <p class="text-oxford-blue text-sm opacity-75 mt-2">
-                Fiecare email contează! Ajută și tu prin trimiterea unui email către autorități.
-              </p>
-            </mat-card-content>
-          </mat-card>
+            </nz-card>
 
-          <!-- Authorities List -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title class="text-oxford-blue">
-                <mat-icon class="mr-2">account_balance</mat-icon>
-                Autorități Responsabile
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <div class="space-y-3">
+            <!-- Authorities List -->
+            <nz-card>
+              <nz-card-meta 
+                nzTitle="Autorități Responsabile"
+                [nzAvatar]="authIcon">
+              </nz-card-meta>
+              <ng-template #authIcon>
+                <i nz-icon nzType="bank" class="text-oxford-blue"></i>
+              </ng-template>
+              <div class="space-y-3 mt-4">
                 <div *ngFor="let authority of issue.authorities"
                   class="p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div class="flex items-center justify-between mb-2">
                     <h4 class="font-semibold text-oxford-blue">{{ authority.name }}</h4>
-                    <mat-icon class="text-oxford-blue opacity-50">
-                      {{ authority.type === 'primarie' ? 'location_city' :
-                      authority.type === 'politie' ? 'local_police' :
-                      authority.type === 'administratie' ? 'business' :
-                      'corporate_fare' }}
-                    </mat-icon>
+                    <nz-badge [nzCount]="0" [nzShowZero]="false">
+                      <i nz-icon [nzType]="authority.type === 'primarie' ? 'bank' :
+                        authority.type === 'politie' ? 'safety-certificate' :
+                        authority.type === 'administratie' ? 'apartment' :
+                        'team'" class="text-oxford-blue opacity-50 text-xl"></i>
+                    </nz-badge>
                   </div>
                   <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authority.email }}</p>
-                  <button mat-raised-button color="accent" class="w-full btn-primary"
-                    (click)="openEmailModal(authority, issue)">
-                    <mat-icon class="mr-2">email</mat-icon>
+                  <button nz-button nzType="primary" nzBlock (click)="openEmailModal(authority, issue)">
+                    <i nz-icon nzType="mail" class="mr-2"></i>
                     Trimite Email
                   </button>
                 </div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </nz-card>
 
-          <!-- Share Section -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title class="text-oxford-blue">
-                <mat-icon class="mr-2">share</mat-icon>
-                Distribuie Problema
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <p class="text-sm text-oxford-blue opacity-75 mb-4">
+            <!-- Share Section -->
+            <nz-card>
+              <nz-card-meta 
+                nzTitle="Distribuie Problema"
+                [nzAvatar]="shareIcon">
+              </nz-card-meta>
+              <ng-template #shareIcon>
+                <i nz-icon nzType="share-alt" class="text-oxford-blue"></i>
+              </ng-template>
+              <p class="text-sm text-oxford-blue opacity-75 mb-4 mt-4">
                 Ajută la creșterea vizibilității acestei probleme distribuind-o pe rețelele sociale.
               </p>
-              <div class="flex gap-2 justify-center">
-                <button mat-mini-fab class="btn-secondary" disabled matTooltip="În curând">
-                  <mat-icon>facebook</mat-icon>
+              <nz-space nzAlign="center" class="w-full justify-center">
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                  <i nz-icon nzType="facebook"></i>
                 </button>
-                <button mat-mini-fab class="btn-secondary" disabled matTooltip="În curând">
-                  <mat-icon>chat</mat-icon>
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                  <i nz-icon nzType="twitter"></i>
                 </button>
-                <button mat-mini-fab class="btn-secondary" disabled matTooltip="În curând">
-                  <mat-icon>link</mat-icon>
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                  <i nz-icon nzType="link"></i>
                 </button>
-              </div>
-            </mat-card-content>
-          </mat-card>
+              </nz-space>
+            </nz-card>
 
-          <!-- Issue Info -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title class="text-oxford-blue text-sm">
-                Informații Problemă
-              </mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="p-4">
-              <div class="space-y-2 text-sm">
+            <!-- Issue Info -->
+            <nz-card nzSize="small">
+              <nz-card-meta nzTitle="Informații Problemă"></nz-card-meta>
+              <div class="space-y-2 text-sm mt-4">
                 <div class="flex justify-between items-center">
                   <span class="text-oxford-blue opacity-75">ID Problemă:</span>
                   <span class="font-mono text-oxford-blue">{{ issue.id }}</span>
                 </div>
+                <nz-divider class="my-2"></nz-divider>
                 <div class="flex justify-between items-center">
                   <span class="text-oxford-blue opacity-75">Data raportării:</span>
                   <span class="text-oxford-blue">{{ issue.dateCreated | date:'dd/MM/yyyy' }}</span>
                 </div>
+                <nz-divider class="my-2"></nz-divider>
                 <div class="flex justify-between items-center">
                   <span class="text-oxford-blue">Status:</span>
-                  <mat-chip class="official-badge text-xs">{{ getStatusText(issue.status) }}</mat-chip>
+                  <nz-tag [nzColor]="issue.status === 'open' ? 'warning' : issue.status === 'resolved' ? 'success' : 'processing'">
+                    {{ getStatusText(issue.status) }}
+                  </nz-tag>
                 </div>
               </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </div>
+            </nz-card>
+          </div>
+        </nz-col>
+      </nz-row>
     </div>
 
     <!-- Not Found -->
     <div *ngIf="!(isLoading$ | async) && !(issue$ | async)" class="text-center py-12">
-      <mat-icon class="text-oxford-blue text-6xl mb-4 opacity-50">error_outline</mat-icon>
+      <i nz-icon nzType="close-circle" class="text-oxford-blue text-6xl mb-4 opacity-50"></i>
       <h3 class="text-oxford-blue text-xl font-semibold mb-2">Problema nu a fost găsită</h3>
       <p class="text-oxford-blue opacity-75 mb-6">
         Este posibil ca această problemă să fi fost ștearsă sau ID-ul să fie incorect.
       </p>
-      <button mat-raised-button color="accent" (click)="goBack()" class="btn-primary">
-        <mat-icon class="mr-2">arrow_back</mat-icon>
+      <button nz-button nzType="primary" (click)="goBack()">
+        <i nz-icon nzType="arrow-left" class="mr-2"></i>
         Înapoi la Lista de Probleme
       </button>
     </div>

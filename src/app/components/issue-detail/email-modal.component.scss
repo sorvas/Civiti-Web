@@ -1,48 +1,104 @@
 .email-modal-container {
   width: 100%;
-  max-width: 800px; // Increased from 600px for wider layout
-  min-width: 320px; // Ensure minimum width on mobile
 }
 
-// Responsive layout utilities
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+// NG-ZORRO form overrides for Civica theme
+:host ::ng-deep {
+  .ant-form-item-label > label {
+    color: var(--oxford-blue);
+    font-weight: 600;
+    font-family: var(--font-primary);
+    
+    &.ant-form-item-required::before {
+      color: var(--orange-web);
+    }
+  }
   
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 0;
+  .ant-input,
+  .ant-input-affix-wrapper {
+    border-color: var(--platinum);
+    
+    &:hover {
+      border-color: var(--oxford-blue);
+    }
+    
+    &:focus,
+    &.ant-input-focused {
+      border-color: var(--orange-web);
+      box-shadow: 0 0 0 2px rgba(252, 163, 17, 0.2);
+    }
+  }
+  
+  .ant-form-item-has-error {
+    .ant-input,
+    .ant-input-affix-wrapper {
+      border-color: var(--color-error);
+    }
   }
 }
 
-.form-row .form-field-third {
-  flex: 1;
-  min-width: 200px;
+// Email preview card styling
+:host ::ng-deep {
+  .email-preview {
+    .ant-card {
+      border-color: var(--platinum);
+    }
+    
+    .ant-card-head {
+      border-bottom-color: var(--platinum);
+    }
+    
+    .ant-card-head-title {
+      color: var(--oxford-blue);
+      font-weight: 600;
+    }
+  }
   
-  @media (max-width: 768px) {
-    flex: none;
-    min-width: auto;
+  .instructions-card {
+    background-color: var(--orange-web-20);
+    
+    .ant-card {
+      background-color: var(--orange-web-20);
+      border-color: var(--orange-web);
+    }
+    
+    ol {
+      list-style: decimal;
+      margin-left: 1.5rem;
+    }
+  }
+  
+  // Button customization
+  .ant-btn-text {
+    &:hover {
+      background-color: rgba(252, 163, 17, 0.1);
+    }
+  }
+  
+  // Empty state
+  .ant-empty-description {
+    color: var(--oxford-blue);
+    opacity: 0.6;
+  }
+  
+  // Divider
+  .ant-divider-dashed {
+    border-color: var(--platinum);
   }
 }
 
-.form-row .form-field-full {
-  flex: 1 1 100%;
+.email-body {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  
+  pre {
+    margin: 0;
+    font-family: inherit;
+  }
 }
 
-.space-y-4 > * + * {
-  margin-top: 1rem;
-}
-
-.email-preview {
-  background-color: var(--platinum);
-  border: 1px solid var(--platinum);
-}
-
-.bg-orange-web-20 {
-  background-color: var(--orange-web-20);
-}
-
+// Civica color utilities
 .text-oxford-blue {
   color: var(--oxford-blue);
 }
@@ -51,86 +107,6 @@
   color: var(--orange-web);
 }
 
-.instructions ol {
-  list-style: decimal;
-}
-
-.email-body {
-  font-family: monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-mat-dialog-content {
-  padding: 0 24px;
-}
-
-mat-dialog-actions {
-  padding: 16px 24px;
-  justify-content: space-between;
-}
-
-// Apply the same form field styling fixes as in global styles
-mat-form-field {
-  margin-bottom: 8px;
-  font-family: var(--font-primary);
-  
-  // Ensure text field wrapper has proper background and borders
-  .mat-mdc-text-field-wrapper {
-    background-color: var(--color-surface);
-    
-    &.mdc-text-field--outlined {
-      // Base outline styling
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: var(--platinum);
-        border-width: 1px;
-        border-style: solid;
-      }
-      
-      // Hover state
-      &:hover:not(.mdc-text-field--focused) {
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: var(--oxford-blue);
-        }
-      }
-      
-      // Focus state
-      &.mdc-text-field--focused {
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: var(--orange-web);
-          border-width: 2px;
-        }
-      }
-    }
-  }
-  
-  // Input and label styling
-  .mat-mdc-input-element {
-    color: var(--color-text);
-    font-family: var(--font-primary);
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 16px 12px;
-  }
-  
-  .mat-mdc-form-field-label {
-    color: var(--oxford-blue);
-    opacity: 0.8;
-    font-family: var(--font-primary);
-  }
-  
-
-  
-  // Icon styling
-  .mat-mdc-form-field-icon-suffix mat-icon {
-    color: var(--oxford-blue);
-  }
+.bg-orange-web-20 {
+  background-color: var(--orange-web-20);
 }

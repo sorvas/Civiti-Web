@@ -1,12 +1,9 @@
 import { Component, inject, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { NZ_MODAL_DATA, NzModalRef } from 'ng-zorro-antd/modal';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NgZorroModule } from '../../shared/ng-zorro.module';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
@@ -27,11 +24,7 @@ export interface EmailModalData {
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatButtonModule,
-        MatIconModule,
+        NgZorroModule
     ],
     templateUrl: './email-modal.component.html',
     styleUrl: './email-modal.component.scss'
@@ -40,8 +33,8 @@ export class EmailModalComponent implements OnInit, OnDestroy {
     private _fb = inject(FormBuilder);
     private _store = inject(Store<AppState>);
     private _mockDataService = inject(MockDataService);
-    private _snackBar = inject(MatSnackBar);
-    private _dialog = inject(MatDialog);
+    private _message = inject(NzMessageService);
+    private _modalRef = inject(NzModalRef);
     private _sanitizer = inject(SanitizationService);
     private _destroy$ = new Subject<void>();
 
@@ -51,7 +44,7 @@ export class EmailModalComponent implements OnInit, OnDestroy {
     emailTemplate: EmailTemplate | null = null;
     isGenerating = false;
 
-    constructor(@Inject(MAT_DIALOG_DATA) public data: EmailModalData) {
+    constructor(@Inject(NZ_MODAL_DATA) public data: EmailModalData) {
         this.issue = data.issue;
         this.authority = data.authority;
     }
@@ -192,7 +185,9 @@ export class EmailModalComponent implements OnInit, OnDestroy {
 
     copyToClipboard(text: string): void {
         navigator.clipboard.writeText(text).then(() => {
-            this._snackBar.open('Copiat în clipboard!', 'OK', { duration: 2000 });
+            this._message.success('Copiat în clipboard!');
+        }).catch(() => {
+            this._message.error('Nu s-a putut copia în clipboard');
         });
     }
 
@@ -211,18 +206,15 @@ export class EmailModalComponent implements OnInit, OnDestroy {
         window.location.href = mailtoLink;
 
         // Show success message
-        this._snackBar.open('Email deschis în clientul tău de email!', 'OK', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-        });
+        this._message.success('Email deschis în clientul tău de email!');
 
         // Close modal after a short delay
         setTimeout(() => {
-            this._dialog.closeAll();
+            this._modalRef.close(true);
         }, 1000);
     }
 
     onCancel(): void {
-        this._dialog.closeAll();
+        this._modalRef.close(false);
     }
 }

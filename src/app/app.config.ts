@@ -1,13 +1,21 @@
-import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 import {
   ApplicationConfig,
   provideZoneChangeDetection,
   isDevMode,
+  importProvidersFrom,
 } from '@angular/core';
 import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
+import { registerLocaleData } from '@angular/common';
+import ro from '@angular/common/locales/ro';
+import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { ngZorroConfig, ngZorroIcons, ngZorroI18n } from './providers/ng-zorro.providers';
+
+registerLocaleData(ro);
 
 import { routes } from './app.routes';
 import {
@@ -32,11 +40,11 @@ export const appConfig: ApplicationConfig = {
       traceLimit: 75,
     }),
     provideClientHydration(withEventReplay()),
-    {
-      provide: MAT_ICON_DEFAULT_OPTIONS,
-      useValue: {
-        fontSet: 'material-symbols-outlined',
-      },
-    },
+    provideAnimations(),
+    provideHttpClient(),
+    importProvidersFrom(FormsModule),
+    ngZorroConfig,
+    ngZorroIcons,
+    ngZorroI18n,
   ],
 };

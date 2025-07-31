@@ -1,11 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
@@ -14,167 +18,108 @@ import { MockDataService } from '../../services/mock-data.service';
 import { SanitizationService } from '../../services/sanitization.service';
 
 interface LocationData {
-    counties: { id: string; name: string }[];
-    cities: { id: string; name: string }[];
-    districts: { id: string; name: string }[];
+  counties: { id: string; name: string }[];
+  cities: { id: string; name: string }[];
+  districts: { id: string; name: string }[];
 }
 
 @Component({
-    selector: 'app-location-selection',
-    standalone: true,
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        MatButtonModule,
-        MatSelectModule,
-        MatFormFieldModule,
-        MatCardModule,
-        MatIconModule,
-    ],
-    template: `
+  selector: 'app-location-selection',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NzButtonModule,
+    NzSelectModule,
+    NzFormModule,
+    NzCardModule,
+    NzIconModule,
+    NzInputModule,
+    NzAlertModule,
+    NzGridModule,
+    NzTypographyModule,
+  ],
+  template: `
     <div class="min-h-screen bg-background flex items-center justify-center p-4">
-      <mat-card class="w-full max-w-md mx-auto">
-        <mat-card-header class="text-center mb-6">
-          <mat-card-title class="text-primary text-2xl font-bold mb-2">
+      <nz-card class="w-full max-w-md mx-auto">
+        <div class="text-center mb-6">
+          <h1 nz-typography class="text-2xl font-bold mb-2 text-oxford-blue">
             Civica - Participare Civică
-          </mat-card-title>
-          <mat-card-subtitle class="text-oxford-blue opacity-75">
+          </h1>
+          <p nz-typography nzType="secondary" class="text-oxford-blue opacity-75">
             Selectează-ți locația pentru a vedea problemele din comunitate
-          </mat-card-subtitle>
-        </mat-card-header>
+          </p>
+        </div>
 
-        <mat-card-content>
-          <form [formGroup]="locationForm" (ngSubmit)="onContinue()" class="space-y-6">
-            <!-- County Selection -->
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label class="form-label">Județ</mat-label>
-              <mat-select formControlName="county">
-                <mat-option value="B">București</mat-option>
-              </mat-select>
-              <mat-icon matSuffix>location_on</mat-icon>
-            </mat-form-field>
+        <form nz-form [formGroup]="locationForm" (ngSubmit)="onContinue()" nzLayout="vertical">
+          <!-- County Selection -->
+          <nz-form-item>
+            <nz-form-label nzRequired>Județ</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="county" nzPlaceHolder="Selectează județul" nzShowSearch>
+                <nz-option nzValue="B" nzLabel="București"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
 
-            <!-- City Selection -->
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label class="form-label">Oraș</mat-label>
-              <mat-select formControlName="city">
-                <mat-option value="BUCURESTI">București</mat-option>
-              </mat-select>
-              <mat-icon matSuffix>location_city</mat-icon>
-            </mat-form-field>
+          <!-- City Selection -->
+          <nz-form-item>
+            <nz-form-label nzRequired>Oraș</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="city" nzPlaceHolder="Selectează orașul" nzShowSearch>
+                <nz-option nzValue="BUCURESTI" nzLabel="București"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
 
-            <!-- District Selection -->
-            <mat-form-field appearance="outline" class="w-full">
-              <mat-label class="form-label">Cartier/Sector</mat-label>
-              <mat-select formControlName="district" required>
-                <mat-option value="SECTOR5">Sector 5</mat-option>
-              </mat-select>
-              <mat-icon matSuffix>map</mat-icon>
-            </mat-form-field>
+          <!-- District Selection -->
+          <nz-form-item>
+            <nz-form-label nzRequired>Cartier/Sector</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="district" nzPlaceHolder="Selectează sectorul" nzShowSearch>
+                <nz-option nzValue="SECTOR5" nzLabel="Sector 5"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
 
-            <!-- Info Box -->
-            <div class="info-box bg-orange-web-20 p-4 rounded-lg border-l-4 border-orange-web">
-              <div class="flex items-start">
-                <mat-icon class="text-orange-web">info</mat-icon>
-                <div class="info-content">
-                  <p class="info-title text-sm font-semibold text-oxford-blue">Pentru MVP</p>
-                  <p class="info-description text-xs text-oxford-blue opacity-75">
-                    Momentan aplicația funcționează doar pentru București, Sectorul 5.
-                  </p>
-                </div>
-              </div>
-            </div>
+          <!-- Info Box -->
+          <nz-alert
+            nzType="info"
+            nzMessage="Pentru MVP"
+            nzDescription="Momentan aplicația funcționează doar pentru București, Sectorul 5."
+            nzShowIcon
+            class="mb-6"
+          ></nz-alert>
 
-            <!-- Continue Button -->
+          <!-- Continue Button -->
+          <nz-form-item>
             <button 
-              mat-raised-button 
-              color="accent" 
+              nz-button 
+              nzType="primary" 
+              nzBlock
+              nzSize="large"
               type="submit"
-              class="w-full btn-primary text-lg py-3"
-              [disabled]="isLoading"
+              [nzLoading]="isLoading"
             >
-              <mat-icon class="mr-2">arrow_forward</mat-icon>
+              <i nz-icon nzType="arrow-right" class="mr-2"></i>
               {{ isLoading ? 'Se încarcă...' : 'Continuă la Probleme' }}
             </button>
-          </form>
-        </mat-card-content>
+          </nz-form-item>
+        </form>
 
         <!-- Footer -->
-        <mat-card-footer class="text-center mt-6 p-4 border-t border-platinum">
+        <div class="text-center mt-6 pt-4 border-t border-platinum">
           <p class="text-xs text-oxford-blue opacity-50">
             Platforma Civica - Împreună pentru comunitate
           </p>
-        </mat-card-footer>
-      </mat-card>
+        </div>
+      </nz-card>
     </div>
   `,
-    styles: [`
-    mat-card {
+  styles: [`
+    nz-card {
       box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
       border: 1px solid var(--platinum);
-    }
-
-    mat-card-header {
-      padding-bottom: 0;
-    }
-
-    mat-form-field {
-      width: 100%;
-    }
-
-    .mat-mdc-form-field-focus-overlay {
-      background-color: var(--orange-web-20);
-    }
-
-    .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
-      background-color: var(--orange-web-20);
-    }
-
-    .space-y-6 > * + * {
-      margin-top: 1.5rem;
-    }
-
-    .bg-orange-web-20 {
-      background-color: var(--orange-web-20);
-    }
-
-    .border-orange-web {
-      border-color: var(--orange-web);
-    }
-
-    // Fix info box layout and spacing
-    .info-box {
-      .flex {
-        gap: 12px;
-      }
-      
-      mat-icon {
-        flex-shrink: 0;
-        width: 20px;
-        height: 20px;
-        font-size: 20px;
-        line-height: 20px;
-        margin-top: 2px;
-      }
-      
-      .info-content {
-        flex: 1;
-        min-width: 0;
-        
-        p {
-          margin: 0;
-          word-wrap: break-word;
-          
-          &.info-title {
-            margin-bottom: 8px;
-            line-height: 1.4;
-          }
-          
-          &.info-description {
-            line-height: 1.5;
-          }
-        }
-      }
     }
 
     .text-orange-web {
@@ -193,65 +138,77 @@ interface LocationData {
       background-color: var(--color-background);
     }
 
-    button[mat-raised-button] {
+    .border-platinum {
+      border-color: var(--platinum);
+    }
+
+    button[nz-button] {
       text-transform: uppercase;
       font-weight: 600;
       letter-spacing: 0.025em;
     }
+
+    nz-form-item {
+      margin-bottom: 16px;
+    }
+
+    nz-form-item:last-child {
+      margin-bottom: 0;
+    }
   `]
 })
 export class LocationSelectionComponent implements OnInit {
-    private _fb = inject(FormBuilder);
-    private _router = inject(Router);
-    private _store = inject(Store<AppState>);
-    private _mockDataService = inject(MockDataService);
-    private _sanitizer = inject(SanitizationService);
+  private _fb = inject(FormBuilder);
+  private _router = inject(Router);
+  private _store = inject(Store<AppState>);
+  private _mockDataService = inject(MockDataService);
+  private _sanitizer = inject(SanitizationService);
 
-    locationData: LocationData | null = null;
-    isLoading = false;
+  locationData: LocationData | null = null;
+  isLoading = false;
 
-    locationForm = this._fb.group({
-        county: [{ value: 'B', disabled: true }, Validators.required],
-        city: [{ value: 'BUCURESTI', disabled: true }, Validators.required],
-        district: [{ value: 'SECTOR5', disabled: true }, Validators.required] // Only Sector 5 for MVP
+  locationForm = this._fb.group({
+    county: [{ value: 'B', disabled: true }, Validators.required],
+    city: [{ value: 'BUCURESTI', disabled: true }, Validators.required],
+    district: [{ value: 'SECTOR5', disabled: true }, Validators.required] // Only Sector 5 for MVP
+  });
+
+  ngOnInit(): void {
+    this.loadLocationData();
+  }
+
+  private loadLocationData(): void {
+    this.isLoading = true;
+    this._mockDataService.getLocationData().subscribe({
+      next: (data) => {
+        this.locationData = data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading location data:', error);
+        this.isLoading = false;
+      }
     });
+  }
 
-    ngOnInit(): void {
-        this.loadLocationData();
-    }
+  onContinue(): void {
+    // For MVP, all fields are pre-filled and disabled, so we don't need to validate
+    // Use getRawValue() to include disabled form controls
+    const rawData = this.locationForm.getRawValue();
 
-    private loadLocationData(): void {
-        this.isLoading = true;
-        this._mockDataService.getLocationData().subscribe({
-            next: (data) => {
-                this.locationData = data;
-                this.isLoading = false;
-            },
-            error: (error) => {
-                console.error('Error loading location data:', error);
-                this.isLoading = false;
-            }
-        });
-    }
+    // Sanitize values before storing
+    const selectedLocation = {
+      county: this._sanitizer.sanitizeUrlParam(rawData.county || ''),
+      city: this._sanitizer.sanitizeUrlParam(rawData.city || ''),
+      district: this._sanitizer.sanitizeUrlParam(rawData.district || '')
+    };
 
-    onContinue(): void {
-        // For MVP, all fields are pre-filled and disabled, so we don't need to validate
-        // Use getRawValue() to include disabled form controls
-        const rawData = this.locationForm.getRawValue();
+    console.log('Location data:', selectedLocation); // Debug log
 
-        // Sanitize values before storing
-        const selectedLocation = {
-            county: this._sanitizer.sanitizeUrlParam(rawData.county || ''),
-            city: this._sanitizer.sanitizeUrlParam(rawData.city || ''),
-            district: this._sanitizer.sanitizeUrlParam(rawData.district || '')
-        };
+    // Dispatch action to store location in state (effects will handle storage)
+    this._store.dispatch(LocationActions.setLocation(selectedLocation));
 
-        console.log('Location data:', selectedLocation); // Debug log
-
-        // Dispatch action to store location in state (effects will handle storage)
-        this._store.dispatch(LocationActions.setLocation(selectedLocation));
-
-        // Navigate to issues list
-        this._router.navigate(['/issues']);
-    }
+    // Navigate to issues list
+    this._router.navigate(['/issues']);
+  }
 } 

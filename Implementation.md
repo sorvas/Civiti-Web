@@ -26,59 +26,86 @@ This guide establishes mandatory implementation standards for the Civica **FRONT
 1. Check UX.md → Understand user flow
 2. Apply Colour-Scheme.md → Use correct colors
 3. Follow Typography-Guide.md → Implement Fira Sans
-4. Use ngm-dev-blocks MCP → Generate Material components
+4. Use NG-ZORRO components → Modern UI components
 ```
 
 ---
 
-## 🛠️ Angular Material Component Usage
+## 🛠️ NG-ZORRO (Ant Design) Component Usage
 
-### **MANDATORY: Use ngm-dev-blocks MCP**
+### **MANDATORY: Use NG-ZORRO Components**
 
-The agent MUST use the `ngm-dev-blocks` MCP server for ALL UI components. DO NOT write custom components when Angular Material blocks are available.
+The agent MUST use NG-ZORRO (ng-zorro-antd) for ALL UI components. This provides modern, enterprise-grade components with better form handling and flexibility.
+
+### **Installation and Setup**
+
+```bash
+# Install NG-ZORRO
+ng add ng-zorro-antd
+
+# During installation, select:
+# - Custom theme: Yes (we'll use Civica colors)
+# - Set up icon assets: Yes
+# - Set up custom theme file: Yes
+# - Choose template: Blank (we'll customize)
+```
+
+### **Module Import Pattern**
+
+```typescript
+// Import only what you need (tree-shakeable)
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+```
 
 ### **Component Mapping for Civica**
 
 ```yaml
 Location Selection (Page 1):
-  - Use: mat-select-block
+  - Use: nz-select
   - Reference: ux.md → "Entry & Location Selection"
   - Colors: Oxford Blue labels, Orange focus states
   
 Issues List (Page 2):
-  - Use: mat-card-block (grid layout)
+  - Use: nz-card (with nz-grid)
   - Reference: ux.md → "Issues Discovery"
-  - Include: mat-chip for email counter
+  - Include: nz-tag for email counter
   - Typography: Follow Typography-Guide.md for card titles
   
 Issue Detail (Page 3):
-  - Use: mat-card-block with expansion panels
+  - Use: nz-card with nz-collapse
   - Reference: ux.md → "Issue Detail View"
-  - Gallery: mat-image-gallery-block
-  - Map: Embed within mat-card
+  - Gallery: nz-carousel or custom gallery
+  - Map: Embed within nz-card
   
 Email Modal:
-  - Use: mat-dialog-block
+  - Use: nz-modal
   - Reference: ux.md → "Email Template Modal"
-  - Forms: mat-form-field-block
-  - Buttons: mat-button-block (raised, Orange for primary)
+  - Forms: nz-form with nz-input
+  - Buttons: nz-button (type="primary" for Orange CTAs)
 ```
 
 ### **Component Customization Rules**
 
-```typescript
-// ALWAYS apply Civica theming to Material components
-@use '@angular/material' as mat;
-@use './civica-theme' as civica;
+```scss
+// ALWAYS apply Civica theming to NG-ZORRO components
+@import 'ng-zorro-antd/ng-zorro-antd.less';
 
-// Example: Customizing mat-card for issue cards
+// Example: Customizing nz-card for issue cards
 .issue-card {
   // Reference: Colour-Scheme.md
   background-color: var(--white);
   border: 1px solid var(--platinum);
   
   // Reference: Typography-Guide.md
-  .mat-card-title {
+  .ant-card-head-title {
     font-family: var(--font-primary);
     font-weight: 600;
     font-size: var(--text-xl);
@@ -100,89 +127,104 @@ Email Modal:
 
 ## 🎨 Theme Implementation
 
-### **Civica Material Theme Configuration**
+### **Civica NG-ZORRO Theme Configuration**
 
-```typescript
-// src/styles/civica-theme.scss
+```less
+// src/styles/civica-theme.less
 // MUST reference Colour-Scheme.md for all color values
 
-@use '@angular/material' as mat;
+// NG-ZORRO theme variables
+@primary-color: #FCA311; // Orange Web from Colour-Scheme.md
+@info-color: #14213D; // Oxford Blue from Colour-Scheme.md
+@success-color: #28A745;
+@warning-color: #FCA311;
+@error-color: #DC3545;
+@font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+@body-background: #E5E5E5; // Platinum from Colour-Scheme.md
+@component-background: #FFFFFF; // White from Colour-Scheme.md
+@heading-color: #14213D; // Oxford Blue
+@text-color: #14213D; // Oxford Blue
+@text-color-secondary: rgba(20, 33, 61, 0.8);
+@border-color-base: #E5E5E5; // Platinum
+@border-radius-base: 8px;
 
-// Define Civica palettes from Colour-Scheme.md
-$civica-primary: mat.define-palette((
-  50: #e3e5ea,
-  100: #b9bfcb,
-  200: #8b95a9,
-  300: #5c6a86,
-  400: #394a6c,
-  500: #14213d, // Oxford Blue from Colour-Scheme.md
-  600: #122037,
-  700: #0e1d2f,
-  800: #0b1927,
-  900: #06111a,
-  contrast: (
-    50: black,
-    100: black,
-    200: black,
-    300: white,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  )
-));
+// Button specific
+@btn-primary-bg: #FCA311; // Orange Web
+@btn-primary-color: #FFFFFF;
+@btn-default-bg: #FFFFFF;
+@btn-default-color: #14213D;
+@btn-default-border: #E5E5E5;
 
-$civica-accent: mat.define-palette((
-  50: #fff3e0,
-  100: #ffe0b2,
-  200: #ffcc80,
-  300: #ffb74d,
-  400: #ffa726,
-  500: #fca311, // Orange Web from Colour-Scheme.md
-  600: #fb8c00,
-  700: #f57c00,
-  800: #ef6c00,
-  900: #e65100,
-  contrast: (
-    50: black,
-    100: black,
-    200: black,
-    300: black,
-    400: black,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-  )
-));
+// Input specific
+@input-border-color: #E5E5E5;
+@input-hover-border-color: #14213D;
+@input-focus-border-color: #FCA311;
+@input-placeholder-color: rgba(20, 33, 61, 0.6);
 
-// Create theme
-$civica-theme: mat.define-light-theme((
-  color: (
-    primary: $civica-primary,
-    accent: $civica-accent,
-  ),
-  typography: mat.define-typography-config(
-    $font-family: '"Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  ),
-));
+// Card specific
+@card-shadow: 0 2px 8px rgba(20, 33, 61, 0.1);
+@card-hover-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
 
-// Apply theme
-@include mat.all-component-themes($civica-theme);
+// Typography scale from Typography-Guide.md
+@font-size-base: 16px;
+@font-size-sm: 14px;
+@font-size-lg: 18px;
+@heading-1-size: 48px;
+@heading-2-size: 36px;
+@heading-3-size: 30px;
+@heading-4-size: 24px;
+@heading-5-size: 20px;
+```
 
-// Override Material defaults to match Civica style
-.mat-mdc-card {
-  --mdc-elevated-card-box-shadow: 0 2px 8px rgba(20, 33, 61, 0.1);
-  --mdc-elevated-card-hover-box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
+### **CSS Variables Integration**
+
+```scss
+// src/styles/ng-zorro-civica.scss
+// Apply Civica CSS variables to NG-ZORRO
+
+:root {
+  // Override NG-ZORRO CSS variables
+  --ant-primary-color: var(--orange-web);
+  --ant-info-color: var(--oxford-blue);
+  --ant-text-color: var(--oxford-blue);
+  --ant-border-color: var(--platinum);
+  --ant-component-background: var(--white);
 }
 
-.mat-mdc-button.mat-accent {
+// NG-ZORRO component overrides
+.ant-btn-primary {
+  background-color: var(--orange-web);
+  border-color: var(--orange-web);
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: var(--tracking-wide);
+  
+  &:hover, &:focus {
+    background: var(--gradient-cta);
+    border-color: var(--orange-web);
+  }
+}
+
+.ant-card {
+  box-shadow: 0 2px 8px rgba(20, 33, 61, 0.1);
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
+  }
+}
+
+.ant-form-item-label > label {
+  color: var(--oxford-blue);
+  font-weight: 600;
+}
+
+.ant-input {
+  font-family: var(--font-primary);
+  color: var(--oxford-blue);
+  
+  &::placeholder {
+    color: rgba(20, 33, 61, 0.6);
+  }
 }
 ```
 
@@ -214,8 +256,8 @@ $civica-theme: mat.define-light-theme((
   --text-5xl: 3rem;
 }
 
-// Apply to Material components
-.mat-typography {
+// Apply to NG-ZORRO components
+.ant-typography {
   font-family: var(--font-primary);
 }
 
@@ -262,28 +304,28 @@ const routes: Routes = [
 ### **Component Implementation Checklist**
 
 #### **LocationSelectionComponent**
-- [ ] Use mat-select-block for dropdowns
+- [ ] Use nz-select for dropdowns
 - [ ] Pre-populate with hardcoded values (Bucharest, Sector 5)
 - [ ] Apply Oxford Blue labels, Orange focus states
-- [ ] Continue button uses Orange (accent) color
+- [ ] Continue button uses nz-button type="primary" (Orange)
 
 #### **IssuesListComponent**
-- [ ] Use mat-card-block in responsive grid
-- [ ] Show email counter with Orange color (Typography-Guide.md)
-- [ ] Implement sort/filter as mat-select
+- [ ] Use nz-card with nz-grid/nz-row/nz-col
+- [ ] Show email counter with nz-tag (Orange color from Typography-Guide.md)
+- [ ] Implement sort/filter as nz-select
 - [ ] Hover effects from Colour-Scheme.md
 
 #### **IssueDetailComponent**
-- [ ] Gallery using mat-image-gallery-block
+- [ ] Gallery using nz-carousel or GLightbox integration
 - [ ] Statistics bar with Orange email counter
 - [ ] Authority buttons with Oxford Blue background
-- [ ] Email modal using mat-dialog-block
+- [ ] Email modal using nz-modal
 
 #### **EmailTemplateModal**
-- [ ] Form fields using mat-form-field-block
-- [ ] Copy buttons with mat-icon
+- [ ] Form fields using nz-form with nz-input
+- [ ] Copy buttons with nz-icon
 - [ ] Template formatting from ux.md
-- [ ] Success toast using mat-snack-bar
+- [ ] Success notification using nz-message service
 
 ---
 
@@ -292,22 +334,24 @@ const routes: Routes = [
 ### **EVERY Component Creation:**
 
 1. **Check ux.md** for user flow requirements
-2. **Use ngm-dev-blocks MCP** to generate Material component
+2. **Use NG-ZORRO components** for consistent UI
 3. **Apply colors** from Colour-Scheme.md
 4. **Set typography** from Typography-Guide.md
 5. **Test responsive** behavior (mobile-first)
 
-### **MCP Usage Pattern:**
+### **NG-ZORRO Component Pattern:**
 
-```bash
-# Example: Creating issue card component
-/build --feature issue-card --ngm-dev-blocks --material
+```typescript
+// Example: Creating issue card component
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzGridModule } from 'ng-zorro-antd/grid';
 
-# The agent MUST:
-# 1. Use mat-card-block as base
-# 2. Apply Civica theme colors
-# 3. Implement email counter with correct typography
-# 4. Follow hover states from Colour-Scheme.md
+// The agent MUST:
+// 1. Use nz-card as base
+// 2. Apply Civica theme colors
+// 3. Implement email counter with nz-tag
+// 4. Follow hover states from Colour-Scheme.md
 ```
 
 ---
@@ -315,8 +359,8 @@ const routes: Routes = [
 ## ⚠️ Common Implementation Mistakes to AVOID
 
 ### **DO NOT:**
-- ❌ Create custom components when Material blocks exist
-- ❌ Use default Material colors (ALWAYS use Civica palette)
+- ❌ Create custom components when NG-ZORRO components exist
+- ❌ Use default Ant Design colors (ALWAYS use Civica palette)
 - ❌ Forget to apply Fira Sans typography
 - ❌ Deviate from ux.md user journey flow
 - ❌ Use pixel values instead of CSS variables
@@ -324,7 +368,7 @@ const routes: Routes = [
 
 ### **ALWAYS:**
 - ✅ Reference documentation files before implementing
-- ✅ Use ngm-dev-blocks MCP for UI generation
+- ✅ Use NG-ZORRO components for UI consistency
 - ✅ Apply Civica theme to ALL components
 - ✅ Test with Romanian text (diacritics)
 - ✅ Ensure mobile responsiveness
@@ -339,7 +383,7 @@ Before ANY commit, verify:
 - [ ] Colors match Colour-Scheme.md exactly
 - [ ] Typography follows Typography-Guide.md
 - [ ] User flow matches ux.md specifications
-- [ ] All UI uses Angular Material components
+- [ ] All UI uses NG-ZORRO components
 - [ ] Mobile view is optimized
 - [ ] Email counter is prominently styled
 - [ ] CTAs use Orange Web color
@@ -613,7 +657,7 @@ export const environment = {
   production: false,
   // Enable to verify documentation compliance
   checkDocumentation: true,
-  // Log Material component usage
+  // Log NG-ZORRO component usage
   logComponentUsage: true,
   // Validate color usage
   validateColors: true
@@ -643,7 +687,7 @@ export class CivicaValidationService {
 
 1. **This guide is MANDATORY** - No exceptions
 2. **Documentation drives development** - Not the other way around
-3. **ngm-dev-blocks is PRIMARY** - Custom components are SECONDARY
+3. **NG-ZORRO components are PRIMARY** - Custom components are SECONDARY
 4. **Theme consistency is CRITICAL** - Every pixel must match our design system
 5. **User journey is SACRED** - Do not deviate from ux.md
 
