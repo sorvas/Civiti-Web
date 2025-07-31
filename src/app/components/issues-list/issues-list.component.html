@@ -1,0 +1,158 @@
+<div class="min-h-screen bg-background">
+  <!-- Header -->
+  <nz-page-header class="navbar shadow-md" (nzBack)="goBack()">
+    <nz-page-header-title>Probleme Active în Sector 5, București</nz-page-header-title>
+    <nz-page-header-extra>
+      <i nz-icon nzType="environment" class="text-orange-web text-xl"></i>
+    </nz-page-header-extra>
+  </nz-page-header>
+
+  <div class="container mx-auto p-4 max-w-6xl">
+    <!-- Filter/Sort Section -->
+    <div class="bg-white rounded-lg shadow-sm border border-platinum p-4 mb-6">
+      <nz-row [nzGutter]="16" nzAlign="middle">
+        <nz-col [nzXs]="24" [nzMd]="16">
+          <h2 class="text-oxford-blue font-semibold text-lg mb-2">
+            {{ (totalIssues$ | async) || 0 }} probleme documentate
+          </h2>
+          <p class="text-oxford-blue opacity-75 text-sm">
+            Alege o problemă și ajută la rezolvarea ei prin trimiterea unui email către autorități
+          </p>
+        </nz-col>
+        
+        <nz-col [nzXs]="24" [nzMd]="8" class="text-right">
+          <nz-select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()" 
+                     nzPlaceHolder="Sortare" style="width: 200px;">
+            <nz-option nzValue="date" nzLabel="Cele mai noi"></nz-option>
+            <nz-option nzValue="emails" nzLabel="Email-uri trimise"></nz-option>
+            <nz-option nzValue="urgency" nzLabel="Urgență"></nz-option>
+          </nz-select>
+        </nz-col>
+      </nz-row>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading$ | async" class="text-center py-12">
+      <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
+      <p class="text-oxford-blue">Se încarcă problemele...</p>
+    </div>
+
+    <!-- Issues Grid -->
+    <nz-row *ngIf="!(isLoading$ | async)" [nzGutter]="[16, 16]">
+      <nz-col *ngFor="let issue of issues$ | async" [nzXs]="24" [nzMd]="12" [nzLg]="8">
+        <nz-card class="issue-card cursor-pointer hover:shadow-lg transition-all duration-300"
+                 (click)="viewIssueDetails(issue.id)"
+                 [nzCover]="coverTemplate">
+          <nz-card-meta 
+            [nzTitle]="issue.title"
+            [nzDescription]="descriptionTemplate">
+          </nz-card-meta>
+          
+          <!-- Cover Template -->
+          <ng-template #coverTemplate>
+            <div class="relative h-48 bg-platinum overflow-hidden">
+              <img 
+                [src]="getIssueImage(issue)" 
+                [alt]="issue.title"
+                class="w-full h-full object-cover"
+                (error)="onImageError($event)"
+              >
+              <!-- Status Badge -->
+              <div class="absolute top-3 left-3">
+                <nz-tag [nzColor]="issue.status === 'open' ? 'warning' : issue.status === 'resolved' ? 'success' : 'processing'">
+                  {{ getStatusText(issue.status) }}
+                </nz-tag>
+              </div>
+              <!-- Urgency Badge -->
+              <div class="absolute top-3 right-3" *ngIf="getUrgencyLevel(issue) === 'urgent'">
+                <nz-tag nzColor="error" class="font-bold">
+                  URGENT
+                </nz-tag>
+              </div>
+            </div>
+          </ng-template>
+          
+          <!-- Description Template -->
+          <ng-template #descriptionTemplate>
+            <p class="text-oxford-blue opacity-75 text-sm mb-3 line-clamp-3">
+              {{ issue.description }}
+            </p>
+
+            <!-- Location -->
+            <div class="flex items-center text-oxford-blue opacity-60 text-xs mb-4">
+              <i nz-icon nzType="environment" class="text-base mr-1"></i>
+              <span class="truncate">{{ issue.location.address }}</span>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="flex items-center justify-between border-t border-platinum pt-3">
+              <!-- Email Counter - PROMINENT as required -->
+              <div class="email-counter">
+                <nz-statistic 
+                  [nzValue]="issue.emailsSent" 
+                  [nzTitle]="'email-uri trimise'"
+                  [nzPrefix]="emailIcon"
+                  class="email-counter-stat">
+                </nz-statistic>
+                <ng-template #emailIcon>
+                  <i nz-icon nzType="mail" class="text-orange-web"></i>
+                </ng-template>
+              </div>
+
+              <!-- Days Since -->
+              <div class="text-right">
+                <div class="text-sm font-semibold text-oxford-blue">
+                  {{ getDaysSince(issue.dateCreated) }}
+                </div>
+                <div class="text-xs text-oxford-blue opacity-60">
+                  zile în urmă
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Button -->
+            <button 
+              nz-button 
+              nzType="primary" 
+              nzBlock
+              class="mt-4"
+              (click)="viewIssueDetails(issue.id); $event.stopPropagation()"
+            >
+              <i nz-icon nzType="eye" class="mr-2"></i>
+              Vezi Detalii
+            </button>
+          </ng-template>
+        </nz-card>
+      </nz-col>
+    </nz-row>
+
+    <!-- Empty State -->
+    <div *ngIf="!(isLoading$ | async) && ((issues$ | async)?.length || 0) === 0">
+      <nz-empty 
+        nzNotFoundContent="Nu au fost găsite probleme"
+        [nzNotFoundFooter]="emptyFooter">
+      </nz-empty>
+      <ng-template #emptyFooter>
+        <p class="text-oxford-blue opacity-75">
+          Încearcă să schimbi criteriile de sortare sau revino mai târziu.
+        </p>
+      </ng-template>
+    </div>
+
+    <!-- Future Feature: Create Issue Button -->
+    <div class="fixed bottom-6 right-6">
+      <button 
+        nz-button 
+        nzType="primary" 
+        nzShape="circle"
+        nzSize="large"
+        [disabled]="true"
+        nz-tooltip
+        nzTooltipTitle="Funcționalitate disponibilă în curând"
+        class="shadow-lg"
+      >
+        <i nz-icon nzType="plus" class="text-2xl"></i>
+      </button>
+    </div>
+  </div>
+</div>

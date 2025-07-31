@@ -1,17 +1,8 @@
 // Civica Theme Implementation
 // Based on Implementation.md and Colour-Scheme.md specifications
 
-// Angular Material Theme Configuration (must come first)
-@use '@angular/material' as mat;
-
-// Import ngm-dev-blocks styles using @use
-@use './app/ngm-dev-blocks/styles/ngm-dev-blocks-styles.scss';
-
 // Import GLightbox styles
 @import 'glightbox/dist/css/glightbox.min.css';
-
-// Include Angular Material core
-@include mat.core();
 
 // NG-ZORRO theme is loaded separately in angular.json
 // Custom overrides are applied below
@@ -73,131 +64,6 @@
   --gradient-cta: linear-gradient(135deg, #FCA311 0%, #FDB833 100%);
 }
 
-// Fix Material component styling for Civica theme
-.mat-mdc-form-field {
-  // Override Material Design tokens for consistent theming
-  --mdc-filled-text-field-container-color: var(--color-surface);
-  --mdc-filled-text-field-label-text-color: var(--oxford-blue);
-  --mdc-filled-text-field-input-text-color: var(--color-text);
-  --mdc-outlined-text-field-outline-color: var(--platinum);
-  --mdc-outlined-text-field-hover-outline-color: var(--oxford-blue);
-  --mdc-outlined-text-field-focus-outline-color: var(--orange-web);
-  --mdc-outlined-text-field-label-text-color: var(--oxford-blue);
-  --mdc-outlined-text-field-input-text-color: var(--color-text);
-
-  .mat-mdc-text-field-wrapper {
-    background-color: var(--color-surface) !important;
-
-    &.mdc-text-field--outlined {
-
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: var(--platinum) !important;
-      }
-
-      &:hover .mdc-notched-outline__leading,
-      &:hover .mdc-notched-outline__notch,
-      &:hover .mdc-notched-outline__trailing {
-        border-color: var(--oxford-blue) !important;
-      }
-
-      &.mdc-text-field--focused .mdc-notched-outline__leading,
-      &.mdc-text-field--focused .mdc-notched-outline__notch,
-      &.mdc-text-field--focused .mdc-notched-outline__trailing {
-        border-color: var(--orange-web) !important;
-        border-width: 2px !important;
-      }
-    }
-  }
-
-  // Fix select trigger styling
-  .mat-mdc-select-trigger {
-    color: var(--color-text) !important;
-    padding: 16px 12px !important;
-    min-height: 24px !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  // Fix select value styling
-  .mat-mdc-select-value {
-    color: var(--color-text) !important;
-    font-family: var(--font-primary) !important;
-    font-size: 16px !important;
-    line-height: 1.5 !important;
-  }
-
-  // Fix placeholder styling
-  .mat-mdc-select-placeholder {
-    color: var(--oxford-blue) !important;
-    opacity: 0.6 !important;
-    font-family: var(--font-primary) !important;
-  }
-
-  // Fix label styling
-  .mat-mdc-form-field-label {
-    color: var(--oxford-blue) !important;
-    opacity: 0.8 !important;
-    font-family: var(--font-primary) !important;
-  }
-
-  // Fix arrow styling
-  .mat-mdc-select-arrow {
-    color: var(--oxford-blue) !important;
-  }
-}
-
-// Fix select dropdown panel styling
-.mat-mdc-select-panel {
-  background-color: var(--color-surface) !important;
-  border: 1px solid var(--platinum) !important;
-  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.15) !important;
-  border-radius: 8px !important;
-  max-height: 300px !important;
-  overflow-y: auto !important;
-
-  // Override Material Design tokens for panel
-  --mdc-list-list-item-container-color: var(--color-surface);
-  --mdc-list-list-item-label-text-color: var(--color-text);
-  --mdc-list-list-item-hover-label-text-color: var(--color-text);
-  --mdc-list-list-item-selected-container-color: var(--orange-web-20);
-}
-
-// Fix option styling
-.mat-mdc-option {
-  color: var(--color-text) !important;
-  font-family: var(--font-primary) !important;
-  padding: 12px 16px !important;
-  min-height: 48px !important;
-  display: flex !important;
-  align-items: center !important;
-
-  &:hover,
-  &.mat-mdc-option-active {
-    background-color: var(--orange-web-20) !important;
-    color: var(--color-text) !important;
-  }
-
-  &.mat-mdc-option-selected {
-    background-color: var(--orange-web) !important;
-    color: var(--white) !important;
-    font-weight: 600 !important;
-
-    &:hover {
-      background-color: var(--orange-web-90) !important;
-      color: var(--white) !important;
-    }
-  }
-
-  // Fix option text
-  .mdc-list-item__primary-text {
-    color: inherit !important;
-    font-family: var(--font-primary) !important;
-    font-size: 16px !important;
-    line-height: 1.5 !important;
-  }
-}
 
 // Set base styles for the application
 html {
@@ -217,24 +83,6 @@ body {
   color: var(--color-text);
 }
 
-// Apply Fira Sans to Material Typography
-.mat-typography {
-  font-family: var(--font-primary);
-}
-
-// Override Material component styles for Civica theme
-.mat-mdc-card {
-  --mdc-elevated-card-box-shadow: 0 2px 8px rgba(20, 33, 61, 0.1);
-  --mdc-elevated-card-hover-box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
-  background-color: var(--color-surface);
-  border: 1px solid var(--platinum);
-}
-
-.mat-mdc-button.mat-accent {
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: var(--tracking-wide);
-}
 
 // Issue-specific styling (from Implementation.md)
 .issue-card {
@@ -242,12 +90,6 @@ body {
   border: 1px solid var(--platinum);
   transition: all 0.3s ease;
 
-  .mat-card-title {
-    font-family: var(--font-primary);
-    font-weight: 600;
-    font-size: var(--text-xl);
-    color: var(--oxford-blue);
-  }
 
   &:hover {
     box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);

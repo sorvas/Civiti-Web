@@ -8,26 +8,15 @@
   }
 
   // Prevent hover conflicts with buttons
-  mat-card-actions {
-    position: relative;
-    z-index: 2;
-    margin-bottom: 8px; // Extra space to prevent hover conflicts
+  button {
+    transition: all 0.2s ease;
+    // Add padding to increase hover area and prevent flickering
+    margin: 4px 0;
 
-    button {
-      transition: all 0.2s ease;
-      // Add padding to increase hover area and prevent flickering
-      margin: 4px 0;
-
-      &:hover {
-        transform: translateY(-1px); // Subtle lift effect only on button
-        box-shadow: 0 4px 12px rgba(252, 163, 17, 0.3);
-      }
+    &:hover {
+      transform: translateY(-1px); // Subtle lift effect only on button
+      box-shadow: 0 4px 12px rgba(252, 163, 17, 0.3);
     }
-  }
-
-  // Add some padding at the bottom of the card
-  mat-card-content:last-of-type {
-    padding-bottom: 16px;
   }
 }
 
@@ -110,8 +99,19 @@
   color: var(--white);
 }
 
-mat-form-field {
-  font-size: 14px;
+// NG-ZORRO statistic styling for email counter
+.email-counter-stat {
+  .ant-statistic-title {
+    font-size: 12px;
+    color: var(--oxford-blue);
+    opacity: 0.6;
+  }
+  
+  .ant-statistic-content-value {
+    color: var(--orange-web);
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
 }
 
 .container {
