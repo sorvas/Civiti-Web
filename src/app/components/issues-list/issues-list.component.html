@@ -3,7 +3,7 @@
   <nz-page-header class="navbar shadow-md" (nzBack)="goBack()">
     <nz-page-header-title>Probleme Active în Sector 5, București</nz-page-header-title>
     <nz-page-header-extra>
-      <i nz-icon nzType="environment" class="text-orange-web text-xl"></i>
+      <i nz-icon nzType="environment" nzTheme="outline" class="text-orange-web text-xl"></i>
     </nz-page-header-extra>
   </nz-page-header>
 
@@ -33,7 +33,7 @@
 
     <!-- Loading State -->
     <div *ngIf="isLoading$ | async" class="text-center py-12">
-      <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
+      <i nz-icon nzType="loading" nzTheme="outline" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
       <p class="text-oxford-blue">Se încarcă problemele...</p>
     </div>
 
@@ -80,7 +80,7 @@
 
             <!-- Location -->
             <div class="flex items-center text-oxford-blue opacity-60 text-xs mb-4">
-              <i nz-icon nzType="environment" class="text-base mr-1"></i>
+              <i nz-icon nzType="environment" nzTheme="outline" class="text-base mr-1"></i>
               <span class="truncate">{{ issue.location.address }}</span>
             </div>
 
@@ -95,7 +95,7 @@
                   class="email-counter-stat">
                 </nz-statistic>
                 <ng-template #emailIcon>
-                  <i nz-icon nzType="mail" class="text-orange-web"></i>
+                  <i nz-icon nzType="mail" nzTheme="outline" class="text-orange-web"></i>
                 </ng-template>
               </div>
 
@@ -118,7 +118,7 @@
               class="mt-4"
               (click)="viewIssueDetails(issue.id); $event.stopPropagation()"
             >
-              <i nz-icon nzType="eye" class="mr-2"></i>
+              <i nz-icon nzType="eye" nzTheme="outline" class="mr-2"></i>
               Vezi Detalii
             </button>
           </ng-template>
@@ -151,7 +151,7 @@
         nzTooltipTitle="Funcționalitate disponibilă în curând"
         class="shadow-lg"
       >
-        <i nz-icon nzType="plus" class="text-2xl"></i>
+        <i nz-icon nzType="plus" nzTheme="outline" class="text-2xl"></i>
       </button>
     </div>
   </div>

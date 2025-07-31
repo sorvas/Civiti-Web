@@ -1,10 +1,10 @@
 // Civica Theme Implementation
 // Based on Implementation.md and Colour-Scheme.md specifications
 
-@import 'tailwindcss';
+@use 'tailwindcss';
 
 // Import GLightbox styles
-@import 'glightbox/dist/css/glightbox.min.css';
+@use 'glightbox/dist/css/glightbox.min.css';
 
 // NG-ZORRO theme is loaded separately in angular.json
 // Custom overrides are applied below

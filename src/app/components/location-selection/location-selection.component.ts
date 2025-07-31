@@ -101,7 +101,7 @@ interface LocationData {
               type="submit"
               [nzLoading]="isLoading"
             >
-              <i nz-icon nzType="arrow-right" class="mr-2"></i>
+              <i nz-icon nzType="arrow-right" nzTheme="outline" class="mr-2"></i>
               {{ isLoading ? 'Se încarcă...' : 'Continuă la Probleme' }}
             </button>
           </nz-form-item>

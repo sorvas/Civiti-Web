@@ -216,7 +216,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     openEmailModal(authority: Authority, issue: Issue): void {
-        const modalRef = this._modal.create({
+        const modalRef: any = this._modal.create({
             nzTitle: `Email către ${authority.name}`,
             nzContent: EmailModalComponent,
             nzData: { issue, authority },
@@ -230,8 +230,12 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
                 {
                     label: 'Trimite Email',
                     type: 'primary',
-                    disabled: (componentInstance) => !componentInstance?.emailForm?.valid,
-                    onClick: (componentInstance) => {
+                    disabled: () => {
+                        const componentInstance: any = modalRef.getContentComponent();
+                        return !componentInstance?.emailForm?.valid;
+                    },
+                    onClick: () => {
+                        const componentInstance: any = modalRef.getContentComponent();
                         if (componentInstance?.emailForm?.valid) {
                             componentInstance.openEmailClient();
                         }

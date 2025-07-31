@@ -3,14 +3,14 @@
   <nz-page-header class="navbar shadow-md" (nzBack)="goBack()">
     <nz-page-header-title>Detalii Problemă</nz-page-header-title>
     <nz-page-header-extra>
-      <i nz-icon nzType="warning" class="text-orange-web text-xl"></i>
+      <i nz-icon nzType="warning" nzTheme="outline" class="text-orange-web text-xl"></i>
     </nz-page-header-extra>
   </nz-page-header>
 
   <div class="container mx-auto p-4 max-w-6xl">
     <!-- Loading State -->
     <div *ngIf="isLoading$ | async" class="text-center py-12">
-      <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
+      <i nz-icon nzType="loading" nzTheme="outline" nzSpin class="text-oxford-blue text-4xl mb-4"></i>
       <p class="text-oxford-blue">Se încarcă detaliile problemei...</p>
     </div>
 
@@ -47,7 +47,7 @@
 
               <!-- Location -->
               <div class="flex items-center text-oxford-blue opacity-75 text-sm">
-                <i nz-icon nzType="environment" class="mr-2"></i>
+                <i nz-icon nzType="environment" nzTheme="outline" class="mr-2"></i>
                 {{ issue.location.address }}
               </div>
             </nz-card>
@@ -59,7 +59,7 @@
                 [nzAvatar]="photoIcon">
               </nz-card-meta>
               <ng-template #photoIcon>
-                <i nz-icon nzType="picture" class="text-oxford-blue"></i>
+                <i nz-icon nzType="picture" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                 <a *ngFor="let photo of issue.photos; let i = index" [href]="getPhotoUrl(photo)"
@@ -69,7 +69,7 @@
                     class="w-full h-40 object-cover rounded-lg" (error)="onImageError($event, i)">
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
                               transition-opacity rounded-lg flex items-center justify-center">
-                    <i nz-icon nzType="zoom-in" class="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
+                    <i nz-icon nzType="zoom-in" nzTheme="outline" class="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
                   </div>
                 </a>
               </div>
@@ -103,15 +103,15 @@
                 [nzAvatar]="mapIcon">
               </nz-card-meta>
               <ng-template #mapIcon>
-                <i nz-icon nzType="environment" class="text-oxford-blue"></i>
+                <i nz-icon nzType="environment" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="mt-4">
                 <div *ngIf="!isMapLoaded && !mapLoadError" class="text-center py-8">
-                  <i nz-icon nzType="loading" nzSpin class="text-oxford-blue text-3xl mb-2"></i>
+                  <i nz-icon nzType="loading" nzTheme="outline" nzSpin class="text-oxford-blue text-3xl mb-2"></i>
                   <p class="text-oxford-blue opacity-75">Se încarcă harta...</p>
                 </div>
                 <div *ngIf="mapLoadError" class="text-center py-8">
-                  <i nz-icon nzType="close-circle" class="text-orange-web text-3xl mb-2"></i>
+                  <i nz-icon nzType="close-circle" nzTheme="outline" class="text-orange-web text-3xl mb-2"></i>
                   <p class="text-oxford-blue font-semibold mb-2">Harta nu poate fi încărcată</p>
                   <p class="text-oxford-blue opacity-75 text-sm">
                     Verificați că ați configurat cheia API Google Maps în <code>src/environments/environment.ts</code>
@@ -136,11 +136,11 @@
                     <div class="p-3 max-w-xs">
                       <h4 class="font-semibold text-oxford-blue mb-1">{{ issue.title }}</h4>
                       <p class="text-sm text-oxford-blue opacity-75 mb-2">
-                        <i nz-icon nzType="environment" class="inline-block align-middle text-base mr-1"></i>
+                        <i nz-icon nzType="environment" nzTheme="outline" class="inline-block align-middle text-base mr-1"></i>
                         {{ issue.location.address }}
                       </p>
                       <nz-tag>
-                        <i nz-icon nzType="mail" class="mr-1"></i>
+                        <i nz-icon nzType="mail" nzTheme="outline" class="mr-1"></i>
                         {{ issue.emailsSent }} email-uri trimise
                       </nz-tag>
                     </div>
@@ -157,7 +157,7 @@
             <!-- Email Counter Card - PROMINENT -->
             <nz-card [nzBordered]="true" class="bg-orange-web-20 border-2 border-orange-web">
               <div class="text-center">
-                <i nz-icon nzType="mail" class="text-orange-web text-5xl mb-2"></i>
+                <i nz-icon nzType="mail" nzTheme="outline" class="text-orange-web text-5xl mb-2"></i>
                 <div class="email-counter-number text-orange-web font-bold mb-2">
                   {{ issue.emailsSent }}
                 </div>
@@ -177,7 +177,7 @@
                 [nzAvatar]="authIcon">
               </nz-card-meta>
               <ng-template #authIcon>
-                <i nz-icon nzType="bank" class="text-oxford-blue"></i>
+                <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="space-y-3 mt-4">
                 <div *ngFor="let authority of issue.authorities"
@@ -193,7 +193,7 @@
                   </div>
                   <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authority.email }}</p>
                   <button nz-button nzType="primary" nzBlock (click)="openEmailModal(authority, issue)">
-                    <i nz-icon nzType="mail" class="mr-2"></i>
+                    <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
                     Trimite Email
                   </button>
                 </div>
@@ -207,20 +207,20 @@
                 [nzAvatar]="shareIcon">
               </nz-card-meta>
               <ng-template #shareIcon>
-                <i nz-icon nzType="share-alt" class="text-oxford-blue"></i>
+                <i nz-icon nzType="share-alt" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <p class="text-sm text-oxford-blue opacity-75 mb-4 mt-4">
                 Ajută la creșterea vizibilității acestei probleme distribuind-o pe rețelele sociale.
               </p>
               <nz-space nzAlign="center" class="w-full justify-center">
                 <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
-                  <i nz-icon nzType="facebook"></i>
+                  <i nz-icon nzType="facebook" nzTheme="outline"></i>
                 </button>
                 <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
-                  <i nz-icon nzType="twitter"></i>
+                  <i nz-icon nzType="twitter" nzTheme="outline"></i>
                 </button>
                 <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
-                  <i nz-icon nzType="link"></i>
+                  <i nz-icon nzType="link" nzTheme="outline"></i>
                 </button>
               </nz-space>
             </nz-card>
@@ -254,13 +254,13 @@
 
     <!-- Not Found -->
     <div *ngIf="!(isLoading$ | async) && !(issue$ | async)" class="text-center py-12">
-      <i nz-icon nzType="close-circle" class="text-oxford-blue text-6xl mb-4 opacity-50"></i>
+      <i nz-icon nzType="close-circle" nzTheme="outline" class="text-oxford-blue text-6xl mb-4 opacity-50"></i>
       <h3 class="text-oxford-blue text-xl font-semibold mb-2">Problema nu a fost găsită</h3>
       <p class="text-oxford-blue opacity-75 mb-6">
         Este posibil ca această problemă să fi fost ștearsă sau ID-ul să fie incorect.
       </p>
       <button nz-button nzType="primary" (click)="goBack()">
-        <i nz-icon nzType="arrow-left" class="mr-2"></i>
+        <i nz-icon nzType="arrow-left" nzTheme="outline" class="mr-2"></i>
         Înapoi la Lista de Probleme
       </button>
     </div>
