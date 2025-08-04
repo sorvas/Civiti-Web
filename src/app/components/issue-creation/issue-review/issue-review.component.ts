@@ -857,6 +857,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
 
     // Prepare issue data for submission
     const issueToSubmit: IssueCreationData = {
+      id: this.issueData.id, // Include the ID from the loaded data
       title: this.generateIssueTitle(),
       description: this.issueData.aiAnalysis?.description || this.issueData.briefDescription,
       category: this.issueData.category,

@@ -777,6 +777,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
     
     // Store form data and AI analysis in session
     const issueData = {
+      id: this.generateIssueId(), // Generate ID here to be used in submission
       category: this.selectedCategory,
       photos: this.uploadedPhotos,
       location: this.currentLocation,
@@ -789,5 +790,9 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
     sessionStorage.setItem('civica_complete_issue_data', JSON.stringify(issueData));
     
     this.router.navigate(['/create-issue/review']);
+  }
+
+  private generateIssueId(): string {
+    return 'issue-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
   }
 }

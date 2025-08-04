@@ -646,25 +646,35 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
     }
 
     this.isUploading = true;
+    
+    // Track number of files being processed
+    const filesToProcess = Array.from(files);
+    let processedCount = 0;
 
     // Process each file
-    Array.from(files).forEach(file => {
-      this.processFile(file);
+    filesToProcess.forEach(file => {
+      this.processFile(file, () => {
+        processedCount++;
+        // Only set isUploading to false when all files are processed
+        if (processedCount === filesToProcess.length) {
+          this.isUploading = false;
+        }
+      });
     });
   }
 
-  private processFile(file: File): void {
+  private processFile(file: File, onComplete: () => void): void {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       this.message.error(`${file.name} is not a valid image file.`);
-      this.isUploading = false;
+      onComplete(); // Call completion callback even on error
       return;
     }
 
     // Validate file size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
       this.message.error(`${file.name} is too large. Maximum size is 10MB.`);
-      this.isUploading = false;
+      onComplete(); // Call completion callback even on error
       return;
     }
 
@@ -686,8 +696,8 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
     
     // Simulate upload delay
     setTimeout(() => {
-      this.isUploading = false;
       this.message.success(`Photo uploaded successfully (${this.getQualityLabel(photoData.quality)} quality)`);
+      onComplete(); // Call completion callback after upload completes
     }, 1000);
 
     console.log('[PHOTO UPLOAD] Photo added:', photoData);
