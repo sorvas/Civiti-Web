@@ -91,12 +91,12 @@ import {
           </div>
           
           <div class="header-actions">
-            <nz-dropdown [nzTrigger]="'click'">
-              <button nz-button nzType="text" nzSize="large" nz-dropdown>
-                <span nz-icon nzType="user"></span>
-                <span nz-icon nzType="down"></span>
-              </button>
-              <ul nz-menu nz-dropdown-menu>
+            <button nz-button nzType="text" nzSize="large" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
+              <span nz-icon nzType="user"></span>
+              <span nz-icon nzType="down"></span>
+            </button>
+            <nz-dropdown-menu #userMenu="nzDropdownMenu">
+              <ul nz-menu>
                 <li nz-menu-item>
                   <span nz-icon nzType="setting"></span>
                   Profile Settings
@@ -111,7 +111,7 @@ import {
                   Sign Out
                 </li>
               </ul>
-            </nz-dropdown>
+            </nz-dropdown-menu>
           </div>
         </div>
       </div>

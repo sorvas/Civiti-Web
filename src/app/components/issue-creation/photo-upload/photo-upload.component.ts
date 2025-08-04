@@ -130,6 +130,7 @@ import { MockIssueCreationService, IssueCategory, PhotoData } from '../../../ser
               (change)="onFileSelected($event)">
 
           </div>
+          </nz-spin>
 
           <!-- Photo Preview Grid -->
           <div class="photo-grid" *ngIf="uploadedPhotos.length > 0">
@@ -213,8 +214,7 @@ import { MockIssueCreationService, IssueCategory, PhotoData } from '../../../ser
         <div class="requirement-note" *ngIf="uploadedPhotos.length === 0">
           <p>At least one photo is required to continue</p>
         </div>
-        </div>
-      </nz-spin>
+      </div>
 
     </div>
   `,
