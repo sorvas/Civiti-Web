@@ -6,6 +6,13 @@ This file provides essential context for Claude agents working on the Civica pro
 
 **Civica** is a civic engagement platform for Romanian citizens to collectively pressure local authorities through coordinated email campaigns. This is a **FRONTEND-ONLY** Angular application using NgRx for state management and NG-ZORRO (Ant Design) for UI components.
 
+### New Features (December 2024)
+- **User Registration System** with Google OAuth and email/password options
+- **Issue Creation Workflow** where registered users can report civic issues
+- **AI-Enhanced Descriptions** (mocked) for issue text generation
+- **Gamification System** with points, badges, and achievements
+- **Admin Approval Interface** for issue moderation
+
 ## 📁 Critical Documentation Structure
 
 **ALWAYS consult these files in order:**
@@ -20,6 +27,11 @@ This file provides essential context for Claude agents working on the Civica pro
 - **`docs/technical/GOOGLE_MAPS_SECURITY.md`** - Maps API security
 - **`docs/technical/README_GOOGLE_MAPS.md`** - Maps integration guide
 - **`docs/README.md`** - Documentation structure overview
+
+**New Feature Documentation:**
+- **`docs/design/user-registration-ux-research.md`** - UX research for user system
+- **`docs/design/user-registration-ui-design.md`** - UI specifications for new features
+- **`docs/IMPLEMENTATION-UPDATE.md`** - Implementation details for December 2024 update
 
 ### Documentation Update Protocol
 
@@ -138,9 +150,21 @@ Run these in parallel where possible"
 ```
 src/app/
 ├── components/        # UI components (NG-ZORRO based)
+│   ├── auth/         # Registration, login components
+│   ├── user/         # User dashboard with gamification
+│   ├── issue-creation/ # Multi-step issue creation wizard
+│   ├── admin/        # Admin approval interface
+│   └── ...existing components
 ├── services/         # Mock data services ONLY
+│   ├── mock-auth.service.ts    # JWT authentication (mock)
+│   ├── mock-user.service.ts    # User profile & gamification
+│   ├── mock-issue-creation.service.ts # Issue creation with AI
+│   ├── mock-admin.service.ts   # Admin workflows
+│   └── ...existing services
 ├── store/           # NgRx state management
-│   ├── issues/      # Issue state
+│   ├── auth/        # Authentication state
+│   ├── user/        # User profile & gamification state
+│   ├── issues/      # Enhanced issue state
 │   ├── location/    # Location state
 │   └── ui/          # UI state
 └── config/          # Mock configuration
@@ -157,10 +181,12 @@ src/app/
 ### FRONTEND ONLY
 - ❌ NO backend implementation
 - ❌ NO real API calls
-- ❌ NO authentication (mock only)
+- ❌ NO authentication (mock only - JWT simulation in localStorage)
 - ❌ NO database connections
 - ✅ ALL data from mock services
 - ✅ Hardcoded location data (Bucharest, Sector 5)
+- ✅ Mock AI text generation for issue descriptions
+- ✅ LocalStorage for data persistence in development
 
 ### Implementation Standards
 1. **Read documentation BEFORE coding**
@@ -276,6 +302,24 @@ getIssues(): Observable<Issue[]> {
 "Use performance-benchmarker agent to optimize initial load time"
 ```
 
+### New Feature Routes
+- `/auth/register` - Registration gateway
+- `/auth/login` - Login page
+- `/dashboard` - User dashboard (protected)
+- `/create-issue` - Issue creation wizard (protected)
+- `/admin/approval` - Admin interface
+
+### Test Credentials
+- Email: `test@civica.ro`
+- Password: `password123`
+
+### Mock Service Patterns
+All new mock services follow the same pattern with:
+- 300-700ms simulated delays
+- LocalStorage for persistence
+- Console logging with `[MOCK]` prefix
+- Realistic data structures matching planned backend
+
 ## 📊 Success Metrics
 
 Before marking ANY task complete, verify:
@@ -293,7 +337,7 @@ Before marking ANY task complete, verify:
 
 ## 🎯 User Journey Implementation Checklist
 
-From ux.md, ensure these flows work perfectly:
+### Original Flows (Anonymous Users)
 
 1. **Entry & Location Selection**
    - [ ] Pre-selected Bucharest, Sector 5
@@ -323,6 +367,32 @@ From ux.md, ensure these flows work perfectly:
    - [ ] Success feedback
    - [ ] Email counter updates
    - [ ] Option to contact another authority
+
+### New Flows (Registered Users)
+
+6. **User Registration**
+   - [ ] Google OAuth integration (mocked)
+   - [ ] Email/password registration form
+   - [ ] Progressive profiling
+   - [ ] Welcome flow with gamification intro
+
+7. **User Dashboard**
+   - [ ] Gamification stats (points, level, badges)
+   - [ ] Recent activity
+   - [ ] Quick actions for issue creation
+   - [ ] Achievement progress
+
+8. **Issue Creation (4-step wizard)**
+   - [ ] Issue type selection with icons
+   - [ ] Photo upload with AI guidance
+   - [ ] AI-enhanced description generation
+   - [ ] Location confirmation and review
+
+9. **Admin Approval**
+   - [ ] Pending issues queue
+   - [ ] Detailed review interface
+   - [ ] Approve/reject/request changes flow
+   - [ ] Template responses
 
 ## 🔄 Continuous Improvement
 

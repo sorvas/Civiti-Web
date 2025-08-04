@@ -1,0 +1,126 @@
+import { createReducer, on } from '@ngrx/store';
+import { UserState, initialUserState } from './user.state';
+import * as UserActions from './user.actions';
+
+export const userReducer = createReducer(
+  initialUserState,
+
+  // Profile Management Reducers
+  on(UserActions.loadUserProfile, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(UserActions.loadUserProfileSuccess, (state, { profile }) => ({
+    ...state,
+    profile,
+    isLoading: false,
+    error: null
+  })),
+
+  on(UserActions.loadUserProfileFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  on(UserActions.updateUserProfile, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(UserActions.updateUserProfileSuccess, (state, { profile }) => ({
+    ...state,
+    profile,
+    isLoading: false,
+    error: null
+  })),
+
+  on(UserActions.updateUserProfileFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  // Gamification Reducers
+  on(UserActions.loadGamificationData, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(UserActions.loadGamificationDataSuccess, (state, { gamification }) => ({
+    ...state,
+    gamification,
+    isLoading: false,
+    error: null
+  })),
+
+  on(UserActions.loadGamificationDataFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  on(UserActions.updatePointsSuccess, (state, { totalPoints }) => ({
+    ...state,
+    gamification: state.gamification ? {
+      ...state.gamification,
+      points: totalPoints
+    } : null
+  })),
+
+  on(UserActions.awardBadgeSuccess, (state, { gamification }) => ({
+    ...state,
+    gamification
+  })),
+
+  on(UserActions.updateStreakSuccess, (state, { gamification }) => ({
+    ...state,
+    gamification
+  })),
+
+  // Preferences Reducers
+  on(UserActions.loadUserPreferences, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(UserActions.loadUserPreferencesSuccess, (state, { preferences }) => ({
+    ...state,
+    preferences,
+    isLoading: false,
+    error: null
+  })),
+
+  on(UserActions.loadUserPreferencesFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  on(UserActions.updateUserPreferences, (state) => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+
+  on(UserActions.updateUserPreferencesSuccess, (state, { preferences }) => ({
+    ...state,
+    preferences,
+    isLoading: false,
+    error: null
+  })),
+
+  on(UserActions.updateUserPreferencesFailure, (state, { error }) => ({
+    ...state,
+    isLoading: false,
+    error
+  })),
+
+  // Clear User Data
+  on(UserActions.clearUserData, () => initialUserState)
+);

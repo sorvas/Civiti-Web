@@ -21,6 +21,18 @@ import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzResultModule } from 'ng-zorro-antd/result';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzStepsModule } from 'ng-zorro-antd/steps';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzStatisticModule } from 'ng-zorro-antd/statistic';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzListModule } from 'ng-zorro-antd/list';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { NzMessageModule } from 'ng-zorro-antd/message';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
 
 
 // Import required icons
@@ -63,7 +75,31 @@ import {
   LeftOutline,
   RightOutline,
   EyeOutline,
-  ArrowRightOutline
+  ArrowRightOutline,
+  GoogleOutline,
+  EyeInvisibleOutline,
+  PlusCircleOutline,
+  FileTextOutline,
+  UserAddOutline,
+  LoginOutline,
+  LogoutOutline,
+  DownOutline,
+  SettingOutline,
+  NotificationOutline,
+  HeartOutline,
+  LikeOutline,
+  ToolOutline,
+  MessageOutline,
+  RobotOutline,
+  UploadOutline,
+  CameraOutline,
+  DeleteOutline,
+  EditOutline,
+  CheckOutline,
+  PercentageOutline,
+  FieldTimeOutline,
+  FlagOutline,
+  InboxOutline
 } from '@ant-design/icons-angular/icons';
 
 const icons: IconDefinition[] = [
@@ -104,7 +140,31 @@ const icons: IconDefinition[] = [
   LeftOutline,
   RightOutline,
   EyeOutline,
-  ArrowRightOutline
+  ArrowRightOutline,
+  GoogleOutline,
+  EyeInvisibleOutline,
+  PlusCircleOutline,
+  FileTextOutline,
+  UserAddOutline,
+  LoginOutline,
+  LogoutOutline,
+  DownOutline,
+  SettingOutline,
+  NotificationOutline,
+  HeartOutline,
+  LikeOutline,
+  ToolOutline,
+  MessageOutline,
+  RobotOutline,
+  UploadOutline,
+  CameraOutline,
+  DeleteOutline,
+  EditOutline,
+  CheckOutline,
+  PercentageOutline,
+  FieldTimeOutline,
+  FlagOutline,
+  InboxOutline
 ];
 
 const NgZorroModules = [
@@ -129,7 +189,19 @@ const NgZorroModules = [
   NzPageHeaderModule,
   NzSpinModule,
   NzEmptyModule,
-  NzResultModule
+  NzResultModule,
+  NzAlertModule,
+  NzCheckboxModule,
+  NzStepsModule,
+  NzProgressModule,
+  NzStatisticModule,
+  NzAvatarModule,
+  NzListModule,
+  NzDropDownModule,
+  NzUploadModule,
+  NzMessageModule,
+  NzTableModule,
+  NzRadioModule
 ];
 
 @NgModule({
