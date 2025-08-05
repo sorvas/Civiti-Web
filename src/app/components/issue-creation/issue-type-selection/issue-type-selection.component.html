@@ -1,0 +1,158 @@
+<div class="issue-type-container">
+  
+  <!-- Header -->
+  <div class="page-header">
+    <button nz-button nzType="text" nzSize="large" routerLink="/dashboard" class="back-btn">
+      <span nz-icon nzType="arrow-left"></span>
+      Înapoi la panou
+    </button>
+    <h1 class="page-title">Raportează o problemă din comunitate</h1>
+    <p class="page-subtitle">Alege categoria care descrie cel mai bine problema ta</p>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div class="progress-indicator">
+    <div class="progress-step active">
+      <div class="step-number">1</div>
+      <div class="step-label">Tip problemă</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">2</div>
+      <div class="step-label">Fotografii</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">3</div>
+      <div class="step-label">Detalii</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">4</div>
+      <div class="step-label">Verificare</div>
+    </div>
+  </div>
+
+  <!-- Authentication Check -->
+  <nz-alert
+    *ngIf="!(isAuthenticated$ | async)"
+    nzMessage="Autentificare necesară"
+    nzDescription="Te rugăm să te conectezi pentru a raporta probleme din comunitate"
+    nzType="warning"
+    nzShowIcon
+    nzCloseable
+    class="auth-alert">
+    <div class="auth-actions">
+      <button nz-button nzType="primary" routerLink="/auth/login">Conectare</button>
+      <button nz-button nzType="default" routerLink="/auth/register">Creează cont</button>
+    </div>
+  </nz-alert>
+
+  <!-- Category Selection -->
+  <nz-spin [nzSpinning]="isLoading">
+    <div class="categories-container">
+    
+    <div class="categories-intro">
+      <h2>Ce tip de problemă raportezi?</h2>
+      <p>Selectează categoria care se potrivește cel mai bine cu preocuparea ta. Aceasta ne ajută să direcționăm raportul către autoritățile competente.</p>
+    </div>
+
+    <div class="categories-grid">
+      <div nz-row [nzGutter]="[16, 16]">
+        
+        <div 
+          nz-col 
+          [nzSpan]="24" 
+          [nzMd]="12" 
+          [nzLg]="8"
+          *ngFor="let category of categories"
+          class="category-col">
+          
+          <nz-card 
+            class="category-card" 
+            [class.selected]="selectedCategory?.id === category.id"
+            (click)="selectCategory(category)">
+            
+            <div class="category-content">
+              <div class="category-icon">
+                {{ category.icon }}
+              </div>
+              
+              <div class="category-info">
+                <h3 class="category-title">{{ category.name }}</h3>
+                <p class="category-description">{{ category.description }}</p>
+              </div>
+              
+              <div class="category-examples">
+                <div class="examples-label">Exemple:</div>
+                <div class="examples-tags">
+                  <nz-tag 
+                    *ngFor="let example of category.examples.slice(0, 3)" 
+                    class="example-tag">
+                    {{ example }}
+                  </nz-tag>
+                  <nz-tag 
+                    *ngIf="category.examples.length > 3" 
+                    class="example-tag more-tag">
+                    +{{ category.examples.length - 3 }} altele
+                  </nz-tag>
+                </div>
+              </div>
+              
+              <div class="selection-indicator" *ngIf="selectedCategory?.id === category.id">
+                <span nz-icon nzType="check-circle" nzTheme="fill"></span>
+                Selectat
+              </div>
+              
+            </div>
+          </nz-card>
+          
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Current Location Display -->
+    <div class="location-info" *ngIf="currentLocation">
+      <nz-card class="location-card">
+        <div class="location-content">
+          <span nz-icon nzType="environment" class="location-icon"></span>
+          <div class="location-details">
+            <div class="location-label">Locație actuală</div>
+            <div class="location-address">{{ currentLocation.address }}</div>
+            <button nz-button nzType="link" nzSize="small" (click)="changeLocation()">
+              Schimbă locația
+            </button>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Continue Button -->
+    <div class="continue-section">
+      <button 
+        nz-button 
+        nzType="primary" 
+        nzSize="large"
+        [disabled]="!selectedCategory || !(isAuthenticated$ | async)"
+        (click)="continueToPhotos()"
+        class="continue-btn">
+        <span>Continuă cu fotografiile</span>
+        <span nz-icon nzType="arrow-right"></span>
+      </button>
+      
+      <p class="help-text" *ngIf="!selectedCategory">
+        Te rugăm să selectezi o categorie pentru a continua
+      </p>
+      
+      <div class="category-help">
+        <p>Nu ești sigur ce categorie se potrivește problemei tale?</p>
+        <button nz-button nzType="link" (click)="showCategoryHelp()">
+          Obține ajutor pentru a alege o categorie
+        </button>
+      </div>
+    </div>
+
+    </div>
+  </nz-spin>
+</div>

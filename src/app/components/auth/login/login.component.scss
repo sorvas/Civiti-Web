@@ -1,0 +1,278 @@
+.login-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--oxford-blue) 0%, #1a2b4f 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--white);
+  max-width: 500px;
+  width: 100%;
+}
+
+.back-btn {
+  position: absolute;
+  left: 2rem;
+  top: 2rem;
+  color: var(--white) !important;
+  font-weight: 600;
+  opacity: 0.9;
+  
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.logo {
+  height: 60px;
+  margin-bottom: 1.5rem;
+  filter: brightness(0) invert(1); // Make logo white
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--white);
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.login-form-card {
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  
+  :deep(.ant-card-body) {
+    padding: 2.5rem;
+  }
+}
+
+.error-alert {
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+}
+
+.oauth-section {
+  margin-bottom: 1.5rem;
+}
+
+.google-oauth-btn {
+  background: #4285f4 !important;
+  border-color: #4285f4 !important;
+  color: var(--white) !important;
+  font-weight: 600;
+  height: 48px;
+  border-radius: 8px;
+  
+  &:hover {
+    background: #3367d6 !important;
+    border-color: #3367d6 !important;
+  }
+  
+  span[nz-icon] {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+}
+
+.login-form {
+  margin-bottom: 1.5rem;
+}
+
+.login-input {
+  height: 48px;
+  border-radius: 8px;
+  font-size: 1rem;
+  
+  &:focus {
+    border-color: var(--orange-web);
+    box-shadow: 0 0 0 2px rgba(252, 163, 17, 0.2);
+  }
+}
+
+.password-toggle {
+  cursor: pointer;
+  color: #666;
+  font-size: 1.1rem;
+  
+  &:hover {
+    color: var(--orange-web);
+  }
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.forgot-password-link {
+  color: var(--orange-web);
+  text-decoration: none;
+  font-weight: 500;
+  
+  &:hover {
+    text-decoration: underline;
+    color: #e8930f;
+  }
+}
+
+.submit-section {
+  margin-bottom: 1.5rem;
+}
+
+.login-submit-btn {
+  background: var(--orange-web) !important;
+  border-color: var(--orange-web) !important;
+  color: var(--white) !important;
+  font-weight: 600;
+  height: 48px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &:hover:not(:disabled) {
+    background: #e8930f !important;
+    border-color: #e8930f !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(252, 163, 17, 0.3);
+  }
+  
+  &:disabled {
+    background: #ccc !important;
+    border-color: #ccc !important;
+  }
+  
+  span[nz-icon] {
+    margin-right: 0.5rem;
+  }
+}
+
+.demo-info {
+  margin-bottom: 1.5rem;
+}
+
+.demo-alert {
+  border-radius: 8px;
+  
+  ul {
+    margin: 0.5rem 0;
+    padding-left: 1rem;
+    
+    li {
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.registration-link {
+  text-align: center;
+  margin-bottom: 0;
+  
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+}
+
+.registration-link-text {
+  color: var(--orange-web);
+  font-weight: 600;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+    color: #e8930f;
+  }
+}
+
+// Form label styling
+:deep(.ant-form-item-label) {
+  label {
+    color: var(--oxford-blue);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+}
+
+// Checkbox styling
+:deep(.ant-checkbox-checked .ant-checkbox-inner) {
+  background-color: var(--orange-web);
+  border-color: var(--orange-web);
+}
+
+// Divider styling
+:deep(.ant-divider-inner-text) {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .back-btn {
+    position: relative;
+    left: auto;
+    top: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .login-header {
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .login-form-card {
+    :deep(.ant-card-body) {
+      padding: 1.5rem;
+    }
+  }
+}
+
+// Error states
+:deep(.ant-form-item-has-error) {
+  .ant-input,
+  .ant-input:focus {
+    border-color: #dc3545;
+  }
+  
+  .ant-input:focus {
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+  }
+}

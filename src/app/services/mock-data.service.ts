@@ -233,7 +233,7 @@ export class MockDataService {
     // - System prompt tailored for each issue type/category
     const body = `Stimate reprezentant ${authority.name},
 
-Vă scriu pentru a vă aduce la cunoștință o problemă care necesită intervenția dumneavoastră urgentă în comunitatea noastră.
+Îți scriu pentru a-ți aduce la cunoștință o problemă care necesită intervenția ta urgentă în comunitatea noastră.
 
 Detalii problemă:
 - Locație: ${issue.location.address}
@@ -241,18 +241,18 @@ Detalii problemă:
 - Impact: ${issue.communityImpact}
 - Acțiune solicitată: ${issue.desiredOutcome}
 
-Această problemă a fost raportată la data de ${issue.dateCreated.toLocaleDateString('ro-RO')} și a fost adusă deja la cunoștința dumneavoastră de ${issue.emailsSent} cetățeni îngrijorați.
+Această problemă a fost raportată la data de ${issue.dateCreated.toLocaleDateString('ro-RO')} și a fost adusă deja la cunoștința ta de ${issue.emailsSent} cetățeni îngrijorați.
 
 ${userData.additionalComments ? `\nComentarii suplimentare:\n${userData.additionalComments}` : ''}
 
-Vă rog să luați măsurile necesare pentru rezolvarea acestei probleme cât mai rapid posibil.
+Te rog să iei măsurile necesare pentru rezolvarea acestei probleme cât mai rapid posibil.
 
 Date de contact:
 Nume: ${userData.name}
 Email: ${userData.email}
 ${userData.phone ? `Telefon: ${userData.phone}` : ''}
 
-Vă mulțumesc pentru atenția acordată acestei probleme.
+Îți mulțumesc pentru atenția acordată acestei probleme.
 
 Cu respect,
 ${userData.name}

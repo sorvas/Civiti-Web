@@ -53,6 +53,12 @@ export class MockAuthService {
   }
 
   private initializeMockData(): void {
+    // Check if we're in a browser environment
+    if (!this.isBrowser()) {
+      console.log('[MOCK AUTH] Running in SSR context, skipping localStorage initialization');
+      return;
+    }
+
     // Simulate some existing users in localStorage
     if (!localStorage.getItem('civica_mock_users')) {
       localStorage.setItem('civica_mock_users', JSON.stringify(this.mockUsers));
@@ -60,6 +66,10 @@ export class MockAuthService {
       const storedUsers = JSON.parse(localStorage.getItem('civica_mock_users') || '{}');
       this.mockUsers = { ...this.mockUsers, ...storedUsers };
     }
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
   // Google OAuth Mock Implementation
@@ -158,7 +168,9 @@ export class MockAuthService {
 
         // Store new user
         this.mockUsers[email] = { ...user, password };
-        localStorage.setItem('civica_mock_users', JSON.stringify(this.mockUsers));
+        if (this.isBrowser()) {
+          localStorage.setItem('civica_mock_users', JSON.stringify(this.mockUsers));
+        }
 
         const token = this.generateJWT(user);
         const refreshToken = this.generateRefreshToken();
@@ -186,8 +198,10 @@ export class MockAuthService {
         const token = this.generateJWT(currentUser);
         const refreshToken = this.generateRefreshToken();
 
-        localStorage.setItem(this.STORAGE_KEYS.TOKEN, token);
-        localStorage.setItem(this.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+        if (this.isBrowser()) {
+          localStorage.setItem(this.STORAGE_KEYS.TOKEN, token);
+          localStorage.setItem(this.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+        }
 
         console.log('[MOCK AUTH] Token refresh successful');
         return { token, refreshToken };
@@ -201,8 +215,8 @@ export class MockAuthService {
       delay(100),
       map(() => {
         const user = this.getCurrentUserSync();
-        const token = localStorage.getItem(this.STORAGE_KEYS.TOKEN);
-        const refreshToken = localStorage.getItem(this.STORAGE_KEYS.REFRESH_TOKEN);
+        const token = this.isBrowser() ? localStorage.getItem(this.STORAGE_KEYS.TOKEN) : null;
+        const refreshToken = this.isBrowser() ? localStorage.getItem(this.STORAGE_KEYS.REFRESH_TOKEN) : null;
 
         if (user && token && refreshToken) {
           return { user, token, refreshToken };
@@ -218,7 +232,7 @@ export class MockAuthService {
     return of(null).pipe(
       delay(100),
       map(() => {
-        const token = localStorage.getItem(this.STORAGE_KEYS.TOKEN);
+        const token = this.isBrowser() ? localStorage.getItem(this.STORAGE_KEYS.TOKEN) : null;
         if (!token) return false;
 
         try {
@@ -239,9 +253,11 @@ export class MockAuthService {
     return of(null).pipe(
       delay(200),
       map(() => {
-        localStorage.removeItem(this.STORAGE_KEYS.USER);
-        localStorage.removeItem(this.STORAGE_KEYS.TOKEN);
-        localStorage.removeItem(this.STORAGE_KEYS.REFRESH_TOKEN);
+        if (this.isBrowser()) {
+          localStorage.removeItem(this.STORAGE_KEYS.USER);
+          localStorage.removeItem(this.STORAGE_KEYS.TOKEN);
+          localStorage.removeItem(this.STORAGE_KEYS.REFRESH_TOKEN);
+        }
         console.log('[MOCK AUTH] Logout successful');
       })
     );
@@ -249,6 +265,10 @@ export class MockAuthService {
 
   // Private Helper Methods
   private getCurrentUserSync(): AuthUser | null {
+    if (!this.isBrowser()) {
+      return null;
+    }
+    
     const userData = localStorage.getItem(this.STORAGE_KEYS.USER);
     if (userData) {
       try {
@@ -261,6 +281,10 @@ export class MockAuthService {
   }
 
   private storeAuthData(user: AuthUser, token: string, refreshToken: string): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+    
     localStorage.setItem(this.STORAGE_KEYS.USER, JSON.stringify(user));
     localStorage.setItem(this.STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(this.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
@@ -313,7 +337,7 @@ export class MockAuthService {
       delay(500),
       map(() => {
         const user = this.getCurrentUserSync();
-        if (user) {
+        if (user && this.isBrowser()) {
           user.emailVerified = true;
           localStorage.setItem(this.STORAGE_KEYS.USER, JSON.stringify(user));
         }

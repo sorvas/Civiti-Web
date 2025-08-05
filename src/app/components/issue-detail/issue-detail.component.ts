@@ -72,9 +72,9 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('infoWindow') infoWindow!: MapInfoWindow;
     @ViewChild('markerElement') markerElement!: MapMarker;
 
-    issue$: Observable<Issue | null | undefined>;
-    isLoading$: Observable<boolean>;
-    error$: Observable<string | null>;
+    issue$!: Observable<Issue | null | undefined>;
+    isLoading$!: Observable<boolean>;
+    error$!: Observable<string | null>;
     
     // Google Maps properties
     mapOptions: any = {
@@ -102,7 +102,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         this.error$ = this._store.select(IssueSelectors.selectIssuesError);
 
         // Reinitialize gallery when issue data changes (only in browser)
-        if (isPlatformBrowser(this._platformId)) {
+        if (isPlatformBrowser(this._platformId) && this.issue$) {
             this.issue$.pipe(
                 takeUntil(this._destroy$)
             ).subscribe(issue => {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -10,12 +10,10 @@ import { MockAuthService } from '../../services/mock-auth.service';
 
 @Injectable()
 export class AuthEffects {
-  constructor(
-    private actions$: Actions,
-    private mockAuthService: MockAuthService,
-    private router: Router,
-    private message: NzMessageService
-  ) {}
+  private actions$ = inject(Actions);
+  private mockAuthService = inject(MockAuthService);
+  private router = inject(Router);
+  private message = inject(NzMessageService);
 
   // Google OAuth Effects
   loginWithGoogle$ = createEffect(() =>

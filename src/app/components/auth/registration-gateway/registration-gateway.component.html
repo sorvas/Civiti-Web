@@ -1,0 +1,136 @@
+<div class="registration-gateway-container">
+  
+  <!-- Header -->
+  <div class="gateway-header">
+    <button nz-button nzType="text" nzSize="large" routerLink="/" class="back-btn">
+      <span nz-icon nzType="arrow-left"></span>
+      Înapoi la probleme
+    </button>
+    <img src="/assets/logo/civica-logo.svg" alt="Civica" class="logo" />
+    <h1 class="page-title">Alătură-te comunității Civica</h1>
+    <p class="page-subtitle">Creează un cont pentru a raporta probleme și a face diferența în comunitatea ta</p>
+  </div>
+
+  <!-- Registration Options -->
+  <div class="registration-options">
+    <nz-card [nzBordered]="false" class="options-card">
+      
+      <!-- Google OAuth -->
+      <div class="oauth-section">
+        <button 
+          nz-button 
+          nzType="primary" 
+          nzSize="large" 
+          nzBlock
+          class="google-oauth-btn"
+          (click)="loginWithGoogle()">
+          <span nz-icon nzType="google" nzTheme="outline"></span>
+          Înregistrează-te cu Google
+        </button>
+        
+        <div class="oauth-benefits">
+          <div class="benefit-item">
+            <span nz-icon nzType="check-circle" class="benefit-icon"></span>
+            <span>Înregistrare rapidă în 10 secunde</span>
+          </div>
+          <div class="benefit-item">
+            <span nz-icon nzType="check-circle" class="benefit-icon"></span>
+            <span>Profilul se completează automat</span>
+          </div>
+        </div>
+        
+        <nz-divider nzText="sau" nzOrientation="center"></nz-divider>
+      </div>
+
+      <!-- Email Registration -->
+      <div class="email-section">
+        <button 
+          nz-button 
+          nzType="default" 
+          nzSize="large" 
+          nzBlock
+          class="email-signup-btn"
+          routerLink="/auth/user-registration">
+          <span nz-icon nzType="mail" nzTheme="outline"></span>
+          Înregistrează-te cu email
+        </button>
+        
+        <p class="email-description">
+          Control complet asupra datelor tale. Proces ghidat pas cu pas.
+        </p>
+      </div>
+
+      <!-- Benefits Section -->
+      <div class="benefits-section">
+        <h3>De ce să îți creezi un cont?</h3>
+        
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <div class="benefit-icon-large">🎯</div>
+            <h4>Raportează probleme</h4>
+            <p>Semnalează probleme din comunitate cu fotografii și descrieri detaliate</p>
+          </div>
+          
+          <div class="benefit-card">
+            <div class="benefit-icon-large">📊</div>
+            <h4>Urmărește progresul</h4>
+            <p>Vezi status-ul rapoartelor tale și primește actualizări în timp real</p>
+          </div>
+          
+          <div class="benefit-card">
+            <div class="benefit-icon-large">🏆</div>
+            <h4>Câștigă recunoștere</h4>
+            <p>Obține puncte și badges pentru contribuția ta la comunitate</p>
+          </div>
+          
+          <div class="benefit-card">
+            <div class="benefit-icon-large">👥</div>
+            <h4>Conectează-te</h4>
+            <p>Colaborează cu alți cetățeni pentru schimbări pozitive</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="stats-section">
+        <nz-card nzTitle="Impact comunitar" class="stats-card">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number">1,247</div>
+              <div class="stat-label">Probleme rezolvate</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">8,432</div>
+              <div class="stat-label">Membri activi</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">95%</div>
+              <div class="stat-label">Rata de răspuns</div>
+            </div>
+          </div>
+        </nz-card>
+      </div>
+
+      <!-- Footer Links -->
+      <div class="footer-links">
+        <nz-divider nzText="Ai deja un cont?" nzOrientation="center"></nz-divider>
+        <div class="login-link">
+          <a routerLink="/auth/login" class="login-link-text">
+            <span nz-icon nzType="login"></span>
+            Conectează-te aici
+          </a>
+        </div>
+      </div>
+
+    </nz-card>
+  </div>
+
+  <!-- Privacy Notice -->
+  <div class="privacy-notice">
+    <p>
+      <span nz-icon nzType="lock"></span>
+      Datele tale sunt protejate și nu vor fi partajate cu terți. 
+      <a href="#" class="privacy-link">Citește politica de confidențialitate</a>
+    </p>
+  </div>
+</div>
