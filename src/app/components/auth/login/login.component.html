@@ -1,0 +1,150 @@
+<div class="login-container">
+  
+  <!-- Header -->
+  <div class="login-header">
+    <button nz-button nzType="text" nzSize="large" routerLink="/auth/register" class="back-btn">
+      <span nz-icon nzType="arrow-left"></span>
+      Înapoi
+    </button>
+    <img src="/assets/logo/civica-logo.svg" alt="Civica" class="logo" />
+    <h1 class="page-title">Bine ai revenit</h1>
+    <p class="page-subtitle">Conectează-te pentru a continua să faci diferența în comunitatea ta</p>
+  </div>
+
+  <!-- Login Form -->
+  <div class="login-form-container">
+    <nz-card [nzBordered]="false" class="login-form-card">
+      
+      <nz-spin [nzSpinning]="(isLoading$ | async) || false">
+        
+        <!-- Error Alert -->
+        <nz-alert
+          *ngIf="error$ | async as error"
+          [nzMessage]="error"
+          nzType="error"
+          nzShowIcon
+          nzCloseable
+          (nzOnClose)="clearError()"
+          class="error-alert">
+        </nz-alert>
+
+        <!-- Google OAuth Option -->
+        <div class="oauth-section">
+          <button 
+            nz-button 
+            nzType="primary" 
+            nzSize="large" 
+            nzBlock
+            class="google-oauth-btn"
+            (click)="loginWithGoogle()">
+            <span nz-icon nzType="google" nzTheme="outline"></span>
+            Continuă cu Google
+          </button>
+          
+          <nz-divider nzText="sau conectează-te cu email" nzOrientation="center"></nz-divider>
+        </div>
+
+        <!-- Login Form -->
+        <form nz-form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="email" nzRequired>Adresă de email</nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să introduci o adresă de email validă">
+              <input
+                nz-input
+                formControlName="email"
+                id="email"
+                type="email"
+                placeholder="Introdu adresa de email"
+                autocomplete="email"
+                class="login-input">
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="password" nzRequired>Parolă</nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să introduci parola">
+              <nz-input-group [nzSuffix]="passwordSuffix">
+                <input
+                  nz-input
+                  formControlName="password"
+                  id="password"
+                  [type]="passwordVisible ? 'text' : 'password'"
+                  placeholder="Introdu parola"
+                  autocomplete="current-password"
+                  class="login-input">
+              </nz-input-group>
+              <ng-template #passwordSuffix>
+                <span 
+                  nz-icon 
+                  [nzType]="passwordVisible ? 'eye-invisible' : 'eye'" 
+                  (click)="passwordVisible = !passwordVisible"
+                  class="password-toggle">
+                </span>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+
+          <!-- Remember Me and Forgot Password -->
+          <div class="form-options">
+            <label nz-checkbox formControlName="rememberMe">
+              Ține-mă minte
+            </label>
+            <a href="#" class="forgot-password-link" (click)="$event.preventDefault(); showForgotPassword()">
+              Ai uitat parola?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <nz-form-item class="submit-section">
+            <nz-form-control [nzSpan]="24">
+              <button
+                nz-button
+                nzType="primary"
+                nzSize="large"
+                nzBlock
+                type="submit"
+                [disabled]="!loginForm.valid"
+                class="login-submit-btn">
+                <span nz-icon nzType="login"></span>
+                Conectare
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+
+        </form>
+
+        <!-- Demo Account Info -->
+        <div class="demo-info">
+          <nz-alert
+            nzMessage="Cont demonstrativ disponibil"
+            [nzDescription]="demoDescription"
+            nzType="info"
+            nzShowIcon
+            class="demo-alert">
+          </nz-alert>
+          
+          <ng-template #demoDescription>
+            <p>Folosește aceste date pentru a explora platforma:</p>
+            <ul>
+              <li><strong>Email:</strong> test&#64;civica.ro</li>
+              <li><strong>Parolă:</strong> password123</li>
+            </ul>
+            <button nz-button nzType="link" nzSize="small" (click)="fillDemoCredentials()">
+              Completează datele demo
+            </button>
+          </ng-template>
+        </div>
+
+        <!-- Registration Link -->
+        <div class="registration-link">
+          <nz-divider nzText="or" nzOrientation="center"></nz-divider>
+          <p>Nu ai încă un cont? 
+            <a routerLink="/auth/register" class="registration-link-text">Creează un cont</a>
+          </p>
+        </div>
+
+      </nz-spin>
+    </nz-card>
+  </div>
+</div>

@@ -140,9 +140,18 @@ export class MockIssueCreationService {
   }
 
   private initializeStorage(): void {
+    if (!this.isBrowser()) {
+      console.log('[MOCK ISSUE] Running in SSR context, skipping localStorage initialization');
+      return;
+    }
+
     if (!localStorage.getItem(this.STORAGE_KEY)) {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify({}));
     }
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
   getIssueCategories(): Observable<IssueCategory[]> {
@@ -203,7 +212,9 @@ export class MockIssueCreationService {
         };
 
         drafts[issueId] = updatedDraft;
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+        if (this.isBrowser()) {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+        }
         
         return updatedDraft;
       })
@@ -246,7 +257,9 @@ export class MockIssueCreationService {
         if (drafts[issueId]) {
           drafts[issueId].photos.push(photoData);
           drafts[issueId].updatedAt = new Date();
-          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+          if (this.isBrowser()) {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+          }
         }
 
         return photoData;
@@ -264,7 +277,9 @@ export class MockIssueCreationService {
         if (drafts[issueId]) {
           drafts[issueId].photos = drafts[issueId].photos.filter(photo => photo.id !== photoId);
           drafts[issueId].updatedAt = new Date();
-          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+          if (this.isBrowser()) {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
+          }
           return true;
         }
         return false;
@@ -464,23 +479,39 @@ export class MockIssueCreationService {
   }
 
   private getDraftIssues(): { [id: string]: IssueCreationData } {
+    if (!this.isBrowser()) {
+      return {};
+    }
+    
     const data = localStorage.getItem(this.STORAGE_KEY);
     return data ? JSON.parse(data) : {};
   }
 
   private saveDraftIssue(issue: IssueCreationData): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+    
     const drafts = this.getDraftIssues();
     drafts[issue.id!] = issue;
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
   }
 
   private removeDraftIssue(issueId: string): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+    
     const drafts = this.getDraftIssues();
     delete drafts[issueId];
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(drafts));
   }
 
   private storeSubmittedIssue(issue: IssueCreationData): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+    
     const submitted = JSON.parse(localStorage.getItem('civica_submitted_issues') || '{}');
     submitted[issue.id!] = issue;
     localStorage.setItem('civica_submitted_issues', JSON.stringify(submitted));

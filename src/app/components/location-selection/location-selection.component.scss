@@ -1,0 +1,38 @@
+nz-card {
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
+  border: 1px solid var(--platinum);
+}
+
+.text-orange-web {
+  color: var(--orange-web);
+}
+
+.text-oxford-blue {
+  color: var(--oxford-blue);
+}
+
+.text-primary {
+  color: var(--oxford-blue);
+}
+
+.bg-background {
+  background-color: var(--color-background);
+}
+
+.border-platinum {
+  border-color: var(--platinum);
+}
+
+button[nz-button] {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+nz-form-item {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}

@@ -47,11 +47,11 @@ export class IssuesListComponent implements OnInit {
   private _store = inject(Store<AppState>);
   private _imageErrorCount: Map<string, number> = new Map();
 
-  issues$: Observable<Issue[]>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
-  sortBy$: Observable<string>;
-  totalIssues$: Observable<number>;
+  issues$!: Observable<Issue[]>;
+  isLoading$!: Observable<boolean>;
+  error$!: Observable<string | null>;
+  sortBy$!: Observable<string>;
+  totalIssues$!: Observable<number>;
   
   sortBy = 'date';
 

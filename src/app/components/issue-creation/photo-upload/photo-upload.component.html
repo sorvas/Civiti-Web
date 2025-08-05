@@ -1,0 +1,184 @@
+<div class="photo-upload-container">
+  
+  <!-- Header -->
+  <div class="page-header">
+    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue" class="back-btn">
+      <span nz-icon nzType="arrow-left"></span>
+      Înapoi
+    </button>
+    <h1 class="page-title">Documentează problema</h1>
+    <p class="page-subtitle">Fă sau încarcă fotografii pentru a ajuta autoritățile să înțeleagă problema</p>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div class="progress-indicator">
+    <div class="progress-step completed">
+      <div class="step-number">✓</div>
+      <div class="step-label">Tip problemă</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step active">
+      <div class="step-number">2</div>
+      <div class="step-label">Fotografii</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">3</div>
+      <div class="step-label">Detalii</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">4</div>
+      <div class="step-label">Verificare</div>
+    </div>
+  </div>
+
+  <!-- Selected Category Info -->
+  <div class="category-info" *ngIf="selectedCategory">
+    <nz-card class="category-card">
+      <div class="category-summary">
+        <span class="category-icon">{{ selectedCategory.icon }}</span>
+        <div class="category-details">
+          <h3>{{ selectedCategory.name }}</h3>
+          <p>{{ selectedCategory.description }}</p>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Photo Upload Section -->
+  <div class="upload-section">
+    <nz-card nzTitle="Adaugă fotografii" class="upload-card">
+      
+      <!-- Photo Tips -->
+      <div class="photo-tips">
+        <nz-alert
+          nzMessage="Sfaturi pentru fotografii mai bune"
+          nzType="info"
+          nzShowIcon
+          nzCloseable="false"
+          class="tips-alert">
+          <div class="tips-content">
+            <ul class="tips-list">
+              <li>📸 Apropie-te pentru a arăta detaliile clar</li>
+              <li>🌅 Fă fotografii în lumină bună, dacă este posibil</li>
+              <li>📏 Include contextul din jur pentru perspectivă</li>
+              <li>🔄 Mai multe unghiuri ajută la relatarea poveștii</li>
+            </ul>
+          </div>
+        </nz-alert>
+      </div>
+
+      <!-- Upload Area -->
+      <nz-spin [nzSpinning]="isUploading">
+        <div class="upload-area">
+        
+        <!-- File Input (Mock Implementation) -->
+        <div class="mock-upload-area" (click)="triggerFileInput()">
+          <div class="upload-icon">
+            <span nz-icon nzType="camera" nzTheme="outline"></span>
+          </div>
+          <div class="upload-text">
+            <h4>Fă sau încarcă fotografii</h4>
+            <p>Fă clic pentru a deschide camera sau selectează din galerie</p>
+            <p class="upload-note">Maxim 5 fotografii, până la 10MB fiecare</p>
+          </div>
+        </div>
+
+        <input 
+          #fileInput 
+          type="file" 
+          accept="image/*" 
+          multiple 
+          capture="environment"
+          style="display: none;"
+          (change)="onFileSelected($event)">
+
+      </div>
+      </nz-spin>
+
+      <!-- Photo Preview Grid -->
+      <div class="photo-grid" *ngIf="uploadedPhotos.length > 0">
+        <div class="photo-count">
+          <span>{{ uploadedPhotos.length }}/5 fotografii încărcate</span>
+        </div>
+        
+        <div nz-row [nzGutter]="[16, 16]">
+          <div 
+            nz-col 
+            [nzSpan]="12" 
+            [nzSm]="8" 
+            [nzMd]="6"
+            *ngFor="let photo of uploadedPhotos; let i = index"
+            class="photo-col">
+            
+            <div class="photo-preview">
+              <img [src]="photo.url" [alt]="'Photo ' + (i + 1)" class="photo-image">
+              
+              <div class="photo-overlay">
+                <div class="photo-actions">
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    nzSize="small" 
+                    nzShape="circle"
+                    (click)="viewPhoto(photo)">
+                    <span nz-icon nzType="eye"></span>
+                  </button>
+                  <button 
+                    nz-button 
+                    nzType="primary" 
+                    nzDanger 
+                    nzSize="small" 
+                    nzShape="circle"
+                    (click)="removePhoto(i)">
+                    <span nz-icon nzType="delete"></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="photo-quality" [ngClass]="'quality-' + photo.quality">
+                {{ getQualityLabel(photo.quality) }}
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+    </nz-card>
+  </div>
+
+  <!-- Navigation -->
+  <div class="navigation-section">
+    <div class="nav-buttons">
+      <button 
+        nz-button 
+        nzType="default" 
+        nzSize="large"
+        routerLink="/create-issue"
+        class="nav-btn">
+        <span nz-icon nzType="arrow-left"></span>
+        Înapoi
+      </button>
+      
+      <div class="nav-spacer"></div>
+      
+      <button 
+        nz-button 
+        nzType="primary" 
+        nzSize="large"
+        [disabled]="uploadedPhotos.length === 0"
+        (click)="continueToDetails()"
+        class="nav-btn continue-btn">
+        Continuă cu detaliile
+        <span nz-icon nzType="arrow-right"></span>
+      </button>
+    </div>
+    
+    <div class="requirement-note" *ngIf="uploadedPhotos.length === 0">
+      <p>Este necesară cel puțin o fotografie pentru a continua</p>
+    </div>
+  </div>
+
+</div>

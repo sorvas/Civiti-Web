@@ -1,0 +1,265 @@
+<nz-spin [nzSpinning]="(isLoading$ | async) || false">
+  <div class="dashboard-container">
+  
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="user-welcome">
+        <nz-avatar 
+          [nzSrc]="(user$ | async)?.photoURL" 
+          [nzText]="(displayName$ | async)?.charAt(0)" 
+          nzSize="large"
+          class="user-avatar">
+        </nz-avatar>
+        <div class="welcome-text">
+          <h1>Bună, {{ displayName$ | async }}!</h1>
+          <p>Bine ai revenit la panoul civic</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <button nz-button nzType="text" nzSize="large" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
+          <span nz-icon nzType="user"></span>
+          <span nz-icon nzType="down"></span>
+        </button>
+        <nz-dropdown-menu #userMenu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item>
+              <span nz-icon nzType="setting"></span>
+              Setări profil
+            </li>
+            <li nz-menu-item>
+              <span nz-icon nzType="notification"></span>
+              Notificări
+            </li>
+            <li nz-menu-divider></li>
+            <li nz-menu-item (click)="logout()">
+              <span nz-icon nzType="logout"></span>
+              Deconectare
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gamification Progress Section -->
+  <div class="gamification-section" *ngIf="levelProgress$ | async as progress">
+    <nz-card nzTitle="Impactul tău civic" class="impact-card">
+      <div class="impact-overview">
+        <div class="level-info">
+          <div class="level-badge">
+            <span class="level-number">{{ userLevel$ | async }}</span>
+            <span class="level-label">Nivel</span>
+          </div>
+          <div class="level-title">
+            <h3>{{ getLevelTitle(userLevel$ | async) }}</h3>
+            <p>{{ userPoints$ | async }} puncte de comunitate</p>
+          </div>
+        </div>
+        
+        <div class="progress-info">
+          <nz-progress 
+            [nzPercent]="progress.percentage" 
+            nzStrokeColor="#FCA311"
+            nzSize="small"
+            class="level-progress">
+          </nz-progress>
+          <p class="progress-text">
+            {{ progress.current }} / {{ progress.required }} puncte până la nivelul {{ (userLevel$ | async)! + 1 }}
+          </p>
+        </div>
+      </div>
+    </nz-card>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div nz-row [nzGutter]="[16, 16]" *ngIf="userStats$ | async as stats">
+      
+      <div nz-col [nzSpan]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic
+            [nzValue]="stats.issuesReported"
+            nzTitle="Probleme raportate"
+            [nzValueStyle]="{ color: '#FCA311' }">
+          </nz-statistic>
+        </nz-card>
+      </div>
+
+      <div nz-col [nzSpan]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic
+            [nzValue]="stats.issuesResolved"
+            nzTitle="Probleme rezolvate"
+            [nzValueStyle]="{ color: '#28A745' }">
+          </nz-statistic>
+        </nz-card>
+      </div>
+
+      <div nz-col [nzSpan]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic
+            [nzValue]="stats.communityVotes"
+            nzTitle="Voturi comunitate"
+            [nzValueStyle]="{ color: '#14213D' }">
+          </nz-statistic>
+        </nz-card>
+      </div>
+
+      <div nz-col [nzSpan]="12" [nzSm]="6">
+        <nz-card class="stat-card">
+          <nz-statistic
+            [nzValue]="stats.approvalRate"
+            nzSuffix="%"
+            nzTitle="Rată de aprobare"
+            [nzValueStyle]="{ color: '#6c757d' }">
+          </nz-statistic>
+        </nz-card>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="main-content">
+    <div nz-row [nzGutter]="[24, 24]">
+      
+      <!-- Left Column -->
+      <div nz-col [nzSpan]="24" [nzLg]="16">
+        
+        <!-- Quick Actions -->
+        <nz-card nzTitle="Acțiuni rapide" class="quick-actions-card">
+          <div class="quick-actions">
+            
+            <div class="action-item primary" routerLink="/create-issue">
+              <div class="action-icon">
+                <span nz-icon nzType="plus-circle" nzTheme="outline"></span>
+              </div>
+              <div class="action-content">
+                <h4>Raportează problemă nouă</h4>
+                <p>Documentează o problemă din comunitatea ta</p>
+              </div>
+              <span nz-icon nzType="arrow-right" class="action-arrow"></span>
+            </div>
+
+            <div class="action-item" routerLink="/issues">
+              <div class="action-icon">
+                <span nz-icon nzType="search" nzTheme="outline"></span>
+              </div>
+              <div class="action-content">
+                <h4>Răsfoiește probleme</h4>
+                <p>Explorează și susține problemele comunității</p>
+              </div>
+              <span nz-icon nzType="arrow-right" class="action-arrow"></span>
+            </div>
+
+            <div class="action-item" (click)="viewMyIssues()">
+              <div class="action-icon">
+                <span nz-icon nzType="file-text" nzTheme="outline"></span>
+              </div>
+              <div class="action-content">
+                <h4>Problemele mele</h4>
+                <p>Urmărește problemele raportate</p>
+              </div>
+              <span nz-icon nzType="arrow-right" class="action-arrow"></span>
+            </div>
+
+          </div>
+        </nz-card>
+
+        <!-- Recent Activity -->
+        <nz-card nzTitle="Activitate recentă" class="activity-card">
+          <nz-list 
+            [nzDataSource]="mockActivity" 
+            [nzRenderItem]="activityItem"
+            [nzLoading]="false">
+            <ng-template #activityItem let-item>
+              <nz-list-item>
+                <nz-list-item-meta
+                  [nzAvatar]="activityAvatar"
+                  [nzTitle]="item.title"
+                  [nzDescription]="item.description">
+                  <ng-template #activityAvatar>
+                    <nz-avatar [nzIcon]="item.icon" [style.backgroundColor]="item.color"></nz-avatar>
+                  </ng-template>
+                </nz-list-item-meta>
+                <div class="activity-time">{{ item.time }}</div>
+              </nz-list-item>
+            </ng-template>
+          </nz-list>
+          
+          <div *ngIf="mockActivity.length === 0" class="empty-activity">
+            <nz-empty 
+              nzNotFoundImage="simple" 
+              nzNotFoundContent="Nicio activitate recentă. Începe prin a raporta o problemă!">
+            </nz-empty>
+          </div>
+        </nz-card>
+
+      </div>
+
+      <!-- Right Column -->
+      <div nz-col [nzSpan]="24" [nzLg]="8">
+        
+        <!-- Recent Badges -->
+        <nz-card nzTitle="Insigne recente" class="badges-card" *ngIf="recentBadges$ | async as badges">
+          <div class="badges-grid" *ngIf="badges.length > 0; else noBadges">
+            <div 
+              *ngFor="let badge of badges" 
+              class="badge-item"
+              [title]="badge.description">
+              <div class="badge-icon">
+                <img [src]="badge.iconUrl" [alt]="badge.name" onerror="this.style.display='none'">
+                <span *ngIf="!badge.iconUrl" class="badge-emoji">🏆</span>
+              </div>
+              <div class="badge-info">
+                <h5>{{ badge.name }}</h5>
+                <nz-tag [nzColor]="getBadgeColor(badge.rarity)">{{ badge.rarity }}</nz-tag>
+              </div>
+            </div>
+          </div>
+          <ng-template #noBadges>
+            <nz-empty 
+              nzNotFoundImage="simple" 
+              nzNotFoundContent="Nicio insignă încă. Continuă să participi pentru a câștiga prima insignă!">
+            </nz-empty>
+          </ng-template>
+        </nz-card>
+
+        <!-- Achievements Progress -->
+        <nz-card nzTitle="Realizări" class="achievements-card" *ngIf="incompleteAchievements$ | async as achievements">
+          <div class="achievements-list" *ngIf="achievements.length > 0; else noAchievements">
+            <div 
+              *ngFor="let achievement of achievements.slice(0, 3)" 
+              class="achievement-item">
+              <div class="achievement-info">
+                <h5>{{ achievement.title }}</h5>
+                <p>{{ achievement.description }}</p>
+              </div>
+              <div class="achievement-progress">
+                <nz-progress 
+                  [nzPercent]="(achievement.progress / achievement.maxProgress) * 100"
+                  nzStrokeColor="#FCA311"
+                  nzSize="small"
+                  [nzShowInfo]="false">
+                </nz-progress>
+                <span class="progress-text">{{ achievement.progress }}/{{ achievement.maxProgress }}</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noAchievements>
+            <nz-empty 
+              nzNotFoundImage="simple" 
+              nzNotFoundContent="Toate realizările completate! Bună treabă!">
+            </nz-empty>
+          </ng-template>
+        </nz-card>
+
+      </div>
+
+    </div>
+  </div>
+
+  </div>
+</nz-spin>

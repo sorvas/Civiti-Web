@@ -102,6 +102,11 @@ export class MockUserService {
   }
 
   private initializeMockData(): void {
+    if (!this.isBrowser()) {
+      console.log('[MOCK USER] Running in SSR context, skipping localStorage initialization');
+      return;
+    }
+
     if (!localStorage.getItem(this.STORAGE_KEY)) {
       const mockData = {
         profiles: {},
@@ -110,6 +115,10 @@ export class MockUserService {
       };
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(mockData));
     }
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
   getUserProfile(userId: string): Observable<UserProfile> {
@@ -410,11 +419,19 @@ export class MockUserService {
   }
 
   private getStoredData(): any {
+    if (!this.isBrowser()) {
+      return { profiles: {}, gamification: {}, preferences: {} };
+    }
+    
     const data = localStorage.getItem(this.STORAGE_KEY);
     return data ? JSON.parse(data) : { profiles: {}, gamification: {}, preferences: {} };
   }
 
   private saveStoredData(data: any): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+    
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
   }
 

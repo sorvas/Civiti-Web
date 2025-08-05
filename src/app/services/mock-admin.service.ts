@@ -108,6 +108,11 @@ export class MockAdminService {
   }
 
   private initializeMockData(): void {
+    if (!this.isBrowser()) {
+      console.log('[MOCK ADMIN] Running in SSR context, skipping localStorage initialization');
+      return;
+    }
+
     // Initialize storage if empty
     Object.values(this.STORAGE_KEYS).forEach(key => {
       if (!localStorage.getItem(key)) {
@@ -117,6 +122,10 @@ export class MockAdminService {
 
     // Create some mock pending issues
     this.createMockPendingIssues();
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
   private createMockPendingIssues(): void {
@@ -217,7 +226,9 @@ export class MockAdminService {
         pendingStorage[issue.id!] = issue;
       });
 
-      localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingStorage));
+      if (this.isBrowser()) {
+        localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingStorage));
+      }
     }
   }
 
@@ -284,8 +295,10 @@ export class MockAdminService {
         reviewedIssues[decision.issueId] = updatedIssue;
 
         // Save changes
-        localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingIssues));
-        localStorage.setItem(this.STORAGE_KEYS.REVIEWED_ISSUES, JSON.stringify(reviewedIssues));
+        if (this.isBrowser()) {
+          localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingIssues));
+          localStorage.setItem(this.STORAGE_KEYS.REVIEWED_ISSUES, JSON.stringify(reviewedIssues));
+        }
 
         console.log('[MOCK ADMIN] Decision processed successfully:', updatedIssue);
         
@@ -460,8 +473,10 @@ export class MockAdminService {
         // Save changes
         const pendingIssues = this.getPendingIssuesFromStorage();
         const reviewedIssues = this.getReviewedIssuesFromStorage();
-        localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingIssues));
-        localStorage.setItem(this.STORAGE_KEYS.REVIEWED_ISSUES, JSON.stringify(reviewedIssues));
+        if (this.isBrowser()) {
+          localStorage.setItem(this.STORAGE_KEYS.PENDING_ISSUES, JSON.stringify(pendingIssues));
+          localStorage.setItem(this.STORAGE_KEYS.REVIEWED_ISSUES, JSON.stringify(reviewedIssues));
+        }
 
         return { successCount, failureCount };
       })
@@ -470,11 +485,19 @@ export class MockAdminService {
 
   // Private helper methods
   private getPendingIssuesFromStorage(): { [id: string]: AdminIssue } {
+    if (!this.isBrowser()) {
+      return {};
+    }
+    
     const data = localStorage.getItem(this.STORAGE_KEYS.PENDING_ISSUES);
     return data ? JSON.parse(data) : {};
   }
 
   private getReviewedIssuesFromStorage(): { [id: string]: AdminIssue } {
+    if (!this.isBrowser()) {
+      return {};
+    }
+    
     const data = localStorage.getItem(this.STORAGE_KEYS.REVIEWED_ISSUES);
     return data ? JSON.parse(data) : {};
   }

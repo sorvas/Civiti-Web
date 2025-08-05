@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { map, catchError, switchMap, tap } from 'rxjs/operators';
@@ -9,11 +9,9 @@ import { MockUserService } from '../../services/mock-user.service';
 
 @Injectable()
 export class UserEffects {
-  constructor(
-    private actions$: Actions,
-    private mockUserService: MockUserService,
-    private message: NzMessageService
-  ) {}
+  private actions$ = inject(Actions);
+  private mockUserService = inject(MockUserService);
+  private message = inject(NzMessageService);
 
   // Load User Profile Effects
   loadUserProfile$ = createEffect(() =>
