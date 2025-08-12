@@ -25,6 +25,11 @@ export const routes: Routes = [
         path: 'login',
         loadComponent: () => import('./components/auth/login/login.component').then(m => m.LoginComponent),
         data: { animation: 'LoginPage' }
+      },
+      {
+        path: 'callback',
+        loadComponent: () => import('./components/auth/oauth-callback/oauth-callback.component').then(m => m.OauthCallbackComponent),
+        data: { animation: 'CallbackPage' }
       }
     ]
   },

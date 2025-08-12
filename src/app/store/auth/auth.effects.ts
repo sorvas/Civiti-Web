@@ -6,12 +6,14 @@ import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 import * as AuthActions from './auth.actions';
-import { MockAuthService } from '../../services/mock-auth.service';
+import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
 
 @Injectable()
 export class AuthEffects {
   private actions$ = inject(Actions);
-  private mockAuthService = inject(MockAuthService);
+  private authService = inject(AuthService);
+  private apiService = inject(ApiService);
   private router = inject(Router);
   private message = inject(NzMessageService);
 
@@ -20,15 +22,23 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loginWithGoogle),
       switchMap(() =>
-        this.mockAuthService.loginWithGoogle().pipe(
+        this.authService.loginWithGoogle().pipe(
           map(response => AuthActions.loginWithGoogleSuccess({
             user: response.user,
             token: response.token,
             refreshToken: response.refreshToken
           })),
-          catchError(error => of(AuthActions.loginWithGoogleFailure({ 
-            error: error.message || 'Google login failed' 
-          })))
+          catchError(error => {
+            // Handle OAuth redirect case
+            if (error.type === 'oauth_redirect') {
+              // This is expected for OAuth flows
+              this.message.info('Redirecting to Google for authentication...');
+              return of({ type: '[Auth] OAuth Redirect' });
+            }
+            return of(AuthActions.loginWithGoogleFailure({ 
+              error: error.message || 'Google login failed' 
+            }));
+          })
         )
       )
     )
@@ -39,12 +49,28 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loginWithEmail),
       switchMap(({ email, password }) =>
-        this.mockAuthService.loginWithEmail(email, password).pipe(
-          map(response => AuthActions.loginWithEmailSuccess({
-            user: response.user,
-            token: response.token,
-            refreshToken: response.refreshToken
-          })),
+        this.authService.loginWithEmail(email, password).pipe(
+          switchMap(response => {
+            // After successful Supabase login, get/create user profile from backend
+            return this.apiService.getUserProfile().pipe(
+              map(profile => AuthActions.loginWithEmailSuccess({
+                user: {
+                  ...response.user,
+                  ...profile
+                },
+                token: response.token,
+                refreshToken: response.refreshToken
+              })),
+              catchError(() => {
+                // If profile doesn't exist, we still have a valid auth
+                return of(AuthActions.loginWithEmailSuccess({
+                  user: response.user,
+                  token: response.token,
+                  refreshToken: response.refreshToken
+                }));
+              })
+            );
+          }),
           catchError(error => of(AuthActions.loginWithEmailFailure({ 
             error: error.message || 'Email login failed' 
           })))
@@ -58,12 +84,33 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.registerWithEmail),
       switchMap(({ email, password, displayName }) =>
-        this.mockAuthService.registerWithEmail(email, password, displayName).pipe(
-          map(response => AuthActions.registerWithEmailSuccess({
-            user: response.user,
-            token: response.token,
-            refreshToken: response.refreshToken
-          })),
+        this.authService.registerWithEmail(email, password, displayName).pipe(
+          switchMap(response => {
+            // After successful Supabase registration, create user profile in backend
+            return this.apiService.createUserProfile({
+              displayName,
+              phoneNumber: null,
+              city: 'București',
+              district: 'Sector 5'
+            }).pipe(
+              map(profile => AuthActions.registerWithEmailSuccess({
+                user: {
+                  ...response.user,
+                  ...profile
+                },
+                token: response.token,
+                refreshToken: response.refreshToken
+              })),
+              catchError(() => {
+                // If profile creation fails, we still have a valid auth
+                return of(AuthActions.registerWithEmailSuccess({
+                  user: response.user,
+                  token: response.token,
+                  refreshToken: response.refreshToken
+                }));
+              })
+            );
+          }),
           catchError(error => of(AuthActions.registerWithEmailFailure({ 
             error: error.message || 'Registration failed' 
           })))
@@ -77,7 +124,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.refreshToken),
       switchMap(() =>
-        this.mockAuthService.refreshToken().pipe(
+        this.authService.refreshToken().pipe(
           map(response => AuthActions.refreshTokenSuccess({
             token: response.token,
             refreshToken: response.refreshToken
@@ -99,7 +146,7 @@ export class AuthEffects {
         AuthActions.registerWithEmailSuccess
       ),
       tap(({ user }) => {
-        this.message.success(`Welcome back, ${user.displayName}!`);
+        this.message.success(`Bine ai venit, ${user.displayName}!`);
         this.router.navigate(['/dashboard']);
       })
     ),
@@ -127,9 +174,9 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.logout),
       switchMap(() =>
-        this.mockAuthService.logout().pipe(
+        this.authService.logout().pipe(
           tap(() => {
-            this.message.info('You have been logged out');
+            this.message.info('Ai fost deconectat');
             this.router.navigate(['/auth/register']);
           }),
           map(() => ({ type: '[Auth] Logout Complete' })),
@@ -148,18 +195,32 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loadUserFromStorage),
       switchMap(() =>
-        this.mockAuthService.getCurrentUser().pipe(
-          map(userData => {
+        this.authService.getCurrentUser().pipe(
+          switchMap(userData => {
             if (userData) {
-              return AuthActions.loadUserFromStorageSuccess({
-                user: userData.user,
-                token: userData.token,
-                refreshToken: userData.refreshToken
-              });
+              // Try to get user profile from backend
+              return this.apiService.getUserProfile().pipe(
+                map(profile => AuthActions.loadUserFromStorageSuccess({
+                  user: {
+                    ...userData.user,
+                    ...profile
+                  },
+                  token: userData.token,
+                  refreshToken: userData.refreshToken
+                })),
+                catchError(() => {
+                  // If profile fetch fails, use auth data only
+                  return of(AuthActions.loadUserFromStorageSuccess({
+                    user: userData.user,
+                    token: userData.token,
+                    refreshToken: userData.refreshToken
+                  }));
+                })
+              );
             }
-            return AuthActions.loadUserFromStorageFailure({ 
+            return of(AuthActions.loadUserFromStorageFailure({ 
               error: 'No user found in storage' 
-            });
+            }));
           }),
           catchError(error => {
             console.error('Load user error:', error);
@@ -177,7 +238,7 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.checkAuthStatus),
       switchMap(() =>
-        this.mockAuthService.isTokenValid().pipe(
+        this.authService.isTokenValid().pipe(
           map(isValid => {
             if (!isValid) {
               return AuthActions.logout();
