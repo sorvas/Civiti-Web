@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Get the API key from environment
-const googleMapsApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Get the API key from environment (try both new and old names for compatibility)
+const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 console.log('Post-build HTML API key injection...');
 console.log('Current working directory:', process.cwd());
@@ -11,9 +11,9 @@ console.log('Is Vercel environment:', process.env.VERCEL ? 'YES' : 'NO');
 console.log('Vercel URL:', process.env.VERCEL_URL || 'not set');
 
 if (!googleMapsApiKey) {
-  console.error('ERROR: VITE_GOOGLE_MAPS_API_KEY is not set!');
-  console.error('Environment variables available:', Object.keys(process.env).filter(k => k.includes('GOOGLE') || k.includes('VITE')));
-  console.error('All env vars starting with V:', Object.keys(process.env).filter(k => k.startsWith('V')).sort());
+  console.error('ERROR: GOOGLE_MAPS_API_KEY is not set!');
+  console.error('Environment variables available:', Object.keys(process.env).filter(k => k.includes('GOOGLE') || k.includes('MAPS')));
+  console.error('All env vars starting with G:', Object.keys(process.env).filter(k => k.startsWith('G')).sort());
   process.exit(1);
 }
 

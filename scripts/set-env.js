@@ -14,8 +14,8 @@ if (result.error) {
   console.log('Environment variables found:', keys);
 }
 
-// Get the Google Maps API key from environment variable
-let googleMapsApiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Get the Google Maps API key from environment variable (try both new and old names for compatibility)
+let googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
 // Remove quotes if they exist (in case someone wrapped the key in quotes)
 if (googleMapsApiKey.startsWith('"') && googleMapsApiKey.endsWith('"')) {
@@ -41,7 +41,7 @@ if (!srcContent.includes('YOUR_DEVELOPMENT_API_KEY')) {
 }
 
 if (!googleMapsApiKey) {
-  console.warn('Warning: VITE_GOOGLE_MAPS_API_KEY environment variable is not set');
+  console.warn('Warning: GOOGLE_MAPS_API_KEY environment variable is not set');
   console.warn('Google Maps will not work without a valid API key');
   // Exit successfully - the build should continue with the placeholder
   process.exit(0);

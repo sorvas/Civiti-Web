@@ -6,7 +6,7 @@ This project uses Google Maps to display issue locations on a map.
 
 1. Create a `.env` file in the project root:
    ```
-   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+   GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
    ```
 
 2. Run the development server:
@@ -25,7 +25,7 @@ This project uses Google Maps to display issue locations on a map.
 
 1. In your Vercel dashboard:
    - Go to Project Settings → Environment Variables
-   - Add `VITE_GOOGLE_MAPS_API_KEY` with your production API key
+   - Add `GOOGLE_MAPS_API_KEY` with your production API key
 
 2. Deploy normally - the build script will automatically inject the API key during the build process.
 

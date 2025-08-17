@@ -48,3 +48,12 @@ Thumbs.db
 
 # Google Maps config (contains API key)
 src/environments/google-maps-config.ts
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Auto-generated environment files
+src/environments/environment.ts
+src/environments/environment.prod.ts

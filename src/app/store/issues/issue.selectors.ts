@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { IssueState, issueAdapter } from './issue.state';
-import { Issue } from '../../services/mock-data.service';
+import { IssueItem } from '../../types/civica-api.types';
 
 export const selectIssueState = createFeatureSelector<IssueState>('issues');
 
@@ -34,21 +34,20 @@ export const selectSelectedIssueId = createSelector(
 );
 
 export const selectSelectedIssue = createSelector(
-  selectEntities,
-  selectSelectedIssueId,
-  (entities, selectedId) => selectedId ? entities[selectedId] : null
+  selectIssueState,
+  (state: IssueState) => state.selectedIssueDetail
 );
 
 // Sorted issues selector
 export const selectSortedIssues = createSelector(
   selectAll,
   selectSortBy,
-  (issues: Issue[], sortBy: string) => {
+  (issues: IssueItem[], sortBy: string) => {
     const sortedIssues = [...issues];
     
     switch (sortBy) {
       case 'emails':
-        return sortedIssues.sort((a, b) => b.emailsSent - a.emailsSent);
+        return sortedIssues.sort((a, b) => b.emailCount - a.emailCount);
       
       case 'urgency':
         return sortedIssues.sort((a, b) => {
@@ -59,17 +58,17 @@ export const selectSortedIssues = createSelector(
       
       default: // 'date'
         return sortedIssues.sort((a, b) => 
-          new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
     }
   }
 );
 
 // Helper function for urgency calculation
-function getUrgencyScore(issue: Issue): number {
+function getUrgencyScore(issue: IssueItem): number {
   const daysSince = Math.ceil(
-    Math.abs(new Date().getTime() - new Date(issue.dateCreated).getTime()) / (1000 * 60 * 60 * 24)
+    Math.abs(new Date().getTime() - new Date(issue.createdAt).getTime()) / (1000 * 60 * 60 * 24)
   );
-  const emailRatio = issue.emailsSent / 100;
+  const emailRatio = issue.emailCount / 100;
   return emailRatio + (daysSince / 10);
 }

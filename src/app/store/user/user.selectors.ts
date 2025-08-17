@@ -1,5 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { UserState } from './user.state';
+import { BadgeResponse, AchievementProgressResponse } from '../../types/civica-api.types';
 
 export const selectUserState = createFeatureSelector<UserState>('user');
 
@@ -11,12 +12,12 @@ export const selectUserProfile = createSelector(
 
 export const selectUserLocation = createSelector(
   selectUserProfile,
-  (profile) => profile?.location
+  (profile) => profile ? { county: profile.county, city: profile.city, district: profile.district } : null
 );
 
 export const selectCommunicationPreferences = createSelector(
-  selectUserProfile,
-  (profile) => profile?.profile.communicationPrefs
+  selectUserState,
+  (state: UserState) => state.preferences?.notifications
 );
 
 // Gamification Selectors
@@ -27,37 +28,43 @@ export const selectGamificationData = createSelector(
 
 export const selectUserPoints = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.points || 0
+  (gamification) => gamification?.totalPoints || 0
 );
 
 export const selectUserLevel = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.level || 1
+  (gamification) => gamification?.currentLevel || 1
 );
 
 export const selectUserBadges = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.badges || []
+  (gamification) => gamification?.recentBadges || []
 );
 
 export const selectUserStats = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.stats || null
+  (gamification) => gamification ? {
+    issuesReported: 0,
+    issuesResolved: 0,
+    communityVotes: 0,
+    approvalRate: 0,
+    qualityScore: 0
+  } : null
 );
 
 export const selectUserAchievements = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.achievements || []
+  (gamification) => gamification?.activeAchievements || []
 );
 
 export const selectUserStreaks = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.streaks
+  (gamification) => null // No streaks property in current GamificationData
 );
 
 export const selectLeaderboardPosition = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.leaderboardPosition
+  (gamification) => gamification?.rank
 );
 
 // Progress and Stats Selectors
@@ -140,19 +147,24 @@ export const selectNextLevelProgress = createSelector(
 
 export const selectRecentBadges = createSelector(
   selectUserBadges,
-  (badges) => badges
-    .filter(badge => {
+  (badges: BadgeResponse[]) => badges
+    .filter((badge: BadgeResponse) => {
+      if (!badge.earnedAt) return false;
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       return new Date(badge.earnedAt) > oneWeekAgo;
     })
-    .sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime())
+    .sort((a: BadgeResponse, b: BadgeResponse) => {
+      if (!a.earnedAt || !b.earnedAt) return 0;
+      return new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime();
+    })
     .slice(0, 5)
 );
 
 export const selectIncompleteAchievements = createSelector(
   selectUserAchievements,
-  (achievements) => achievements
-    .filter(achievement => !achievement.completed)
-    .sort((a, b) => b.progress - a.progress)
+  (achievements: AchievementProgressResponse[]) => achievements
+    .filter((achievement: AchievementProgressResponse) => !achievement.completed)
+    .sort((a: AchievementProgressResponse, b: AchievementProgressResponse) => 
+      (b.percentageComplete || 0) - (a.percentageComplete || 0))
 );

@@ -11,8 +11,9 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { registerLocaleData } from '@angular/common';
 import ro from '@angular/common/locales/ro';
 import { FormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { authInterceptor } from './interceptors/auth.interceptor';
 import { ngZorroConfig, ngZorroIcons, ngZorroI18n } from './providers/ng-zorro.providers';
 
 registerLocaleData(ro);
@@ -43,7 +44,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideClientHydration(withEventReplay()),
     provideAnimations(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     importProvidersFrom(FormsModule),
     ngZorroConfig,
     ngZorroIcons,

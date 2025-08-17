@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
 import * as LocationActions from '../../store/location/location.actions';
-import { MockDataService } from '../../services/mock-data.service';
+import { ROMANIAN_COUNTIES, getDistrictsForCity, getCitiesForCounty } from '../../data/romanian-locations';
 import { SanitizationService } from '../../services/sanitization.service';
 
 interface LocationData {
@@ -48,7 +48,6 @@ export class LocationSelectionComponent implements OnInit {
   private _fb = inject(FormBuilder);
   private _router = inject(Router);
   private _store = inject(Store<AppState>);
-  private _mockDataService = inject(MockDataService);
   private _sanitizer = inject(SanitizationService);
 
   locationData: LocationData | null = null;
@@ -66,16 +65,16 @@ export class LocationSelectionComponent implements OnInit {
 
   private loadLocationData(): void {
     this.isLoading = true;
-    this._mockDataService.getLocationData().subscribe({
-      next: (data) => {
-        this.locationData = data;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading location data:', error);
-        this.isLoading = false;
-      }
-    });
+    
+    // Load static location data
+    // For MVP, we only use București Sector 5
+    this.locationData = {
+      counties: [{ id: 'B', name: 'București' }],
+      cities: [{ id: 'BUCURESTI', name: 'București' }],
+      districts: [{ id: 'SECTOR5', name: 'Sector 5' }]
+    };
+    
+    this.isLoading = false;
   }
 
   onContinue(): void {

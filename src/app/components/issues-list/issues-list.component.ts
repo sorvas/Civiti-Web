@@ -20,7 +20,7 @@ import { Observable } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
 import * as IssueSelectors from '../../store/issues/issue.selectors';
-import { Issue } from '../../services/mock-data.service';
+import { IssueItem } from '../../types/civica-api.types';
 
 @Component({
   selector: 'app-issues-list',
@@ -52,12 +52,12 @@ export class IssuesListComponent implements OnInit {
   private _modal = inject(NzModalService);
   private _imageErrorCount: Map<string, number> = new Map();
 
-  issues$!: Observable<Issue[]>;
+  issues$!: Observable<IssueItem[]>;
   isLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
   sortBy$!: Observable<string>;
   totalIssues$!: Observable<number>;
-  
+
   sortBy = 'date';
 
   constructor() {
@@ -69,25 +69,26 @@ export class IssuesListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._store.dispatch(IssueActions.loadIssues());
+    // Load issues without filters initially
+    this._store.dispatch(IssueActions.loadIssues({ params: undefined }));
   }
 
   onSortChange(): void {
-    this._store.dispatch(IssueActions.changeSortBy({ 
-      sortBy: this.sortBy as 'date' | 'emails' | 'urgency' 
+    this._store.dispatch(IssueActions.changeSortBy({
+      sortBy: this.sortBy as 'date' | 'emails' | 'urgency'
     }));
   }
 
-  getUrgencyLevel(issue: Issue): 'urgent' | 'normal' {
-    return issue.emailsSent > 100 ? 'urgent' : 'normal';
+  getUrgencyLevel(issue: IssueItem): 'urgent' | 'normal' {
+    return issue.emailCount > 100 ? 'urgent' : 'normal';
   }
 
-  getDaysSince(date: Date): string {
+  getDaysSince(date: string | Date): string {
     const days = this.getDaysSinceNumber(date);
     return days.toString();
   }
 
-  private getDaysSinceNumber(date: Date): number {
+  private getDaysSinceNumber(date: string | Date): number {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -95,14 +96,21 @@ export class IssuesListComponent implements OnInit {
 
   getStatusText(status: string): string {
     switch (status) {
-      case 'open': return 'DESCHISĂ';
-      case 'in-progress': return 'ÎN PROGRES';
-      case 'resolved': return 'REZOLVATĂ';
+      case 'Unspecified': return 'NESPECIFICAT';
+      case 'Draft': return 'CIORNĂ';
+      case 'Submitted': return 'TRIMISĂ';
+      case 'UnderReview': return 'ÎN REVIZUIRE';
+      case 'Approved': return 'APROBATĂ';
+      case 'Rejected': return 'RESPINSĂ';
+      case 'ChangesRequested': return 'MODIFICĂRI NECESARE';
+      case 'InProgress': return 'ÎN PROGRES';
+      case 'Resolved': return 'REZOLVATĂ';
+      case 'Closed': return 'ÎNCHISĂ';
       default: return 'NECUNOSCUTĂ';
     }
   }
 
-  getIssueImage(issue: Issue): string {
+  getIssueImage(issue: IssueItem): string {
     // Use local placeholder for development
     // In production, this would return the actual photo URL from backend
     return '/images/placeholders/issue-placeholder.svg';
@@ -111,7 +119,7 @@ export class IssuesListComponent implements OnInit {
   onImageError(event: any): void {
     const imgElement = event.target;
     const currentSrc = imgElement.src;
-    
+
     // Track error count per image to prevent infinite loops
     const errorCount = this._imageErrorCount.get(currentSrc) || 0;
     if (errorCount >= 1) {
@@ -119,9 +127,9 @@ export class IssuesListComponent implements OnInit {
       imgElement.style.display = 'none';
       return;
     }
-    
+
     this._imageErrorCount.set(currentSrc, errorCount + 1);
-    
+
     // Try local fallback image
     imgElement.src = '/images/placeholders/issue-placeholder.svg';
   }

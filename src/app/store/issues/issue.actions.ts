@@ -1,12 +1,15 @@
 import { createAction, props } from '@ngrx/store';
-import { Issue } from '../../services/mock-data.service';
+import { IssueItem, IssueDetailResponse, CreateIssueRequest, CreateIssueResponse, IssueQueryParams } from '../../types/civica-api.types';
 
 // Load Issues
-export const loadIssues = createAction('[Issues] Load Issues');
+export const loadIssues = createAction(
+  '[Issues] Load Issues',
+  props<{ params?: IssueQueryParams }>()
+);
 
 export const loadIssuesSuccess = createAction(
   '[Issues] Load Issues Success',
-  props<{ issues: Issue[] }>()
+  props<{ issues: IssueItem[], totalCount: number }>()
 );
 
 export const loadIssuesFailure = createAction(
@@ -22,7 +25,7 @@ export const loadIssue = createAction(
 
 export const loadIssueSuccess = createAction(
   '[Issue Detail] Load Issue Success',
-  props<{ issue: Issue }>()
+  props<{ issue: IssueDetailResponse }>()
 );
 
 export const loadIssueFailure = createAction(
@@ -42,18 +45,34 @@ export const changeSortBy = createAction(
   props<{ sortBy: 'date' | 'emails' | 'urgency' }>()
 );
 
-// Increment Email Count
-export const incrementEmailCount = createAction(
-  '[Issue Detail] Increment Email Count',
-  props<{ issueId: string }>()
+// Track Email Sent
+export const trackEmailSent = createAction(
+  '[Issue Detail] Track Email Sent',
+  props<{ issueId: string, emailAddress: string, targetAuthority: string }>()
 );
 
-export const incrementEmailCountSuccess = createAction(
-  '[Issue Detail] Increment Email Count Success',
-  props<{ issueId: string }>()
+export const trackEmailSentSuccess = createAction(
+  '[Issue Detail] Track Email Sent Success',
+  props<{ issueId: string, pointsEarned: number, newTotalEmails: number }>()
 );
 
-export const incrementEmailCountFailure = createAction(
-  '[Issue Detail] Increment Email Count Failure',
+export const trackEmailSentFailure = createAction(
+  '[Issue Detail] Track Email Sent Failure',
+  props<{ error: string }>()
+);
+
+// Create Issue
+export const createIssue = createAction(
+  '[Issue Creation] Create Issue',
+  props<{ issue: CreateIssueRequest }>()
+);
+
+export const createIssueSuccess = createAction(
+  '[Issue Creation] Create Issue Success',
+  props<{ response: CreateIssueResponse }>()
+);
+
+export const createIssueFailure = createAction(
+  '[Issue Creation] Create Issue Failure',
   props<{ error: string }>()
 );

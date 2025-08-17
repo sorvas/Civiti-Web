@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
-import { takeUntil, map } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -32,10 +32,19 @@ import {
 } from '../../../store/auth/auth.selectors';
 import {
   GamificationData,
-  Badge,
   Achievement,
-  UserStats
+  UserProfile
 } from '../../../store/user/user.state';
+import { BadgeResponse } from '../../../types/civica-api.types';
+
+// Interface for user statistics (not part of UserProfile)
+interface UserStats {
+  issuesReported: number;
+  issuesResolved: number;
+  communityVotes: number;
+  approvalRate: number;
+  qualityScore: number;
+}
 import {
   selectGamificationData,
   selectUserPoints,
@@ -82,10 +91,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   gamificationData$!: Observable<GamificationData | null>;
   userPoints$!: Observable<number>;
   userLevel$!: Observable<number>;
-  userBadges$!: Observable<Badge[]>;
+  userBadges$!: Observable<BadgeResponse[]>;
   userStats$!: Observable<UserStats | null>;
   levelProgress$!: Observable<{ current: number; required: number; percentage: number }>;
-  recentBadges$!: Observable<Badge[]>;
+  recentBadges$!: Observable<BadgeResponse[]>;
   incompleteAchievements$!: Observable<Achievement[]>;
   isLoading$!: Observable<boolean>;
 
@@ -168,15 +177,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getBadgeColor(rarity: string): string {
+    // Map rarity values to colors
+    // The backend uses string rarity values, we'll map common rarities
     const colors: { [key: string]: string } = {
       'common': 'default',
       'uncommon': 'blue',
-      'rare': 'purple',
-      'epic': 'orange',
-      'legendary': 'gold'
+      'rare': 'gold',
+      'epic': 'purple',
+      'legendary': 'red',
+      // Also keep old tier mappings for backward compatibility
+      'bronze': 'default',
+      'silver': 'blue',
+      'gold': 'gold',
+      'platinum': 'purple'
     };
 
-    return colors[rarity] || 'default';
+    return colors[rarity?.toLowerCase()] || 'default';
   }
 
   viewMyIssues(): void {

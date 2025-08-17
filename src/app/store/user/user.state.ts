@@ -1,95 +1,22 @@
-// User Profile and Gamification State Interface
+import { UserProfileResponse, UserGamificationResponse, BadgeResponse, AchievementProgressResponse } from '../../types/civica-api.types';
+
 export interface UserState {
-  profile: UserProfile | null;
-  gamification: GamificationData | null;
+  profile: UserProfileResponse | null;  // Updated to use backend type
+  gamification: UserGamificationResponse | null;  // Updated to use backend type
   preferences: UserPreferences | null;
   isLoading: boolean;
   error: string | null;
 }
 
-export interface UserProfile {
-  id: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
-  location: {
-    county: string;
-    city: string;
-    district: string;
-  };
-  profile: {
-    residenceType?: 'apartment' | 'house' | 'business';
-    communicationPrefs: {
-      issueUpdates: boolean;
-      communityNews: boolean;
-      monthlyDigest: boolean;
-      achievements: boolean;
-    };
-  };
-  createdAt: Date;
-  lastActive: Date;
-  emailVerified: boolean;
-}
+// Use the backend UserProfileResponse type directly
+export type UserProfile = UserProfileResponse;
 
-export interface GamificationData {
-  points: number;
-  level: number;
-  badges: Badge[];
-  stats: UserStats;
-  achievements: Achievement[];
-  streaks: Streaks;
-  leaderboardPosition?: LeaderboardPosition;
-}
+// Use the backend UserGamificationResponse type directly
+export type GamificationData = UserGamificationResponse;
 
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  iconUrl: string;
-  category: 'starter' | 'progress' | 'achievement' | 'special';
-  earnedAt: Date;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-}
-
-export interface UserStats {
-  issuesReported: number;
-  issuesResolved: number;
-  communityVotes: number;
-  commentsGiven: number;
-  helpfulComments: number;
-  qualityScore: number; // 0-100
-  approvalRate: number; // 0-100
-}
-
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  progress: number; // 0-100
-  maxProgress: number;
-  completed: boolean;
-  completedAt?: Date;
-  reward: {
-    points: number;
-    badge?: string;
-  };
-}
-
-export interface Streaks {
-  currentLoginStreak: number;
-  longestLoginStreak: number;
-  currentVotingStreak: number;
-  longestVotingStreak: number;
-  lastActivityDate: Date;
-}
-
-export interface LeaderboardPosition {
-  overall: number;
-  monthly: number;
-  category: number;
-  neighborhood: number;
-  totalUsers: number;
-}
+// Re-export for backward compatibility
+export type Achievement = AchievementProgressResponse;
+export type Badge = BadgeResponse;
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'auto';
