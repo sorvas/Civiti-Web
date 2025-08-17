@@ -3,8 +3,8 @@ const path = require('path');
 
 // Environment variables to inject
 const envVars = {
-  // API URLs
-  apiUrl: process.env.API_URL || 'http://localhost:5000/api',
+  // API URLs - Default to local backend service
+  apiUrl: process.env.API_URL || 'http://localhost:8080/api',
   
   // Supabase configuration
   supabaseUrl: process.env.SUPABASE_URL || '',
@@ -13,8 +13,7 @@ const envVars = {
   // Google Maps (consider renaming VITE_GOOGLE_MAPS_API_KEY to GOOGLE_MAPS_API_KEY)
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || '',
   
-  // Feature flags
-  mockMode: process.env.MOCK_MODE === 'true' || false,
+  // Environment
   production: process.env.NODE_ENV === 'production'
 };
 
@@ -26,12 +25,12 @@ console.log('Environment:', process.env.NODE_ENV || 'development');
 const requiredVars = ['supabaseUrl', 'supabaseAnonKey'];
 const missingVars = requiredVars.filter(key => !envVars[key]);
 
-if (missingVars.length > 0 && !envVars.mockMode) {
+if (missingVars.length > 0) {
   console.error('ERROR: Missing required environment variables:', missingVars);
   console.error('Available env vars:', Object.keys(process.env).filter(k => 
     k.includes('SUPABASE') || k.includes('VITE') || k.includes('API')
   ));
-  // Don't exit in development to allow mock mode
+  // Exit with error if required vars are missing
   if (process.env.NODE_ENV === 'production') {
     process.exit(1);
   }
@@ -55,8 +54,7 @@ export const environment = {
   supabase: {
     url: '${envVars.supabaseUrl}',
     anonKey: '${envVars.supabaseAnonKey}'
-  },
-  mockMode: ${envVars.mockMode}
+  }
 };
 `;
 
@@ -74,8 +72,7 @@ export const environment = {
   supabase: {
     url: '${envVars.supabaseUrl}',
     anonKey: '${envVars.supabaseAnonKey}'
-  },
-  mockMode: false // Always use real API in production
+  }
 };
 `;
 
