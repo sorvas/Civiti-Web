@@ -18,6 +18,15 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { IntegrationService } from '../../../services/integration.service';
 import { IssueCategory } from '../../../types/civica-api.types';
 
+// Interface for category data from session storage
+interface IssueCategoryInfo {
+  id: IssueCategory;
+  name: string;
+  description: string;
+  icon: string;
+  examples: string[];
+}
+
 // Keep local PhotoData interface for component
 interface PhotoData {
   id: string;
@@ -53,7 +62,7 @@ interface PhotoData {
 export class PhotoUploadComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  selectedCategory: IssueCategory | null = null;
+  selectedCategory: IssueCategoryInfo | null = null;
   uploadedPhotos: PhotoData[] = [];
   isUploading = false;
 
@@ -75,7 +84,7 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
   private loadSelectedCategory(): void {
     const categoryData = sessionStorage.getItem('civica_selected_category');
     if (categoryData) {
-      this.selectedCategory = JSON.parse(categoryData);
+      this.selectedCategory = JSON.parse(categoryData) as IssueCategoryInfo;
     } else {
       // No category selected, redirect back
       console.warn('[PHOTO UPLOAD] No category selected, redirecting...');

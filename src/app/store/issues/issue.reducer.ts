@@ -6,13 +6,13 @@ export const issueReducer = createReducer(
   initialIssueState,
   
   // Load Issues
-  on(IssueActions.loadIssues, (state) => ({
+  on(IssueActions.loadIssues, (state, { params }) => ({
     ...state,
     loading: true,
     error: null
   })),
   
-  on(IssueActions.loadIssuesSuccess, (state, { issues }) => 
+  on(IssueActions.loadIssuesSuccess, (state, { issues, totalCount }) => 
     issueAdapter.setAll(issues, {
       ...state,
       loading: false,
@@ -33,13 +33,13 @@ export const issueReducer = createReducer(
     error: null
   })),
   
-  on(IssueActions.loadIssueSuccess, (state, { issue }) => 
-    issueAdapter.upsertOne(issue, {
-      ...state,
-      loading: false,
-      error: null
-    })
-  ),
+  on(IssueActions.loadIssueSuccess, (state, { issue }) => ({
+    ...state,
+    selectedIssueDetail: issue,
+    selectedIssueId: issue.id,
+    loading: false,
+    error: null
+  })),
   
   on(IssueActions.loadIssueFailure, (state, { error }) => ({
     ...state,
@@ -59,14 +59,49 @@ export const issueReducer = createReducer(
     sortBy
   })),
   
-  // Increment Email Count
-  on(IssueActions.incrementEmailCountSuccess, (state, { issueId }) => {
+  // Track Email Sent
+  on(IssueActions.trackEmailSentSuccess, (state, { issueId, newTotalEmails }) => {
     const issue = state.entities[issueId];
-    if (!issue) return state;
+    let newState = state;
     
-    return issueAdapter.updateOne({
-      id: issueId,
-      changes: { emailsSent: issue.emailsSent + 1 }
-    }, state);
-  })
+    // Update the list item if it exists
+    if (issue) {
+      newState = issueAdapter.updateOne({
+        id: issueId,
+        changes: { emailCount: newTotalEmails }
+      }, state);
+    }
+    
+    // Also update the detailed issue if it's the selected one
+    if (state.selectedIssueDetail && state.selectedIssueDetail.id === issueId) {
+      newState = {
+        ...newState,
+        selectedIssueDetail: {
+          ...state.selectedIssueDetail,
+          emailsSent: newTotalEmails
+        }
+      };
+    }
+    
+    return newState;
+  }),
+  
+  // Create Issue
+  on(IssueActions.createIssue, (state) => ({
+    ...state,
+    loading: true,
+    error: null
+  })),
+  
+  on(IssueActions.createIssueSuccess, (state) => ({
+    ...state,
+    loading: false,
+    error: null
+  })),
+  
+  on(IssueActions.createIssueFailure, (state, { error }) => ({
+    ...state,
+    loading: false,
+    error
+  }))
 );

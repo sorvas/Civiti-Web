@@ -7,15 +7,22 @@ import { NgZorroModule } from '../../shared/ng-zorro.module';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
-import { MockDataService, Issue, Authority, EmailTemplate } from '../../services/mock-data.service';
+import { IssueDetailResponse } from '../../types/civica-api.types';
+import { IntegrationService } from '../../services/integration.service';
 import { CustomValidators } from '../../validators/custom-validators';
 import { SanitizationService } from '../../services/sanitization.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 export interface EmailModalData {
-    issue: Issue;
-    authority: Authority;
+    issue: IssueDetailResponse;
+    authority: string; // Authority email address
+}
+
+interface EmailTemplate {
+    subject: string;
+    body: string;
+    recipientEmail: string;
 }
 
 @Component({
@@ -32,14 +39,14 @@ export interface EmailModalData {
 export class EmailModalComponent implements OnInit, OnDestroy {
     private _fb = inject(FormBuilder);
     private _store = inject(Store<AppState>);
-    private _mockDataService = inject(MockDataService);
+    private _integrationService = inject(IntegrationService);
     private _message = inject(NzMessageService);
     private _modalRef = inject(NzModalRef);
     private _sanitizer = inject(SanitizationService);
     private _destroy$ = new Subject<void>();
 
-    issue: Issue;
-    authority: Authority;
+    issue: IssueDetailResponse;
+    authority: string;
 
     emailTemplate: EmailTemplate | null = null;
     isGenerating = false;
@@ -106,11 +113,8 @@ export class EmailModalComponent implements OnInit, OnDestroy {
             // Call AI service to generate personalized email content
             // this.generateAIEmailContent(this.issue, this.authority, userData);
             
-            this.emailTemplate = this._mockDataService.generateEmailTemplate(
-                this.issue,
-                this.authority,
-                userData
-            );
+            // Generate email template locally
+            this.emailTemplate = this.generateLocalEmailTemplate(userData);
         } else {
             // Clear email template when form is invalid
             this.emailTemplate = null;
@@ -138,7 +142,7 @@ export class EmailModalComponent implements OnInit, OnDestroy {
     //     } catch (error) {
     //         console.error('AI email generation failed:', error);
     //         // Fallback to template-based generation
-    //         this.emailTemplate = this._mockDataService.generateEmailTemplate(issue, authority, userData);
+    //         this.emailTemplate = this.generateLocalEmailTemplate(userData);
     //     } finally {
     //         this.isGenerating = false;
     //     }
@@ -194,13 +198,18 @@ export class EmailModalComponent implements OnInit, OnDestroy {
     openEmailClient(): void {
         if (!this.emailTemplate || !this.emailForm.valid) return;
 
-        // Dispatch action to increment email count
-        this._store.dispatch(IssueActions.incrementEmailCount({ issueId: this.issue.id }));
+        // Dispatch action to track email sent
+        const userEmail = this.emailForm.get('email')?.value || '';
+        this._store.dispatch(IssueActions.trackEmailSent({ 
+            issueId: this.issue.id,
+            emailAddress: userEmail,
+            targetAuthority: this.authority
+        }));
 
         // Create mailto link
         const subject = encodeURIComponent(this.emailTemplate.subject);
         const body = encodeURIComponent(this.emailTemplate.body);
-        const mailtoLink = `mailto:${this.emailTemplate.to}?subject=${subject}&body=${body}`;
+        const mailtoLink = `mailto:${this.emailTemplate.recipientEmail}?subject=${subject}&body=${body}`;
 
         // Open email client
         window.location.href = mailtoLink;
@@ -216,5 +225,40 @@ export class EmailModalComponent implements OnInit, OnDestroy {
 
     onCancel(): void {
         this._modalRef.close(false);
+    }
+    
+    private generateLocalEmailTemplate(userData: any): EmailTemplate {
+        const subject = `Problemă urgentă: ${this.issue.title}`;
+        
+        const body = `Stimată autoritate,
+
+Subsemnatul/a ${userData.name}, cu adresa de email ${userData.email}${userData.phone ? ' și numărul de telefon ' + userData.phone : ''}, doresc să vă aduc la cunoștință următoarea problemă:
+
+${this.issue.description}
+
+Locație: ${this.issue.address || `${this.issue.city}, ${this.issue.county}`}
+Categorie: ${this.issue.category}
+Urgență: ${this.issue.urgency}
+
+${userData.additionalComments ? 'Comentarii adiționale:\n' + userData.additionalComments + '\n\n' : ''}Această problemă afectează comunitatea noastră și necesită o intervenție urgentă din partea dumneavoastră.
+
+Vă mulțumesc pentru atenție și aștept cu interes răspunsul dumneavoastră.
+
+Cu stimă,
+${userData.name}`;
+        
+        // Get the authority email - in production this would come from a mapping
+        const recipientEmail = this.getAuthorityEmail(this.authority);
+        
+        return {
+            subject,
+            body,
+            recipientEmail
+        };
+    }
+    
+    getAuthorityEmail(authority: string): string {
+        // Authority is already an email address
+        return authority;
     }
 }

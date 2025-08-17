@@ -1,56 +1,22 @@
-// User Profile and Gamification State Interface
+import { UserProfileResponse, UserGamificationResponse, BadgeResponse, AchievementProgressResponse } from '../../types/civica-api.types';
+
 export interface UserState {
-  profile: UserProfile | null;
-  gamification: GamificationData | null;
+  profile: UserProfileResponse | null;  // Updated to use backend type
+  gamification: UserGamificationResponse | null;  // Updated to use backend type
   preferences: UserPreferences | null;
   isLoading: boolean;
   error: string | null;
 }
 
-export interface UserProfile {
-  id: string;
-  supabaseUserId: string;
-  email: string;
-  photoURL?: string;
-  displayName: string;
-  county: string;
-  city: string;
-  district?: string;
-  residenceType: 'urban' | 'rural';
-  birthYear?: number;
-  points: number;
-  level: number;
-  createdAt: string;
-  updatedAt: string;
-}
+// Use the backend UserProfileResponse type directly
+export type UserProfile = UserProfileResponse;
 
-export interface GamificationData {
-  totalPoints: number;
-  currentLevel: number;
-  pointsToNextLevel: number;
-  rank: number;
-  recentBadges: Badge[];
-  activeAchievements: Achievement[];
-}
+// Use the backend UserGamificationResponse type directly
+export type GamificationData = UserGamificationResponse;
 
-export interface Badge {
-  id: string;
-  name: string;
-  description: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
-  pointValue: number;
-  requirement?: string;
-  earnedAt: string;
-}
-
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  progress: number;
-  target: number;
-  pointReward: number;
-}
+// Re-export for backward compatibility
+export type Achievement = AchievementProgressResponse;
+export type Badge = BadgeResponse;
 
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'auto';

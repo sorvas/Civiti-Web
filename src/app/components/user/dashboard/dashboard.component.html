@@ -6,7 +6,7 @@
     <div class="header-content">
       <div class="user-welcome">
         <nz-avatar 
-          [nzSrc]="(user$ | async)?.photoURL" 
+          [nzSrc]="(user$ | async)?.photoURL || undefined" 
           [nzText]="(displayName$ | async)?.charAt(0)" 
           nzSize="large"
           class="user-avatar">
@@ -249,7 +249,7 @@
               </div>
               <div class="achievement-progress">
                 <nz-progress 
-                  [nzPercent]="(achievement.progress / achievement.maxProgress) * 100"
+                  [nzPercent]="achievement.percentageComplete"
                   nzStrokeColor="#FCA311"
                   nzSize="small"
                   [nzShowInfo]="false">

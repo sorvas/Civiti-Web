@@ -260,3 +260,13 @@ export function hasDistricts(countyCode: string): boolean {
   const county = ROMANIAN_COUNTIES.find(c => c.code === countyCode);
   return county?.hasDistricts || false;
 }
+
+/**
+ * Helper function to get districts for a city (only București has districts)
+ */
+export function getDistrictsForCity(cityName: string): string[] {
+  if (cityName === 'București' || cityName === 'BUCURESTI') {
+    return BUCHAREST_DISTRICTS;
+  }
+  return [];
+}

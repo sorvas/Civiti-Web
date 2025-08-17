@@ -114,12 +114,12 @@
       <div class="mb-4">
         <div class="flex items-center justify-between mb-1">
           <strong class="text-oxford-blue">Către:</strong>
-          <button nz-button nzType="text" nzSize="small" (click)="copyToClipboard(authority.email || '')" 
+          <button nz-button nzType="text" nzSize="small" (click)="copyToClipboard(getAuthorityEmail(authority))" 
                   nz-tooltip nzTooltipTitle="Copiază adresa email">
             <span nz-icon nzType="copy" nzTheme="outline" class="text-orange-web"></span>
           </button>
         </div>
-        <p class="text-sm text-oxford-blue opacity-75">{{ authority.email }}</p>
+        <p class="text-sm text-oxford-blue opacity-75">{{ getAuthorityEmail(authority) }}</p>
       </div>
 
       <nz-divider nzDashed></nz-divider>

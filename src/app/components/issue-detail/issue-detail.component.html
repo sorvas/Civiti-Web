@@ -26,13 +26,13 @@
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1">
                   <h1 class="text-2xl font-bold text-oxford-blue mb-2">
-                    <nz-tag *ngIf="getUrgencyLevel(issue) === 'urgent'"
-                      nzColor="error" class="mr-2">
+                    <nz-tag *ngIf="getUrgencyLevel(issue) === 'urgent'" nzColor="error" class="mr-2">
                       URGENT
                     </nz-tag>{{ issue.title }}
                   </h1>
                   <div class="flex items-center gap-3">
-                    <nz-tag [nzColor]="issue.status === 'open' ? 'warning' : issue.status === 'resolved' ? 'success' : 'processing'">
+                    <nz-tag
+                      [nzColor]="issue.status === 'Submitted' || issue.status === 'Approved' ? 'warning' : issue.status === 'Resolved' ? 'success' : 'processing'">
                       {{ getStatusText(issue.status) }}
                     </nz-tag>
                   </div>
@@ -40,7 +40,7 @@
                 <div class="text-right">
                   <div class="text-xs text-oxford-blue opacity-60">Raportată acum</div>
                   <div class="text-lg font-semibold text-oxford-blue">
-                    {{ getDaysSince(issue.dateCreated) }} zile
+                    {{ getDaysSince(issue.createdAt) }} zile
                   </div>
                 </div>
               </div>
@@ -48,28 +48,27 @@
               <!-- Location -->
               <div class="flex items-center text-oxford-blue opacity-75 text-sm">
                 <i nz-icon nzType="environment" nzTheme="outline" class="mr-2"></i>
-                {{ issue.location.address }}
+                {{ issue.address }}
               </div>
             </nz-card>
 
             <!-- Photos Gallery -->
             <nz-card *ngIf="issue.photos && issue.photos.length > 0">
-              <nz-card-meta 
-                nzTitle="Fotografii ({{ issue.photos.length }})"
-                [nzAvatar]="photoIcon">
+              <nz-card-meta nzTitle="Fotografii ({{ issue.photos.length }})" [nzAvatar]="photoIcon">
               </nz-card-meta>
               <ng-template #photoIcon>
                 <i nz-icon nzType="picture" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                <a *ngFor="let photo of issue.photos; let i = index" [href]="getPhotoUrl(photo)"
+                <a *ngFor="let photo of issue.photos; let i = index" [href]="photo.url"
                   class="photo-gallery-item relative cursor-pointer group block"
-                  [attr.data-glightbox]="'title: Fotografie ' + (i + 1) + '; description: ' + issue.title">
-                  <img [src]="getPhotoUrl(photo)" [alt]="'Fotografie ' + (i + 1)"
+                  [attr.data-glightbox]="'title: Fotografie ' + (i + 1) + '; description: ' + (photo.description || issue.title)">
+                  <img [src]="photo.url" [alt]="photo.description || 'Fotografie ' + (i + 1)"
                     class="w-full h-40 object-cover rounded-lg" (error)="onImageError($event, i)">
                   <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 
                               transition-opacity rounded-lg flex items-center justify-center">
-                    <i nz-icon nzType="zoom-in" nzTheme="outline" class="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
+                    <i nz-icon nzType="zoom-in" nzTheme="outline"
+                      class="text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl"></i>
                   </div>
                 </a>
               </div>
@@ -80,17 +79,17 @@
               <nz-tabset>
                 <nz-tab nzTitle="Situația Actuală">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.currentSituation }}</p>
+                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.currentSituation || issue.description }}</p>
                   </div>
                 </nz-tab>
                 <nz-tab nzTitle="Rezultat Dorit">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.desiredOutcome }}</p>
+                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.desiredOutcome || 'Nu există detalii suplimentare.' }}</p>
                   </div>
                 </nz-tab>
                 <nz-tab nzTitle="Impact Comunitar">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.communityImpact }}</p>
+                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.communityImpact || ('Problema a primit ' + issue.emailsSent + ' email-uri de susținere din partea comunității.') }}</p>
                   </div>
                 </nz-tab>
               </nz-tabset>
@@ -98,9 +97,7 @@
 
             <!-- Location Map -->
             <nz-card>
-              <nz-card-meta 
-                nzTitle="Locație pe hartă"
-                [nzAvatar]="mapIcon">
+              <nz-card-meta nzTitle="Locație pe hartă" [nzAvatar]="mapIcon">
               </nz-card-meta>
               <ng-template #mapIcon>
                 <i nz-icon nzType="environment" nzTheme="outline" class="text-oxford-blue"></i>
@@ -117,27 +114,20 @@
                     Verifică că ai configurat cheia API Google Maps în <code>src/environments/environment.ts</code>
                   </p>
                 </div>
-                <google-map *ngIf="isMapLoaded && !mapLoadError" 
-                  height="400px" 
-                  width="100%" 
-                  [center]="mapCenter"
-                  [options]="mapOptions" 
-                  class="rounded-lg overflow-hidden shadow-inner">
-                  
-                  <map-marker 
-                    *ngIf="markerPosition"
-                    #markerElement 
-                    [position]="markerPosition"
-                    [options]="markerOptions"
-                    (mapClick)="openInfoWindow()">
+                <google-map *ngIf="isMapLoaded && !mapLoadError" height="400px" width="100%" [center]="mapCenter"
+                  [options]="mapOptions" class="rounded-lg overflow-hidden shadow-inner">
+
+                  <map-marker *ngIf="markerPosition" #markerElement [position]="markerPosition"
+                    [options]="markerOptions" (mapClick)="openInfoWindow()">
                   </map-marker>
-                  
+
                   <map-info-window #infoWindow>
                     <div class="p-3 max-w-xs">
                       <h4 class="font-semibold text-oxford-blue mb-1">{{ issue.title }}</h4>
                       <p class="text-sm text-oxford-blue opacity-75 mb-2">
-                        <i nz-icon nzType="environment" nzTheme="outline" class="inline-block align-middle text-base mr-1"></i>
-                        {{ issue.location.address }}
+                        <i nz-icon nzType="environment" nzTheme="outline"
+                          class="inline-block align-middle text-base mr-1"></i>
+                        {{ issue.address }}
                       </p>
                       <nz-tag>
                         <i nz-icon nzType="mail" nzTheme="outline" class="mr-1"></i>
@@ -171,28 +161,25 @@
             </nz-card>
 
             <!-- Authorities List -->
-            <nz-card>
-              <nz-card-meta 
-                nzTitle="Autorități Responsabile"
-                [nzAvatar]="authIcon">
+            <nz-card
+              *ngIf="issue.targetAuthorities && issue.targetAuthorities.length > 0">
+              <nz-card-meta nzTitle="Autorități Responsabile" [nzAvatar]="authIcon">
               </nz-card-meta>
               <ng-template #authIcon>
                 <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="space-y-3 mt-4">
-                <div *ngFor="let authority of issue.authorities"
+                <div *ngFor="let authorityEmail of issue.targetAuthorities"
                   class="p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-oxford-blue">{{ authority.name }}</h4>
+                    <h4 class="font-semibold text-oxford-blue">{{ getAuthorityName(authorityEmail) }}</h4>
                     <nz-badge [nzCount]="0" [nzShowZero]="false">
-                      <i nz-icon [nzType]="authority.type === 'primarie' ? 'bank' :
-                        authority.type === 'politie' ? 'safety-certificate' :
-                        authority.type === 'administratie' ? 'apartment' :
-                        'team'" class="text-oxford-blue opacity-50 text-xl"></i>
+                      <i nz-icon [nzType]="getAuthorityIcon(authorityEmail)"
+                        class="text-oxford-blue opacity-50 text-xl"></i>
                     </nz-badge>
                   </div>
-                  <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authority.email }}</p>
-                  <button nz-button nzType="primary" nzBlock (click)="openEmailModal(authority, issue)">
+                  <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authorityEmail }}</p>
+                  <button nz-button nzType="primary" nzBlock (click)="openEmailModalWithEmail(authorityEmail, issue)">
                     <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
                     Trimite Email
                   </button>
@@ -200,11 +187,29 @@
               </div>
             </nz-card>
 
+            <!-- No Authorities Message -->
+            <nz-card
+              *ngIf="!issue.targetAuthorities || issue.targetAuthorities.length === 0">
+              <nz-card-meta nzTitle="Autorități Responsabile" [nzAvatar]="authIcon">
+              </nz-card-meta>
+              <ng-template #authIcon>
+                <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
+              </ng-template>
+              <div class="text-center py-6">
+                <i nz-icon nzType="inbox" nzTheme="outline" class="text-oxford-blue opacity-50 text-3xl mb-2"></i>
+                <p class="text-oxford-blue opacity-75">
+                  Nu există autorități configurate pentru această problemă.
+                </p>
+                <button nz-button nzType="default" (click)="sendEmailToAuthorities(issue)">
+                  <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
+                  Trimite Email General
+                </button>
+              </div>
+            </nz-card>
+
             <!-- Share Section -->
             <nz-card>
-              <nz-card-meta 
-                nzTitle="Distribuie Problema"
-                [nzAvatar]="shareIcon">
+              <nz-card-meta nzTitle="Distribuie Problema" [nzAvatar]="shareIcon">
               </nz-card-meta>
               <ng-template #shareIcon>
                 <i nz-icon nzType="share-alt" nzTheme="outline" class="text-oxford-blue"></i>
@@ -213,13 +218,16 @@
                 Ajută la creșterea vizibilității acestei probleme distribuind-o pe rețelele sociale.
               </p>
               <nz-space nzAlign="center" class="w-full justify-center">
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
+                  nzTooltipTitle="În curând">
                   <i nz-icon nzType="facebook" nzTheme="outline"></i>
                 </button>
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
+                  nzTooltipTitle="În curând">
                   <i nz-icon nzType="twitter" nzTheme="outline"></i>
                 </button>
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip nzTooltipTitle="În curând">
+                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
+                  nzTooltipTitle="În curând">
                   <i nz-icon nzType="link" nzTheme="outline"></i>
                 </button>
               </nz-space>
@@ -236,12 +244,13 @@
                 <nz-divider class="my-2"></nz-divider>
                 <div class="flex justify-between items-center">
                   <span class="text-oxford-blue opacity-75">Data raportării:</span>
-                  <span class="text-oxford-blue">{{ issue.dateCreated | date:'dd/MM/yyyy' }}</span>
+                  <span class="text-oxford-blue">{{ issue.createdAt | date:'dd/MM/yyyy' }}</span>
                 </div>
                 <nz-divider class="my-2"></nz-divider>
                 <div class="flex justify-between items-center">
                   <span class="text-oxford-blue">Status:</span>
-                  <nz-tag [nzColor]="issue.status === 'open' ? 'warning' : issue.status === 'resolved' ? 'success' : 'processing'">
+                  <nz-tag
+                    [nzColor]="issue.status === 'Submitted' || issue.status === 'Approved' ? 'warning' : issue.status === 'Resolved' ? 'success' : 'processing'">
                     {{ getStatusText(issue.status) }}
                   </nz-tag>
                 </div>

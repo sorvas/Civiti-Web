@@ -11,7 +11,7 @@ import {
   UserProfileResponse,
   CreateIssueRequest,
   CreateIssueResponse,
-  IssueListItem,
+  IssueItem,
   IssueDetailResponse,
   TrackEmailRequest,
   TrackEmailResponse,
@@ -92,7 +92,7 @@ export class IntegrationService {
   // Issues Management
   // ============================================
 
-  getIssues(params?: IssueQueryParams): Observable<PagedResult<IssueListItem>> {
+  getIssues(params?: IssueQueryParams): Observable<PagedResult<IssueItem>> {
     return this.apiService.getIssues(params).pipe(
       catchError(error => {
         console.error('Get issues failed:', error);
@@ -141,7 +141,7 @@ export class IntegrationService {
     );
   }
 
-  getUserIssues(params?: IssueQueryParams): Observable<PagedResult<IssueListItem>> {
+  getUserIssues(params?: IssueQueryParams): Observable<PagedResult<IssueItem>> {
     return this.apiService.getUserIssues(params).pipe(
       catchError(error => {
         console.error('Get user issues failed:', error);
@@ -207,6 +207,16 @@ export class IntegrationService {
     return this.apiService.getAdminStatistics().pipe(
       catchError(error => {
         console.error('Get admin statistics failed:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Get detailed issue information
+  getIssueDetails(id: string): Observable<IssueDetailResponse> {
+    return this.apiService.getIssueById(id).pipe(
+      catchError(error => {
+        console.error('Get issue details failed:', error);
         return throwError(() => error);
       })
     );

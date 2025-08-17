@@ -83,7 +83,7 @@
               >
               <!-- Status Badge -->
               <div class="absolute top-3 left-3">
-                <nz-tag [nzColor]="issue.status === 'Submitted' ? 'warning' : issue.status === 'Resolved' ? 'success' : 'processing'">
+                <nz-tag [nzColor]="issue.status === 'Submitted' || issue.status === 'Approved' ? 'warning' : issue.status === 'Resolved' ? 'success' : 'processing'">
                   {{ getStatusText(issue.status) }}
                 </nz-tag>
               </div>

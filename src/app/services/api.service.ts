@@ -9,12 +9,12 @@ import {
   UserProfileResponse,
   CreateIssueRequest,
   CreateIssueResponse,
-  IssueListItem,
+  IssueItem,
   IssueDetailResponse,
   TrackEmailRequest,
   TrackEmailResponse,
   UserFullProfileResponse,
-  Badge,
+  BadgeResponse,
   LeaderboardResponse,
   AdminIssueListItem,
   AdminIssueDetailResponse,
@@ -71,7 +71,7 @@ export class ApiService {
   // Issues Endpoints
   // ============================================
 
-  getIssues(params?: IssueQueryParams): Observable<PagedResult<IssueListItem>> {
+  getIssues(params?: IssueQueryParams): Observable<PagedResult<IssueItem>> {
     let httpParams = new HttpParams();
     
     if (params) {
@@ -83,7 +83,7 @@ export class ApiService {
       });
     }
 
-    return this.http.get<PagedResult<IssueListItem>>(`${this.baseUrl}/issues`, { params: httpParams });
+    return this.http.get<PagedResult<IssueItem>>(`${this.baseUrl}/issues`, { params: httpParams });
   }
 
   getIssueById(id: string): Observable<IssueDetailResponse> {
@@ -106,7 +106,7 @@ export class ApiService {
     return this.http.get<UserFullProfileResponse>(`${this.baseUrl}/user/profile`);
   }
 
-  getUserIssues(params?: IssueQueryParams): Observable<PagedResult<IssueListItem>> {
+  getUserIssues(params?: IssueQueryParams): Observable<PagedResult<IssueItem>> {
     let httpParams = new HttpParams();
     
     if (params) {
@@ -118,15 +118,15 @@ export class ApiService {
       });
     }
 
-    return this.http.get<PagedResult<IssueListItem>>(`${this.baseUrl}/user/issues`, { params: httpParams });
+    return this.http.get<PagedResult<IssueItem>>(`${this.baseUrl}/user/issues`, { params: httpParams });
   }
 
   // ============================================
   // Gamification Endpoints
   // ============================================
 
-  getBadges(): Observable<Badge[]> {
-    return this.http.get<Badge[]>(`${this.baseUrl}/gamification/badges`);
+  getBadges(): Observable<BadgeResponse[]> {
+    return this.http.get<BadgeResponse[]>(`${this.baseUrl}/gamification/badges`);
   }
 
   getLeaderboard(params?: LeaderboardQueryParams): Observable<LeaderboardResponse> {

@@ -10,7 +10,7 @@
 // Common Types
 // ============================================
 
-export type IssueCategory = 
+export type IssueCategory =
   | 'Infrastructure'
   | 'Environment'
   | 'Transportation'
@@ -20,7 +20,7 @@ export type IssueCategory =
 
 export type UrgencyLevel = 'Unspecified' | 'Low' | 'Medium' | 'High' | 'Urgent';
 
-export type IssueStatus = 
+export type IssueStatus =
   | 'Unspecified'
   | 'Draft'
   | 'Submitted'
@@ -135,7 +135,7 @@ export interface UserProfileResponse {
   updatedAt: string;
 }
 
-export interface IssueListItem {
+export interface IssueItem {
   id: string;
   title: string;
   description: string;
@@ -164,34 +164,45 @@ export interface PagedResult<T> {
 
 export interface IssueDetailResponse {
   id: string;
+  city: string;
+  county: string;
+  district?: string;
   title: string;
   description: string;
-  detailedDescription?: string;
   category: IssueCategory;
+  address: string;
+  latitude: number;
+  longitude: number;
+  neighborhood?: string;
+  landmark?: string;
   urgency: UrgencyLevel;
-  county: string;
-  city: string;
-  district?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  photoUrls: string[];
-  emailCount: number;
-  uniqueEmailers: number;
   status: IssueStatus;
-  templateEmail?: {
-    subject: string;
-    body: string;
-    targetAuthorities: string[];
-  };
+  emailsSent: number;
+  currentSituation?: string;
+  desiredOutcome?: string;
+  communityImpact?: string;
+  aiGeneratedDescription?: string;
+  aiProposedSolution?: string;
+  publicVisibility: boolean;
   createdAt: string;
-  approvedAt?: string;
-  submitterName?: string;
-  relatedIssues?: Array<{
-    id: string;
-    title: string;
-    emailCount: number;
-  }>;
+  updatedAt: string;
+  photos: IssuePhotoResponse[];
+  user: UserBasicResponse;
+  targetAuthorities?: string[]; // Array of authority email addresses
+}
+
+export interface IssuePhotoResponse {
+  id: string;
+  url: string;
+  description?: string;
+  isPrimary: boolean;
+  createdAt: string;
+}
+
+export interface UserBasicResponse {
+  id: string;
+  name: string;
+  photoUrl?: string;
 }
 
 export interface CreateIssueResponse {
@@ -207,27 +218,58 @@ export interface TrackEmailResponse {
   newTotalEmails: number;
 }
 
-export interface Badge {
-  id: string;
+// Badge interfaces matching backend
+export interface BadgeResponse {
+  id: string;  // Guid in backend becomes string
   name: string;
   description: string;
+  iconUrl?: string;  // Changed from imageUrl
+  category: string;  // New property
+  rarity: string;    // New property replacing tier
+  requirementDescription?: string;  // Changed from requirement
+  earnedAt?: string;  // DateTime? becomes string (ISO date)
+  isEarned: boolean;  // New property
+}
+
+// Keep the old Badge interface for backward compatibility during migration
+export interface Badge extends BadgeResponse {
+  // Deprecated properties - to be removed
   imageUrl?: string;
-  tier: BadgeTier;
-  pointValue: number;
+  tier?: BadgeTier;
+  pointValue?: number;
   requirement?: string;
+  createdAt?: string;
 }
 
-export interface UserBadge extends Badge {
-  earnedAt: string;
+// Achievement interfaces matching backend
+export interface AchievementResponse {
+  id: string;  // Guid in backend becomes string
+  title: string;  // Changed from name
+  description: string;
+  maxProgress: number;  // Changed from target
+  rewardPoints: number;  // Changed from pointReward
+  rewardBadge?: BadgeResponse;  // New property
+  achievementType: string;  // New property
 }
 
-export interface Achievement {
-  id: string;
-  name: string;
+export interface AchievementProgressResponse {
+  id: string;  // Guid in backend becomes string
+  title: string;  // Changed from name
   description: string;
   progress: number;
-  target: number;
-  pointReward: number;
+  maxProgress: number;  // Changed from target
+  rewardPoints: number;  // Changed from pointReward
+  completed: boolean;  // New property
+  completedAt?: string;  // DateTime? becomes string (ISO date)
+  percentageComplete: number;  // decimal becomes number
+}
+
+// Keep the old Achievement interface for backward compatibility during migration
+export interface Achievement extends AchievementProgressResponse {
+  // Deprecated properties - to be removed
+  name?: string;
+  target?: number;
+  pointReward?: number;
 }
 
 export interface UserGamificationResponse {
@@ -235,8 +277,8 @@ export interface UserGamificationResponse {
   currentLevel: number;
   pointsToNextLevel: number;
   rank: number;
-  recentBadges: UserBadge[];
-  activeAchievements: Achievement[];
+  recentBadges: BadgeResponse[];  // Updated to use BadgeResponse
+  activeAchievements: AchievementProgressResponse[];  // Updated to use AchievementProgressResponse
 }
 
 export interface UserFullProfileResponse {
@@ -419,14 +461,14 @@ export interface CivicaApiEndpoints {
   deleteProfile: () => Promise<void>;
 
   // Issues
-  getIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueListItem>>;
+  getIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueItem>>;
   getIssueById: (id: string) => Promise<IssueDetailResponse>;
   createIssue: (data: CreateIssueRequest) => Promise<CreateIssueResponse>;
   trackEmailSent: (id: string, data: TrackEmailRequest) => Promise<TrackEmailResponse>;
 
   // User
   getUserFullProfile: () => Promise<UserFullProfileResponse>;
-  getUserIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueListItem>>;
+  getUserIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueItem>>;
 
   // Gamification
   getBadges: () => Promise<Badge[]>;
@@ -504,24 +546,24 @@ export const API_ENDPOINTS = {
 
   // Endpoints
   HEALTH: '/api/health',
-  
+
   // Auth
   CREATE_PROFILE: '/api/auth/create-profile',
   PROFILE: '/api/auth/profile',
-  
+
   // Issues
   ISSUES: '/api/issues',
   ISSUE_BY_ID: (id: string) => `/api/issues/${id}`,
   TRACK_EMAIL: (id: string) => `/api/issues/${id}/email-sent`,
-  
+
   // User
   USER_PROFILE: '/api/user/profile',
   USER_ISSUES: '/api/user/issues',
-  
+
   // Gamification
   BADGES: '/api/gamification/badges',
   LEADERBOARD: '/api/gamification/leaderboard',
-  
+
   // Admin
   PENDING_ISSUES: '/api/admin/pending-issues',
   ADMIN_ISSUE: (id: string) => `/api/admin/issues/${id}`,

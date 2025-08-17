@@ -9,11 +9,12 @@ export interface AuthState {
   loginMethod: 'google' | 'email' | null;
 }
 
+// AuthUser type that matches what the API returns
 export interface AuthUser {
   id: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
   authProvider: 'google' | 'email';
   emailVerified: boolean;
   createdAt: Date;

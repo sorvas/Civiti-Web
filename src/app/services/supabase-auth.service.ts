@@ -75,8 +75,8 @@ export class SupabaseAuthService {
     return {
       id: user.id,
       email: user.email || '',
-      displayName: user.user_metadata?.full_name || user.user_metadata?.name || user.email || '',
-      photoURL: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+      displayName: user.user_metadata?.['full_name'] || user.user_metadata?.['name'] || user.email || '',
+      photoURL: user.user_metadata?.['avatar_url'] || user.user_metadata?.['picture'],
       authProvider: user.app_metadata?.provider === 'google' ? 'google' : 'email',
       emailVerified: user.email_confirmed_at != null,
       createdAt: new Date(user.created_at),

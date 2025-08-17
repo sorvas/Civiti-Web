@@ -21,7 +21,7 @@ import { take, filter, takeUntil } from 'rxjs/operators';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
 import * as IssueSelectors from '../../store/issues/issue.selectors';
-import { Issue, Authority } from '../../services/mock-data.service';
+import { IssueDetailResponse } from '../../types/civica-api.types';
 import { EmailModalComponent } from './email-modal.component';
 import { GoogleMap, MapMarker, MapInfoWindow } from '@angular/google-maps';
 import { GoogleMapsConfigService } from '../../services/google-maps-config.service';
@@ -72,7 +72,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('infoWindow') infoWindow!: MapInfoWindow;
     @ViewChild('markerElement') markerElement!: MapMarker;
 
-    issue$!: Observable<Issue | null | undefined>;
+    issue$!: Observable<IssueDetailResponse | null | undefined>;
     isLoading$!: Observable<boolean>;
     error$!: Observable<string | null>;
     
@@ -143,7 +143,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
                         title: issue.title
                     };
                     // Geocode the address
-                    this.geocodeAddress(issue.location.address);
+                    this.geocodeAddress(issue.address);
                 });
             }).catch(error => {
                 console.error('Failed to load Google Maps:', error);
@@ -215,9 +215,48 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    openEmailModal(authority: Authority, issue: Issue): void {
+    openEmailModalWithEmail(authorityEmail: string, issue: IssueDetailResponse): void {
+        const authorityName = this.getAuthorityName(authorityEmail);
         const modalRef: any = this._modal.create({
-            nzTitle: `Email către ${authority.name}`,
+            nzTitle: `Email către ${authorityName}`,
+            nzContent: EmailModalComponent,
+            nzData: { issue, authority: authorityEmail },
+            nzWidth: 800,
+            nzMaskClosable: true,
+            nzFooter: [
+                {
+                    label: 'Anulează',
+                    onClick: () => modalRef.close(false)
+                },
+                {
+                    label: 'Trimite Email',
+                    type: 'primary',
+                    disabled: () => {
+                        const componentInstance: any = modalRef.getContentComponent();
+                        return !componentInstance?.emailForm?.valid;
+                    },
+                    onClick: () => {
+                        const componentInstance: any = modalRef.getContentComponent();
+                        if (componentInstance?.emailForm?.valid) {
+                            componentInstance.openEmailClient();
+                        }
+                    }
+                }
+            ],
+            nzIconType: 'mail'
+        });
+
+        // Refresh issue data after modal closes to update email count
+        modalRef.afterClose.pipe(
+            take(1)
+        ).subscribe(() => {
+            this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));
+        });
+    }
+
+    openEmailModal(authority: string, issue: IssueDetailResponse): void {
+        const modalRef: any = this._modal.create({
+            nzTitle: `Email către ${authority}`,
             nzContent: EmailModalComponent,
             nzData: { issue, authority },
             nzWidth: 800,
@@ -260,10 +299,29 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    getPhotoUrl(photoPath: string): string {
-        // Use local placeholder for development
-        // In production, this would return the actual photo URL from backend
-        return '/images/placeholders/issue-placeholder.svg';
+    sendEmailToAuthorities(issue: IssueDetailResponse): void {
+        // Open default email client with pre-filled subject and body
+        const subject = encodeURIComponent(`Solicitare rezolvare problemă: ${issue.title}`);
+        const body = encodeURIComponent(
+            `Stimate domn/doamnă,\n\n` +
+            `Vă scriu în legătură cu următoarea problemă din comunitatea noastră:\n\n` +
+            `${issue.currentSituation || issue.description}\n\n` +
+            `Localizare: ${issue.address}\n\n` +
+            `Vă rugăm să luați măsurile necesare pentru rezolvarea acestei probleme.\n\n` +
+            `Cu respect,\n` +
+            `Un cetățean responsabil`
+        );
+        
+        // For now, open with a generic email. In production, this would use actual authority emails
+        const mailto = `mailto:contact@primarie.ro?subject=${subject}&body=${body}`;
+        window.open(mailto, '_blank');
+        
+        // Track the email sent
+        this._store.dispatch(IssueActions.trackEmailSent({ 
+            issueId: issue.id, 
+            emailAddress: 'user@email.com',
+            targetAuthority: 'Primărie'
+        }));
     }
 
     onImageError(event: any, index?: number): void {
@@ -284,22 +342,58 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         imgElement.src = '/images/placeholders/issue-placeholder.svg';
     }
 
-    getUrgencyLevel(issue: Issue): 'urgent' | 'normal' {
+    getUrgencyLevel(issue: IssueDetailResponse): 'urgent' | 'normal' {
         return issue.emailsSent > 100 ? 'urgent' : 'normal';
     }
 
-    getDaysSince(date: Date): string {
+    getDaysSince(date: string): string {
         const now = new Date();
         const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays.toString();
     }
 
+    getAuthorityName(email: string): string {
+        // Extract a readable name from email
+        if (email.includes('primarie')) {
+            return 'Primărie';
+        } else if (email.includes('politie')) {
+            return 'Poliție Locală';
+        } else if (email.includes('administratie')) {
+            return 'Administrație';
+        } else if (email.includes('prefectura')) {
+            return 'Prefectură';
+        } else {
+            // Get domain name from email
+            const domain = email.split('@')[1]?.split('.')[0];
+            return domain ? domain.charAt(0).toUpperCase() + domain.slice(1) : 'Autoritate';
+        }
+    }
+
+    getAuthorityIcon(email: string): string {
+        if (email.includes('primarie')) {
+            return 'bank';
+        } else if (email.includes('politie')) {
+            return 'safety-certificate';
+        } else if (email.includes('administratie')) {
+            return 'apartment';
+        } else {
+            return 'team';
+        }
+    }
+
     getStatusText(status: string): string {
         switch (status) {
-            case 'open': return 'DESCHISĂ';
-            case 'in-progress': return 'ÎN PROGRES';
-            case 'resolved': return 'REZOLVATĂ';
+            case 'Unspecified': return 'NESPECIFICAT';
+            case 'Draft': return 'CIORNĂ';
+            case 'Submitted': return 'TRIMISĂ';
+            case 'UnderReview': return 'ÎN REVIZUIRE';
+            case 'Approved': return 'APROBATĂ';
+            case 'Rejected': return 'RESPINSĂ';
+            case 'ChangesRequested': return 'MODIFICĂRI NECESARE';
+            case 'InProgress': return 'ÎN PROGRES';
+            case 'Resolved': return 'REZOLVATĂ';
+            case 'Closed': return 'ÎNCHISĂ';
             default: return 'NECUNOSCUTĂ';
         }
     }
@@ -471,9 +565,9 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
                         take(1),
                         takeUntil(this._destroy$)
                     ).subscribe(issue => {
-                        if (issue.location.lat && issue.location.lng) {
-                            this.mapCenter = { lat: issue.location.lat, lng: issue.location.lng };
-                            this.markerPosition = { lat: issue.location.lat, lng: issue.location.lng };
+                        if (issue.latitude && issue.longitude) {
+                            this.mapCenter = { lat: issue.latitude, lng: issue.longitude };
+                            this.markerPosition = { lat: issue.latitude, lng: issue.longitude };
                             this._cdr.detectChanges();
                         }
                     });
@@ -536,9 +630,9 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             take(1),
             takeUntil(this._destroy$)
         ).subscribe(issue => {
-            if (issue.location.lat && issue.location.lng) {
-                this.mapCenter = { lat: issue.location.lat, lng: issue.location.lng };
-                this.markerPosition = { lat: issue.location.lat, lng: issue.location.lng };
+            if (issue.latitude && issue.longitude) {
+                this.mapCenter = { lat: issue.latitude, lng: issue.longitude };
+                this.markerPosition = { lat: issue.latitude, lng: issue.longitude };
                 console.log('Using fallback coordinates from issue data');
             } else {
                 // Use default Bucharest coordinates as last resort
