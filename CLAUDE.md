@@ -96,5 +96,6 @@ Consult these docs for detailed specifications:
 
 Environment files are auto-generated. Configure these in Vercel/Railway:
 - `SUPABASE_URL` - Supabase project URL
-- `SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_PUBLISHABLE_KEY` - Supabase publishable key
 - `API_URL` - Backend API URL
+- `GOOGLE_MAPS_API_KEY` - Google Maps API key
