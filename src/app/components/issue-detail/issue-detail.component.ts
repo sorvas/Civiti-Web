@@ -221,25 +221,19 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             nzTitle: `Email către ${authorityName}`,
             nzContent: EmailModalComponent,
             nzData: { issue, authority: authorityEmail },
-            nzWidth: 800,
+            nzWidth: 700,
             nzMaskClosable: true,
             nzFooter: [
                 {
-                    label: 'Anulează',
+                    label: 'Închide',
                     onClick: () => modalRef.close(false)
                 },
                 {
-                    label: 'Trimite Email',
+                    label: 'Am trimis email-ul',
                     type: 'primary',
-                    disabled: () => {
-                        const componentInstance: any = modalRef.getContentComponent();
-                        return !componentInstance?.emailForm?.valid;
-                    },
                     onClick: () => {
                         const componentInstance: any = modalRef.getContentComponent();
-                        if (componentInstance?.emailForm?.valid) {
-                            componentInstance.openEmailClient();
-                        }
+                        componentInstance?.confirmEmailSent();
                     }
                 }
             ],
@@ -249,46 +243,10 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         // Refresh issue data after modal closes to update email count
         modalRef.afterClose.pipe(
             take(1)
-        ).subscribe(() => {
-            this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));
-        });
-    }
-
-    openEmailModal(authority: string, issue: IssueDetailResponse): void {
-        const modalRef: any = this._modal.create({
-            nzTitle: `Email către ${authority}`,
-            nzContent: EmailModalComponent,
-            nzData: { issue, authority },
-            nzWidth: 800,
-            nzMaskClosable: true,
-            nzFooter: [
-                {
-                    label: 'Anulează',
-                    onClick: () => modalRef.close(false)
-                },
-                {
-                    label: 'Trimite Email',
-                    type: 'primary',
-                    disabled: () => {
-                        const componentInstance: any = modalRef.getContentComponent();
-                        return !componentInstance?.emailForm?.valid;
-                    },
-                    onClick: () => {
-                        const componentInstance: any = modalRef.getContentComponent();
-                        if (componentInstance?.emailForm?.valid) {
-                            componentInstance.openEmailClient();
-                        }
-                    }
-                }
-            ],
-            nzIconType: 'mail'
-        });
-
-        // Refresh issue data after modal closes to update email count
-        modalRef.afterClose.pipe(
-            take(1)
-        ).subscribe(() => {
-            this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));
+        ).subscribe((result: boolean) => {
+            if (result) {
+                this._store.dispatch(IssueActions.loadIssue({ id: issue.id }));
+            }
         });
     }
 
@@ -299,30 +257,6 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    sendEmailToAuthorities(issue: IssueDetailResponse): void {
-        // Open default email client with pre-filled subject and body
-        const subject = encodeURIComponent(`Solicitare rezolvare problemă: ${issue.title}`);
-        const body = encodeURIComponent(
-            `Stimate domn/doamnă,\n\n` +
-            `Vă scriu în legătură cu următoarea problemă din comunitatea noastră:\n\n` +
-            `${issue.currentSituation || issue.description}\n\n` +
-            `Localizare: ${issue.address}\n\n` +
-            `Vă rugăm să luați măsurile necesare pentru rezolvarea acestei probleme.\n\n` +
-            `Cu respect,\n` +
-            `Un cetățean responsabil`
-        );
-        
-        // For now, open with a generic email. In production, this would use actual authority emails
-        const mailto = `mailto:contact@primarie.ro?subject=${subject}&body=${body}`;
-        window.open(mailto, '_blank');
-        
-        // Track the email sent
-        this._store.dispatch(IssueActions.trackEmailSent({ 
-            issueId: issue.id, 
-            emailAddress: 'user@email.com',
-            targetAuthority: 'Primărie'
-        }));
-    }
 
     onImageError(event: any, index?: number): void {
         const imgElement = event.target;

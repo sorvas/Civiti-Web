@@ -60,6 +60,11 @@ export const routes: Routes = [
         data: { animation: 'IssueDetailsPage' }
       },
       {
+        path: 'authorities',
+        loadComponent: () => import('./components/issue-creation/authority-selection/authority-selection.component').then(m => m.AuthoritySelectionComponent),
+        data: { animation: 'AuthoritySelectionPage' }
+      },
+      {
         path: 'review',
         loadComponent: () => import('./components/issue-creation/issue-review/issue-review.component').then(m => m.IssueReviewComponent),
         data: { animation: 'IssueReviewPage' }

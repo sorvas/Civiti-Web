@@ -21,11 +21,20 @@ import { AppState } from '../../../store/app.state';
 import { selectAuthUser } from '../../../store/auth/auth.selectors';
 import * as UserActions from '../../../store/user/user.actions';
 import { ApiService } from '../../../services/api.service';
-import { 
+import {
   CreateIssueRequest,
   UrgencyLevel,
-  IssueCategory
+  IssueCategory,
+  IssueAuthorityInput
 } from '../../../types/civica-api.types';
+
+interface SelectedAuthority {
+  /** Server authority ID (only for predefined authorities) */
+  authorityId?: string;
+  email: string;
+  name: string;
+  isCustom: boolean;
+}
 
 @Component({
   selector: 'app-issue-review',
@@ -50,6 +59,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   issueData: any = null;
+  selectedAuthorities: SelectedAuthority[] = [];
   isSubmitting = false;
   isSubmitted = false;
 
@@ -77,6 +87,21 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     } else {
       console.warn('[ISSUE REVIEW] No complete issue data found, redirecting...');
       this.router.navigate(['/create-issue']);
+      return;
+    }
+
+    // Load selected authorities
+    const authoritiesString = sessionStorage.getItem('civica_selected_authorities');
+    if (authoritiesString) {
+      this.selectedAuthorities = JSON.parse(authoritiesString);
+      console.log('[ISSUE REVIEW] Loaded authorities:', this.selectedAuthorities);
+    }
+
+    // Validate at least one authority is selected (empty array '[]' is truthy)
+    if (this.selectedAuthorities.length === 0) {
+      console.warn('[ISSUE REVIEW] No authorities selected, redirecting...');
+      this.router.navigate(['/create-issue/authorities']);
+      return;
     }
   }
 
@@ -118,23 +143,47 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.selectedAuthorities.length === 0) {
+      this.message.error('Trebuie să selectezi cel puțin o autoritate');
+      this.router.navigate(['/create-issue/authorities']);
+      return;
+    }
+
     console.log('[ISSUE REVIEW] Submitting issue...');
     this.isSubmitting = true;
+
+    // Convert selected authorities to IssueAuthorityInput format
+    // For predefined authorities, use authorityId; for custom, use customName/customEmail
+    const authorities: IssueAuthorityInput[] = this.selectedAuthorities.map(auth => {
+      if (auth.authorityId && !auth.isCustom) {
+        // Predefined authority - use the server ID
+        return { authorityId: auth.authorityId };
+      } else {
+        // Custom authority - use name and email
+        return {
+          customName: auth.name,
+          customEmail: auth.email
+        };
+      }
+    });
 
     // Prepare issue data for submission using the API format
     const issueToSubmit: CreateIssueRequest = {
       title: this.generateIssueTitle(),
-      description: this.issueData.aiAnalysis?.description || this.issueData.briefDescription,
-      detailedDescription: this.issueData.aiAnalysis?.suggestedSolution,
+      description: this.issueData.aiAnalysis?.aiGeneratedDescription || this.issueData.briefDescription,
       category: this.issueData.category.id as IssueCategory,
-      urgency: this.issueData.urgency as UrgencyLevel,
-      county: this.issueData.location.county,
-      city: this.issueData.location.city,
-      district: this.issueData.location.district,
       address: this.issueData.location.address,
-      latitude: this.issueData.location.coordinates?.latitude,
-      longitude: this.issueData.location.coordinates?.longitude,
-      photoUrls: this.issueData.photos.map((photo: any) => photo.url)
+      district: this.issueData.location.district || '',
+      latitude: this.issueData.location.coordinates?.lat || 0,
+      longitude: this.issueData.location.coordinates?.lng || 0,
+      neighborhood: this.issueData.location.neighborhood,
+      urgency: this.issueData.urgency as UrgencyLevel,
+      desiredOutcome: this.issueData.aiAnalysis?.aiProposedSolution,
+      aiGeneratedDescription: this.issueData.aiAnalysis?.aiGeneratedDescription,
+      aiProposedSolution: this.issueData.aiAnalysis?.aiProposedSolution,
+      aiConfidence: this.issueData.aiAnalysis?.aiConfidence,
+      photoUrls: this.issueData.photos.map((photo: any) => photo.url),
+      authorities
     };
 
     this.apiService.createIssue(issueToSubmit)
@@ -181,6 +230,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     sessionStorage.removeItem('civica_uploaded_photos');
     sessionStorage.removeItem('civica_current_location');
     sessionStorage.removeItem('civica_complete_issue_data');
+    sessionStorage.removeItem('civica_selected_authorities');
   }
 
   createAnotherIssue(): void {

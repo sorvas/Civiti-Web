@@ -29,6 +29,11 @@
     <div class="progress-line"></div>
     <div class="progress-step">
       <div class="step-number">4</div>
+      <div class="step-label">Autorități</div>
+    </div>
+    <div class="progress-line"></div>
+    <div class="progress-step">
+      <div class="step-number">5</div>
       <div class="step-label">Verificare</div>
     </div>
   </div>
@@ -192,14 +197,14 @@
       
       <div class="nav-spacer"></div>
       
-      <button 
-        nz-button 
-        nzType="primary" 
+      <button
+        nz-button
+        nzType="primary"
         nzSize="large"
         [disabled]="!aiAnalysis"
         (click)="continueToReview()"
         class="nav-btn continue-btn">
-        Continuă cu verificarea
+        Selectează autorități
         <span nz-icon nzType="arrow-right"></span>
       </button>
     </div>

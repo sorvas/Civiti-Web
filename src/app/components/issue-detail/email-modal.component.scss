@@ -1,100 +1,141 @@
-.email-modal-container {
+.email-modal-container.copy-workflow {
   width: 100%;
 }
 
-// NG-ZORRO form overrides for Civica theme
-:host ::ng-deep {
-  .ant-form-item-label > label {
+// Section layout
+.section-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+}
+
+// Authority email display
+.email-display {
+  font-family: monospace;
+  font-size: 15px;
+  color: var(--oxford-blue);
+  padding: 8px 12px;
+  background-color: var(--platinum);
+  border-radius: 4px;
+}
+
+// Subject display
+.subject-display {
+  font-size: 14px;
+  color: var(--oxford-blue);
+  padding: 8px 12px;
+  background-color: var(--platinum);
+  border-radius: 4px;
+}
+
+// Email body display
+.body-display {
+  background-color: var(--platinum);
+  border-radius: 4px;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.email-body-text {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--oxford-blue);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+// Instructions list
+.instructions-list {
+  list-style: decimal;
+  margin: 8px 0 0 1.5rem;
+  padding: 0;
+
+  li {
+    margin-bottom: 4px;
     color: var(--oxford-blue);
-    font-weight: 600;
-    font-family: var(--font-primary);
-    
-    &.ant-form-item-required::before {
-      color: var(--orange-web);
-    }
-  }
-  
-  .ant-input,
-  .ant-input-affix-wrapper {
-    border-color: var(--platinum);
-    
-    &:hover {
-      border-color: var(--oxford-blue);
-    }
-    
-    &:focus,
-    &.ant-input-focused {
-      border-color: var(--orange-web);
-      box-shadow: 0 0 0 2px rgba(252, 163, 17, 0.2);
-    }
-  }
-  
-  .ant-form-item-has-error {
-    .ant-input,
-    .ant-input-affix-wrapper {
-      border-color: var(--color-error);
-    }
+    font-size: 14px;
   }
 }
 
-// Email preview card styling
+// Placeholder styling
+.placeholder-example {
+  background-color: rgba(252, 163, 17, 0.2);
+  color: var(--orange-web);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px dashed var(--orange-web);
+  font-family: monospace;
+  font-size: 13px;
+}
+
+// Placeholder legend
+.placeholder-legend {
+  margin-top: 8px;
+}
+
+.placeholder-list {
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding: 0;
+
+  li {
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: var(--oxford-blue);
+  }
+}
+
+// NG-ZORRO overrides
 :host ::ng-deep {
-  .email-preview {
-    .ant-card {
-      border-color: var(--platinum);
+  // Card styling
+  .authority-card,
+  .subject-card,
+  .body-card {
+    .ant-card-body {
+      padding: 16px;
     }
-    
-    .ant-card-head {
-      border-bottom-color: var(--platinum);
-    }
-    
-    .ant-card-head-title {
+  }
+
+  // Alert styling
+  .ant-alert-info {
+    background-color: rgba(20, 33, 61, 0.05);
+    border-color: var(--oxford-blue);
+
+    .ant-alert-message {
       color: var(--oxford-blue);
       font-weight: 600;
     }
   }
-  
-  .instructions-card {
-    background-color: var(--orange-web-20);
-    
-    .ant-card {
-      background-color: var(--orange-web-20);
-      border-color: var(--orange-web);
-    }
-    
-    ol {
-      list-style: decimal;
-      margin-left: 1.5rem;
-    }
-  }
-  
-  // Button customization
-  .ant-btn-text {
-    &:hover {
-      background-color: rgba(252, 163, 17, 0.1);
-    }
-  }
-  
-  // Empty state
-  .ant-empty-description {
-    color: var(--oxford-blue);
-    opacity: 0.6;
-  }
-  
-  // Divider
-  .ant-divider-dashed {
-    border-color: var(--platinum);
-  }
-}
 
-.email-body {
-  font-family: var(--font-primary);
-  font-size: 14px;
-  line-height: 1.6;
-  
-  pre {
-    margin: 0;
-    font-family: inherit;
+  .ant-alert-warning {
+    background-color: rgba(252, 163, 17, 0.1);
+    border-color: var(--orange-web);
+
+    .ant-alert-message {
+      color: var(--oxford-blue);
+    }
+  }
+
+  // Button states
+  .ant-btn-primary {
+    background-color: var(--orange-web);
+    border-color: var(--orange-web);
+
+    &:hover,
+    &:focus {
+      background-color: darken(#FCA311, 10%);
+      border-color: darken(#FCA311, 10%);
+    }
   }
 }
 
@@ -107,6 +148,19 @@
   color: var(--orange-web);
 }
 
-.bg-orange-web-20 {
-  background-color: var(--orange-web-20);
+// Responsive adjustments
+@media (max-width: 576px) {
+  .section-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .body-display {
+    max-height: 200px;
+  }
+
+  .email-body-text {
+    font-size: 13px;
+  }
 }

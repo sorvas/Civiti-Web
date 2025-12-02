@@ -437,6 +437,65 @@
   }
 }
 
+// Authorities Review Section
+.authorities-review {
+  margin-bottom: 1rem;
+}
+
+.authorities-count {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  color: var(--oxford-blue);
+}
+
+.authorities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.authorities-list .authority-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.authorities-list .authority-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--oxford-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.authorities-list .authority-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.authorities-list .authority-name {
+  font-weight: 600;
+  color: var(--oxford-blue);
+  margin-bottom: 2px;
+}
+
+.authorities-list .authority-email {
+  font-size: 0.9rem;
+  color: #666;
+}
+
 // Mobile responsiveness
 @media (max-width: 768px) {
   .issue-review-container {

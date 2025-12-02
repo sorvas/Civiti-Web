@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { 
+import {
   HealthResponse,
   CreateUserProfileRequest,
   UpdateUserProfileRequest,
@@ -25,6 +25,8 @@ import {
   BulkApproveResponse,
   IssueActionResponse,
   AdminStatisticsResponse,
+  AuthorityListResponse,
+  AuthorityResponse,
   PagedResult,
   IssueQueryParams,
   LeaderboardQueryParams,
@@ -96,6 +98,24 @@ export class ApiService {
 
   trackEmailSent(issueId: string, data: TrackEmailRequest): Observable<TrackEmailResponse> {
     return this.http.post<TrackEmailResponse>(`${this.baseUrl}/issues/${issueId}/email-sent`, data);
+  }
+
+  // ============================================
+  // Authority Endpoints
+  // ============================================
+
+  /**
+   * Get all active predefined authorities
+   */
+  getAuthorities(): Observable<AuthorityListResponse[]> {
+    return this.http.get<AuthorityListResponse[]>(`${this.baseUrl}/authorities`);
+  }
+
+  /**
+   * Get authority details by ID
+   */
+  getAuthorityById(id: string): Observable<AuthorityResponse> {
+    return this.http.get<AuthorityResponse>(`${this.baseUrl}/authorities/${id}`);
   }
 
   // ============================================

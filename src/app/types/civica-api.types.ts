@@ -38,6 +38,55 @@ export type LeaderboardPeriod = 'all-time' | 'monthly' | 'weekly';
 
 export type LeaderboardCategory = 'points' | 'emails' | 'issues';
 
+export type Priority = 'Low' | 'Medium' | 'High' | 'Critical';
+
+// ============================================
+// Authority Types
+// ============================================
+
+/**
+ * Input model for linking an authority to an issue during creation
+ */
+export interface IssueAuthorityInput {
+  /** ID of a predefined authority. If provided, customName and customEmail should be null. */
+  authorityId?: string;
+  /** Custom authority name. Required if authorityId is not provided. */
+  customName?: string;
+  /** Custom authority email. Required if authorityId is not provided. */
+  customEmail?: string;
+}
+
+/**
+ * Response model for authority linked to an issue
+ */
+export interface IssueAuthorityResponse {
+  /** ID of the predefined authority (null if custom) */
+  authorityId?: string;
+  /** Authority name (from predefined or custom) */
+  name: string;
+  /** Authority email (from predefined or custom) */
+  email: string;
+  /** True if this is a predefined authority, false if custom */
+  isPredefined: boolean;
+}
+
+/**
+ * Response model for authority in list views
+ */
+export interface AuthorityListResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+/**
+ * Full authority response with metadata
+ */
+export interface AuthorityResponse extends AuthorityListResponse {
+  isActive: boolean;
+  createdAt: string;
+}
+
 // ============================================
 // Request Interfaces
 // ============================================
@@ -65,20 +114,29 @@ export interface UpdateUserProfileRequest {
 export interface CreateIssueRequest {
   title: string;
   description: string;
-  detailedDescription?: string;
   category: IssueCategory;
-  urgency: UrgencyLevel;
-  county: string;
-  city: string;
-  district?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
+  address: string;
+  district: string;
+  latitude: number;
+  longitude: number;
+  locationAccuracy?: number;
+  neighborhood?: string;
+  landmark?: string;
+  urgency?: UrgencyLevel;
+  estimatedImpact?: number;
+  tags?: string[];
+  currentSituation?: string;
+  desiredOutcome?: string;
+  communityImpact?: string;
+  aiGeneratedDescription?: string;
+  aiProposedSolution?: string;
+  aiConfidence?: number;
   photoUrls?: string[];
+  authorities?: IssueAuthorityInput[];
 }
 
 export interface TrackEmailRequest {
-  emailAddress: string;
+  emailAddress?: string;  // Optional - no longer collected from user
   targetAuthority: string;
 }
 
@@ -164,9 +222,6 @@ export interface PagedResult<T> {
 
 export interface IssueDetailResponse {
   id: string;
-  city: string;
-  county: string;
-  district?: string;
   title: string;
   description: string;
   category: IssueCategory;
@@ -174,8 +229,11 @@ export interface IssueDetailResponse {
   latitude: number;
   longitude: number;
   neighborhood?: string;
+  district?: string;
   landmark?: string;
   urgency: UrgencyLevel;
+  estimatedImpact?: number;
+  tags?: string[];
   status: IssueStatus;
   emailsSent: number;
   currentSituation?: string;
@@ -187,8 +245,8 @@ export interface IssueDetailResponse {
   createdAt: string;
   updatedAt: string;
   photos: IssuePhotoResponse[];
+  authorities: IssueAuthorityResponse[];
   user: UserBasicResponse;
-  targetAuthorities?: string[]; // Array of authority email addresses
 }
 
 export interface IssuePhotoResponse {
@@ -318,35 +376,91 @@ export interface AdminIssueListItem {
   status: IssueStatus;
 }
 
-export interface ModerationHistoryItem {
+/**
+ * Admin action history item
+ */
+export interface AdminActionResponse {
+  id: string;
   action: string;
   adminId: string;
   adminEmail: string;
-  timestamp: string;
+  adminName?: string;
   notes?: string;
+  createdAt: string;
+}
+
+/**
+ * Photo response for admin issue detail
+ */
+export interface AdminIssuePhotoResponse {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+  description?: string;
+  isPrimary: boolean;
+  fileSize?: number;
+  createdAt: string;
 }
 
 export interface AdminIssueDetailResponse {
   id: string;
   title: string;
   description: string;
-  detailedDescription?: string;
   category: IssueCategory;
   urgency: UrgencyLevel;
-  county: string;
-  city: string;
-  district?: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-  photoUrls: string[];
+  priority: Priority;
   status: IssueStatus;
-  submitterId: string;
-  submitterEmail: string;
-  submitterName: string;
-  submittedAt: string;
+
+  // Location details
+  address: string;
+  latitude: number;
+  longitude: number;
+  locationAccuracy: number;
+  neighborhood?: string;
+  district?: string;
+  landmark?: string;
+  estimatedImpact?: number;
+  tags?: string[];
+
+  // Extended details
+  currentSituation?: string;
+  desiredOutcome?: string;
+  communityImpact?: string;
+
+  // AI analysis
+  aiGeneratedDescription?: string;
+  aiProposedSolution?: string;
+  aiConfidence?: number;
+
+  // Admin details
   adminNotes?: string;
-  moderationHistory: ModerationHistoryItem[];
+  rejectionReason?: string;
+  assignedDepartment?: string;
+  estimatedResolutionTime?: string;
+  publicVisibility: boolean;
+
+  // Review info
+  reviewedAt?: string;
+  reviewedBy?: string;
+
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+
+  // User info
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  userTotalIssues: number;
+  userResolvedIssues: number;
+  userPoints: number;
+
+  // Related data
+  photos: AdminIssuePhotoResponse[];
+  authorities: IssueAuthorityResponse[];
+  adminActions: AdminActionResponse[];
+  emailsSent: number;
 }
 
 export interface IssueActionResponse {

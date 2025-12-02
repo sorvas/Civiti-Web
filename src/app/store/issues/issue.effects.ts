@@ -64,11 +64,11 @@ export class IssueEffects {
   trackEmailSent$ = createEffect(() =>
     this.actions$.pipe(
       ofType(IssueActions.trackEmailSent),
-      mergeMap(({ issueId, emailAddress, targetAuthority }) =>
-        this.apiService.trackEmailSent(issueId, { emailAddress, targetAuthority }).pipe(
+      mergeMap(({ issueId, targetAuthority }) =>
+        this.apiService.trackEmailSent(issueId, { targetAuthority }).pipe(
           map(response => {
             this.message.success(`Email trimis! +${response.pointsEarned} puncte câștigate!`);
-            return IssueActions.trackEmailSentSuccess({ 
+            return IssueActions.trackEmailSentSuccess({
               issueId,
               pointsEarned: response.pointsEarned,
               newTotalEmails: response.newTotalEmails
@@ -77,8 +77,8 @@ export class IssueEffects {
           catchError(error => {
             console.error(`[Issues Effects] Failed to track email for issue ${issueId}:`, error);
             this.message.error('Eroare la înregistrarea email-ului');
-            return of(IssueActions.trackEmailSentFailure({ 
-              error: error.message || 'Failed to track email' 
+            return of(IssueActions.trackEmailSentFailure({
+              error: error.message || 'Failed to track email'
             }));
           })
         )
@@ -121,6 +121,7 @@ export class IssueEffects {
         sessionStorage.removeItem('civica_uploaded_photos');
         sessionStorage.removeItem('civica_current_location');
         sessionStorage.removeItem('civica_complete_issue_data');
+        sessionStorage.removeItem('civica_selected_authorities');
       })
     ),
     { dispatch: false }

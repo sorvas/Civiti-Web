@@ -162,24 +162,24 @@
 
             <!-- Authorities List -->
             <nz-card
-              *ngIf="issue.targetAuthorities && issue.targetAuthorities.length > 0">
+              *ngIf="issue.authorities && issue.authorities.length > 0">
               <nz-card-meta nzTitle="Autorități Responsabile" [nzAvatar]="authIcon">
               </nz-card-meta>
               <ng-template #authIcon>
                 <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="space-y-3 mt-4">
-                <div *ngFor="let authorityEmail of issue.targetAuthorities"
+                <div *ngFor="let authority of issue.authorities"
                   class="p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-oxford-blue">{{ getAuthorityName(authorityEmail) }}</h4>
+                    <h4 class="font-semibold text-oxford-blue">{{ authority.name }}</h4>
                     <nz-badge [nzCount]="0" [nzShowZero]="false">
-                      <i nz-icon [nzType]="getAuthorityIcon(authorityEmail)"
+                      <i nz-icon [nzType]="authority.isPredefined ? 'bank' : 'user'"
                         class="text-oxford-blue opacity-50 text-xl"></i>
                     </nz-badge>
                   </div>
-                  <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authorityEmail }}</p>
-                  <button nz-button nzType="primary" nzBlock (click)="openEmailModalWithEmail(authorityEmail, issue)">
+                  <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authority.email }}</p>
+                  <button nz-button nzType="primary" nzBlock (click)="openEmailModalWithEmail(authority.email, issue)">
                     <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
                     Trimite Email
                   </button>
@@ -187,23 +187,19 @@
               </div>
             </nz-card>
 
-            <!-- No Authorities Message -->
+            <!-- No Authorities Message (legacy issues only) -->
             <nz-card
-              *ngIf="!issue.targetAuthorities || issue.targetAuthorities.length === 0">
+              *ngIf="!issue.authorities || issue.authorities.length === 0">
               <nz-card-meta nzTitle="Autorități Responsabile" [nzAvatar]="authIcon">
               </nz-card-meta>
               <ng-template #authIcon>
                 <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
               <div class="text-center py-6">
-                <i nz-icon nzType="inbox" nzTheme="outline" class="text-oxford-blue opacity-50 text-3xl mb-2"></i>
+                <i nz-icon nzType="warning" nzTheme="outline" class="text-orange-web opacity-75 text-3xl mb-2"></i>
                 <p class="text-oxford-blue opacity-75">
-                  Nu există autorități configurate pentru această problemă.
+                  Nu există autorități asociate acestei probleme.
                 </p>
-                <button nz-button nzType="default" (click)="sendEmailToAuthorities(issue)">
-                  <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
-                  Trimite Email General
-                </button>
               </div>
             </nz-card>
 

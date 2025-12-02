@@ -185,7 +185,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
 
     sessionStorage.setItem('civica_complete_issue_data', JSON.stringify(issueData));
 
-    this.router.navigate(['/create-issue/review']);
+    this.router.navigate(['/create-issue/authorities']);
   }
 
   private generateIssueId(): string {

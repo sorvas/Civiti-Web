@@ -2,7 +2,7 @@
   
   <!-- Header -->
   <div class="page-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue/details" class="back-btn">
+    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue/authorities" class="back-btn">
       <span nz-icon nzType="arrow-left"></span>
       Înapoi
     </button>
@@ -27,8 +27,13 @@
       <div class="step-label">Detalii</div>
     </div>
     <div class="progress-line"></div>
+    <div class="progress-step completed">
+      <div class="step-number">✓</div>
+      <div class="step-label">Autorități</div>
+    </div>
+    <div class="progress-line"></div>
     <div class="progress-step active">
-      <div class="step-number">4</div>
+      <div class="step-number">5</div>
       <div class="step-label">Verificare</div>
     </div>
   </div>
@@ -118,20 +123,20 @@
       <div class="ai-report">
         
         <div class="ai-confidence">
-          <nz-tag [nzColor]="getConfidenceColor(issueData.aiAnalysis.confidence)">
-            {{ (issueData.aiAnalysis.confidence * 100) | number:'1.0-0' }}% încredere AI
+          <nz-tag [nzColor]="getConfidenceColor(issueData.aiAnalysis.aiConfidence || 0)">
+            {{ ((issueData.aiAnalysis.aiConfidence || 0) * 100) | number:'1.0-0' }}% încredere AI
           </nz-tag>
         </div>
 
         <div class="ai-sections">
           <div class="ai-section">
             <h4>Descriere profesională</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.description }}</div>
+            <div class="ai-content">{{ issueData.aiAnalysis.aiGeneratedDescription }}</div>
           </div>
 
           <div class="ai-section">
             <h4>Soluție propusă</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.proposedSolution }}</div>
+            <div class="ai-content">{{ issueData.aiAnalysis.aiProposedSolution }}</div>
           </div>
         </div>
 
@@ -174,6 +179,31 @@
       </div>
     </nz-card>
 
+    <!-- Target Authorities -->
+    <nz-card nzTitle="Autorități selectate" class="review-card">
+      <div class="authorities-review">
+        <div class="authorities-count">
+          <nz-badge [nzCount]="selectedAuthorities.length" nzShowZero>
+            <span nz-icon nzType="bank"></span>
+          </nz-badge>
+          <span>{{ selectedAuthorities.length }} autorități selectate</span>
+        </div>
+
+        <div class="authorities-list">
+          <div *ngFor="let auth of selectedAuthorities" class="authority-item">
+            <div class="authority-icon">
+              <span nz-icon [nzType]="auth.isCustom ? 'user' : 'bank'"></span>
+            </div>
+            <div class="authority-info">
+              <div class="authority-name">{{ auth.name }}</div>
+              <div class="authority-email">{{ auth.email }}</div>
+            </div>
+            <nz-tag *ngIf="auth.isCustom" nzColor="orange">PERSONALIZAT</nz-tag>
+          </div>
+        </div>
+      </div>
+    </nz-card>
+
     <!-- Location & Additional Details -->
     <nz-card nzTitle="Locație și detalii" class="review-card">
       <div class="location-details">
@@ -210,11 +240,11 @@
     <!-- Navigation -->
     <div class="navigation-section">
       <div class="nav-buttons">
-        <button 
-          nz-button 
-          nzType="default" 
+        <button
+          nz-button
+          nzType="default"
           nzSize="large"
-          routerLink="/create-issue/details"
+          routerLink="/create-issue/authorities"
           class="nav-btn">
           <span nz-icon nzType="arrow-left"></span>
           Înapoi

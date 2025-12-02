@@ -48,7 +48,7 @@ export const changeSortBy = createAction(
 // Track Email Sent
 export const trackEmailSent = createAction(
   '[Issue Detail] Track Email Sent',
-  props<{ issueId: string, emailAddress: string, targetAuthority: string }>()
+  props<{ issueId: string, targetAuthority: string }>()
 );
 
 export const trackEmailSentSuccess = createAction(
