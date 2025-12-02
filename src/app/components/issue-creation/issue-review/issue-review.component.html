@@ -123,20 +123,20 @@
       <div class="ai-report">
         
         <div class="ai-confidence">
-          <nz-tag [nzColor]="getConfidenceColor(issueData.aiAnalysis.confidence)">
-            {{ (issueData.aiAnalysis.confidence * 100) | number:'1.0-0' }}% încredere AI
+          <nz-tag [nzColor]="getConfidenceColor(issueData.aiAnalysis.aiConfidence || 0)">
+            {{ ((issueData.aiAnalysis.aiConfidence || 0) * 100) | number:'1.0-0' }}% încredere AI
           </nz-tag>
         </div>
 
         <div class="ai-sections">
           <div class="ai-section">
             <h4>Descriere profesională</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.description }}</div>
+            <div class="ai-content">{{ issueData.aiAnalysis.aiGeneratedDescription }}</div>
           </div>
 
           <div class="ai-section">
             <h4>Soluție propusă</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.proposedSolution }}</div>
+            <div class="ai-content">{{ issueData.aiAnalysis.aiProposedSolution }}</div>
           </div>
         </div>
 
