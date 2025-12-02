@@ -95,7 +95,10 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     if (authoritiesString) {
       this.selectedAuthorities = JSON.parse(authoritiesString);
       console.log('[ISSUE REVIEW] Loaded authorities:', this.selectedAuthorities);
-    } else {
+    }
+
+    // Validate at least one authority is selected (empty array '[]' is truthy)
+    if (this.selectedAuthorities.length === 0) {
       console.warn('[ISSUE REVIEW] No authorities selected, redirecting...');
       this.router.navigate(['/create-issue/authorities']);
       return;
@@ -140,6 +143,12 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.selectedAuthorities.length === 0) {
+      this.message.error('Trebuie să selectezi cel puțin o autoritate');
+      this.router.navigate(['/create-issue/authorities']);
+      return;
+    }
+
     console.log('[ISSUE REVIEW] Submitting issue...');
     this.isSubmitting = true;
 
@@ -161,7 +170,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     // Prepare issue data for submission using the API format
     const issueToSubmit: CreateIssueRequest = {
       title: this.generateIssueTitle(),
-      description: this.issueData.aiAnalysis?.description || this.issueData.briefDescription,
+      description: this.issueData.aiAnalysis?.aiGeneratedDescription || this.issueData.briefDescription,
       category: this.issueData.category.id as IssueCategory,
       address: this.issueData.location.address,
       district: this.issueData.location.district || '',
@@ -169,10 +178,10 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
       longitude: this.issueData.location.coordinates?.longitude || 0,
       neighborhood: this.issueData.location.neighborhood,
       urgency: this.issueData.urgency as UrgencyLevel,
-      desiredOutcome: this.issueData.aiAnalysis?.suggestedSolution,
-      aiGeneratedDescription: this.issueData.aiAnalysis?.description,
-      aiProposedSolution: this.issueData.aiAnalysis?.suggestedSolution,
-      aiConfidence: this.issueData.aiAnalysis?.confidence,
+      desiredOutcome: this.issueData.aiAnalysis?.aiProposedSolution,
+      aiGeneratedDescription: this.issueData.aiAnalysis?.aiGeneratedDescription,
+      aiProposedSolution: this.issueData.aiAnalysis?.aiProposedSolution,
+      aiConfidence: this.issueData.aiAnalysis?.aiConfidence,
       photoUrls: this.issueData.photos.map((photo: any) => photo.url),
       authorities
     };
