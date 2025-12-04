@@ -68,20 +68,21 @@ export class StorageService {
    * @returns Observable with upload result containing path and URL
    */
   uploadPhoto(userId: string, file: File): Observable<UploadResult> {
+    // Generate path OUTSIDE defer so retries use the same path (prevents orphaned files)
+    const timestamp = Date.now();
+    const sanitizedFilename = this.sanitizeFilename(file.name);
+    const filePath = `${userId}/${timestamp}-${sanitizedFilename}`;
+
     // Use defer to create the Promise lazily on each subscription
     // This ensures retries actually create new upload attempts
-    return defer(() => {
-      const timestamp = Date.now();
-      const sanitizedFilename = this.sanitizeFilename(file.name);
-      const filePath = `${userId}/${timestamp}-${sanitizedFilename}`;
-
-      return this.supabase.storage
+    return defer(() =>
+      this.supabase.storage
         .from(this.BUCKET)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
-        });
-    }).pipe(
+          upsert: true  // Allow overwrite on retry (prevents orphans if upload succeeded but response failed)
+        })
+    ).pipe(
       map(({ data, error }) => {
         if (error) {
           throw new Error(`Upload failed: ${error.message}`);

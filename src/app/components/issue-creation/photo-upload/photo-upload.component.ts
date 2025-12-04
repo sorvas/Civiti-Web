@@ -162,13 +162,17 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
     // Check if adding these files would exceed the limit
     if (this.uploadedPhotos.length + files.length > 5) {
       this.message.warning('Maxim 5 fotografii permise. Vă rugăm să ștergeți câteva fotografii mai întâi.');
+      target.value = '';  // Reset to allow re-selection
       return;
     }
 
-    this.isUploading = true;
-
-    // Process all files in parallel using RxJS forkJoin
+    // Copy files before resetting input (FileList becomes empty after reset)
     const filesToProcess = Array.from(files);
+
+    // Reset file input to allow re-selecting the same files after deletion/failure
+    target.value = '';
+
+    this.isUploading = true;
     const uploadObservables = filesToProcess.map(file => this.processFile(file));
 
     forkJoin(uploadObservables)
