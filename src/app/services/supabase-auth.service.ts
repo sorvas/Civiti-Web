@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient, AuthResponse, User } from '@supabase/supabase-js';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 import { Observable, from, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
 import { resetTokenRefreshState } from '../interceptors/auth.interceptor';
+import { SupabaseClientService } from './supabase-client.service';
 
 export interface SupabaseAuthUser {
   id: string;
@@ -29,18 +29,8 @@ export class SupabaseAuthService {
   private supabase: SupabaseClient;
   private currentUser$ = new BehaviorSubject<SupabaseAuthUser | null>(null);
 
-  constructor() {
-    this.supabase = createClient(
-      environment.supabase.url,
-      environment.supabase.publishableKey,
-      {
-        auth: {
-          persistSession: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce'
-        }
-      }
-    );
+  constructor(private supabaseClientService: SupabaseClientService) {
+    this.supabase = this.supabaseClientService.getClient();
 
     // Listen for auth state changes
     this.supabase.auth.onAuthStateChange((event, session) => {

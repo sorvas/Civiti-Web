@@ -70,6 +70,9 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private currentUserId: string | null = null;
 
+  // Track ongoing uploads for cancellation (prevents orphaned files)
+  private ongoingUploads = new Map<string, Subject<void>>();
+
   // Compression settings for optimal storage/quality balance
   private readonly compressionOptions = {
     maxSizeMB: 1,              // Target max 1MB per image
@@ -113,6 +116,14 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Cancel all ongoing uploads to prevent orphaned files
+    this.ongoingUploads.forEach((cancel$, photoId) => {
+      console.log('[PHOTO UPLOAD] Cancelling upload on destroy:', photoId);
+      cancel$.next();
+      cancel$.complete();
+    });
+    this.ongoingUploads.clear();
+
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -190,6 +201,10 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
     const previewUrl = URL.createObjectURL(file);
     const photoId = this.generatePhotoId();
 
+    // Create cancellation Subject for this upload
+    const cancel$ = new Subject<void>();
+    this.ongoingUploads.set(photoId, cancel$);
+
     // Add placeholder while compressing/uploading
     const photoData: PhotoData = {
       id: photoId,
@@ -208,6 +223,7 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
 
     // Compress then upload using RxJS operators
     return from(this.compressImage(file)).pipe(
+      takeUntil(cancel$),
       switchMap(compressedFile => {
         // Update metadata with compressed size
         const photoIndex = this.uploadedPhotos.findIndex(p => p.id === photoId);
@@ -217,18 +233,31 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
 
         // Upload compressed file to Supabase Storage (with automatic retry)
         return this.storageService.uploadPhotoWithRetry(this.currentUserId!, compressedFile).pipe(
+          takeUntil(cancel$),
           switchMap((result: UploadResult) => {
-            // Update photo data with real URL from storage
+            // Check if photo was removed while uploading
             const idx = this.uploadedPhotos.findIndex(p => p.id === photoId);
-            if (idx !== -1) {
+            if (idx === -1) {
+              // Photo was removed during upload - delete orphaned file from storage
+              console.log('[PHOTO UPLOAD] Photo removed during upload, cleaning up storage:', result.path);
+              this.storageService.deletePhotoWithRetry(result.path)
+                .pipe(takeUntil(this.destroy$))
+                .subscribe({
+                  next: () => console.log('[PHOTO UPLOAD] Orphaned file cleaned up:', result.path),
+                  error: (err) => console.error('[PHOTO UPLOAD] Failed to clean up orphaned file:', err)
+                });
               URL.revokeObjectURL(previewUrl);
-              this.uploadedPhotos[idx] = {
-                ...this.uploadedPhotos[idx],
-                url: result.url,
-                thumbnail: result.url,
-                storagePath: result.path
-              };
+              return of(null);
             }
+
+            // Update photo data with real URL from storage
+            URL.revokeObjectURL(previewUrl);
+            this.uploadedPhotos[idx] = {
+              ...this.uploadedPhotos[idx],
+              url: result.url,
+              thumbnail: result.url,
+              storagePath: result.path
+            };
 
             this.message.success(`Fotografia a fost încărcată cu succes (calitate ${this.getQualityLabel(photoData.quality)})`);
             console.log('[PHOTO UPLOAD] Photo uploaded to storage:', result);
@@ -256,6 +285,11 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
         }
         this.message.error(`Compresia imaginii a eșuat: ${error.message || 'Eroare necunoscută'}`);
         return of(null);
+      }),
+      finalize(() => {
+        // Clean up the cancellation Subject
+        this.ongoingUploads.delete(photoId);
+        cancel$.complete();
       })
     );
   }
@@ -272,30 +306,35 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Compress image before upload to reduce storage costs and upload time.
-   * Strips EXIF data (including GPS) for privacy.
+   * Process image before upload: strips EXIF data (including GPS) for privacy,
+   * and compresses larger files to reduce storage costs and upload time.
    */
   private async compressImage(file: File): Promise<File> {
-    // Skip compression for small files (< 500KB) - already efficient
-    if (file.size < 500 * 1024) {
-      console.log('[PHOTO UPLOAD] Skipping compression for small file:', file.name);
-      return file;
-    }
-
     try {
       this.isCompressing = true;
-      const compressedFile = await imageCompression(file, this.compressionOptions);
+
+      // For small files, only strip EXIF without aggressive compression
+      const options = file.size < 500 * 1024
+        ? { ...this.compressionOptions, maxSizeMB: Infinity }  // Strip EXIF only
+        : this.compressionOptions;  // Full compression + EXIF strip
+
+      const processedFile = await imageCompression(file, options);
 
       const originalSizeKB = Math.round(file.size / 1024);
-      const compressedSizeKB = Math.round(compressedFile.size / 1024);
-      const reduction = Math.round((1 - compressedFile.size / file.size) * 100);
+      const processedSizeKB = Math.round(processedFile.size / 1024);
+      const reduction = Math.round((1 - processedFile.size / file.size) * 100);
 
-      console.log(`[PHOTO UPLOAD] Compressed: ${originalSizeKB}KB → ${compressedSizeKB}KB (${reduction}% reduction)`);
+      if (file.size < 500 * 1024) {
+        console.log(`[PHOTO UPLOAD] EXIF stripped from small file: ${file.name} (${originalSizeKB}KB)`);
+      } else {
+        console.log(`[PHOTO UPLOAD] Compressed: ${originalSizeKB}KB → ${processedSizeKB}KB (${reduction}% reduction)`);
+      }
 
-      return compressedFile;
+      return processedFile;
     } catch (error) {
-      console.warn('[PHOTO UPLOAD] Compression failed, using original:', error);
-      return file; // Fallback to original if compression fails
+      console.warn('[PHOTO UPLOAD] Image processing failed, using original:', error);
+      // SECURITY NOTE: Original file may contain EXIF/GPS data
+      return file;
     } finally {
       this.isCompressing = false;
     }
@@ -320,7 +359,16 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
     const photo = this.uploadedPhotos[index];
     console.log('[PHOTO UPLOAD] Remove photo:', photo.id);
 
-    // Remove from local array first for immediate UI feedback
+    // Cancel ongoing upload if one exists (prevents orphaned files)
+    const cancel$ = this.ongoingUploads.get(photo.id);
+    if (cancel$) {
+      console.log('[PHOTO UPLOAD] Cancelling ongoing upload for:', photo.id);
+      cancel$.next();
+      cancel$.complete();
+      this.ongoingUploads.delete(photo.id);
+    }
+
+    // Remove from local array for immediate UI feedback
     this.uploadedPhotos.splice(index, 1);
 
     // If photo was uploaded to storage, delete it (with automatic retry)
@@ -339,7 +387,7 @@ export class PhotoUploadComponent implements OnInit, OnDestroy {
           }
         });
     } else {
-      // Photo was only a preview (upload failed or still in progress)
+      // Photo was only a preview (upload failed, cancelled, or still in progress)
       if (photo.url.startsWith('blob:')) {
         URL.revokeObjectURL(photo.url);
       }

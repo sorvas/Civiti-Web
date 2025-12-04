@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { from, Observable, throwError, timer } from 'rxjs';
 import { map, catchError, retry } from 'rxjs/operators';
+import { SupabaseClientService } from './supabase-client.service';
 
 /**
  * Result of a successful photo upload
@@ -57,11 +57,8 @@ export class StorageService {
     maxDelayMs: 8000
   };
 
-  constructor() {
-    this.supabase = createClient(
-      environment.supabase.url,
-      environment.supabase.publishableKey
-    );
+  constructor(private supabaseClientService: SupabaseClientService) {
+    this.supabase = this.supabaseClientService.getClient();
   }
 
   /**
