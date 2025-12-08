@@ -46,7 +46,7 @@ interface RegistrationData {
     city: string;
     district?: string;
   };
-  residenceType: 'urban' | 'rural';
+  residenceType: 'Apartment' | 'House' | 'Business';
   birthYear?: number;
   communicationPrefs: {
     issueUpdates: boolean;
@@ -151,7 +151,7 @@ export class UserRegistrationComponent implements OnInit, OnDestroy {
       county: ['', [Validators.required]],
       city: ['', [Validators.required]],
       district: [''],
-      residenceType: ['urban', [Validators.required]],
+      residenceType: ['Apartment', [Validators.required]],
       birthYear: [null],
 
       // Step 3: Preferences

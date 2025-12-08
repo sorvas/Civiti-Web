@@ -9,7 +9,7 @@ export interface SupabaseAuthUser {
   id: string;
   email: string;
   displayName: string;
-  photoURL?: string;
+  photoUrl?: string;
   authProvider: 'google' | 'email';
   emailVerified: boolean;
   createdAt: Date;
@@ -77,7 +77,7 @@ export class SupabaseAuthService {
       id: user.id,
       email: user.email || '',
       displayName: user.user_metadata?.['full_name'] || user.user_metadata?.['name'] || user.email || '',
-      photoURL: user.user_metadata?.['avatar_url'] || user.user_metadata?.['picture'],
+      photoUrl: user.user_metadata?.['avatar_url'] || user.user_metadata?.['picture'],
       authProvider: user.app_metadata?.provider === 'google' ? 'google' : 'email',
       emailVerified: user.email_confirmed_at != null,
       createdAt: new Date(user.created_at),
@@ -213,6 +213,22 @@ export class SupabaseAuthService {
 
   getAccessToken(): string | null {
     return localStorage.getItem('civica_access_token');
+  }
+
+  /**
+   * Get the current session from Supabase
+   * Used in OAuth callback to ensure session is established before making API calls
+   */
+  async getSession(): Promise<{ user: any; access_token: string; refresh_token?: string } | null> {
+    const { data: { session }, error } = await this.supabase.auth.getSession();
+    if (error || !session) {
+      return null;
+    }
+    return {
+      user: session.user,
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    };
   }
 
   refreshToken(): Observable<string> {

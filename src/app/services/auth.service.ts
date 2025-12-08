@@ -9,7 +9,7 @@ export interface AuthUser {
   id: string;
   email: string | null;
   displayName: string | null;
-  photoURL: string | null;
+  photoUrl: string | null;
   authProvider: 'email' | 'google';
   emailVerified: boolean;
   createdAt: Date;
@@ -95,7 +95,7 @@ export class AuthService {
             id: user.id,
             email: user.email,
             displayName: user.displayName,
-            photoURL: user.photoURL ?? null,
+            photoUrl: user.photoUrl ?? null,
             authProvider: user.authProvider,
             emailVerified: user.emailVerified,
             createdAt: user.createdAt,
@@ -163,7 +163,7 @@ export class AuthService {
         id: supabaseResponse.user.id,
         email: supabaseResponse.user.email,
         displayName: supabaseResponse.user.displayName,
-        photoURL: supabaseResponse.user.photoURL ?? null,
+        photoUrl: supabaseResponse.user.photoUrl ?? null,
         authProvider: supabaseResponse.user.authProvider,
         emailVerified: supabaseResponse.user.emailVerified,
         createdAt: supabaseResponse.user.createdAt,

@@ -5,9 +5,9 @@
   <div class="dashboard-header">
     <div class="header-content">
       <div class="user-welcome">
-        <nz-avatar 
-          [nzSrc]="(user$ | async)?.photoURL || undefined" 
-          [nzText]="(displayName$ | async)?.charAt(0)" 
+        <nz-avatar
+          [nzSrc]="(user$ | async)?.photoUrl || undefined"
+          [nzText]="(displayName$ | async)?.charAt(0)"
           nzSize="large"
           class="user-avatar">
         </nz-avatar>
@@ -113,17 +113,6 @@
             [nzValue]="stats.communityVotes"
             nzTitle="Voturi comunitate"
             [nzValueStyle]="{ color: '#14213D' }">
-          </nz-statistic>
-        </nz-card>
-      </div>
-
-      <div nz-col [nzSpan]="12" [nzSm]="6">
-        <nz-card class="stat-card">
-          <nz-statistic
-            [nzValue]="stats.approvalRate"
-            nzSuffix="%"
-            nzTitle="Rată de aprobare"
-            [nzValueStyle]="{ color: '#6c757d' }">
           </nz-statistic>
         </nz-card>
       </div>

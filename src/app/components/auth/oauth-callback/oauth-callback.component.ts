@@ -29,98 +29,100 @@ export class OauthCallbackComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      // Get the current user from Supabase
-      const user = await this.supabaseAuth.getUser();
-      
-      if (user) {
-        // Get access token
-        const token = this.supabaseAuth.getAccessToken();
-        
-        if (token) {
-          // Try to get user profile from backend
-          this.apiService.getUserProfile().subscribe({
-            next: (profile) => {
-              // User has a profile, dispatch success
-              this.store.dispatch(AuthActions.loginWithGoogleSuccess({
-                user: {
-                  ...profile, // Spread profile first
-                  id: user.id, // Then override with Supabase user data
-                  email: user.email || profile.email || '',
-                  displayName: profile.displayName || user.email || '',
-                  photoURL: user.user_metadata?.['avatar_url'] || profile.photoURL,
-                  authProvider: 'google',
-                  emailVerified: true,
-                  createdAt: new Date(user.created_at),
-                  lastLoginAt: new Date()
-                },
-                token,
-                refreshToken: ''
-              }));
-            },
-            error: () => {
-              // No profile exists, create one
-              const displayName = user.user_metadata?.['full_name'] || 
-                                user.user_metadata?.['name'] || 
-                                user.email?.split('@')[0] || 'User';
-              
-              this.apiService.createUserProfile({
-                supabaseUserId: user.id,
-                email: user.email || '',
-                displayName,
-                county: 'București',
-                city: 'București',
-                district: 'Sector 5',
-                residenceType: 'urban'
-              }).subscribe({
-                next: (profile) => {
-                  this.store.dispatch(AuthActions.loginWithGoogleSuccess({
-                    user: {
-                      ...profile, // Spread profile first
-                      id: user.id, // Then override with Supabase user data
-                      email: user.email || profile.email,
-                      displayName: profile.displayName,
-                      photoURL: user.user_metadata?.['avatar_url'] || profile.photoURL,
-                      authProvider: 'google',
-                      emailVerified: true,
-                      createdAt: new Date(user.created_at),
-                      lastLoginAt: new Date()
-                    },
-                    token,
-                    refreshToken: ''
-                  }));
-                },
-                error: (error) => {
-                  console.error('Profile creation error:', error);
-                  // Even if profile creation fails, we have valid auth
-                  this.store.dispatch(AuthActions.loginWithGoogleSuccess({
-                    user: {
-                      id: user.id,
-                      email: user.email || '',
-                      displayName: displayName,
-                      photoURL: user.user_metadata?.['avatar_url'],
-                      authProvider: 'google',
-                      emailVerified: true,
-                      createdAt: new Date(user.created_at),
-                      lastLoginAt: new Date()
-                    },
-                    token,
-                    refreshToken: ''
-                  }));
-                }
-              });
-            }
-          });
-        }
-      } else {
-        // No user found, redirect to login
-        this.router.navigate(['/auth/login']);
+      // Get the current session - Supabase should have processed the OAuth callback by now
+      const session = await this.supabaseAuth.getSession();
+
+      if (!session?.access_token || !session?.user) {
+        console.error('No session after OAuth callback');
+        this.handleAuthFailure();
+        return;
       }
+
+      const user = session.user;
+      const token = session.access_token;
+
+      // Fetch existing profile or create new one
+      this.apiService.getUserProfile().subscribe({
+        next: (profile) => {
+          this.dispatchLoginSuccess(user, profile, token);
+        },
+        error: (error) => {
+          // Profile doesn't exist (404) or other error - create one
+          if (error.status === 404) {
+            this.createProfileAndLogin(user, token);
+          } else {
+            console.error('Error fetching profile:', error);
+            // For other errors, still try to create profile
+            this.createProfileAndLogin(user, token);
+          }
+        }
+      });
     } catch (error) {
       console.error('OAuth callback error:', error);
-      this.store.dispatch(AuthActions.loginWithGoogleFailure({ 
-        error: 'Authentication failed. Please try again.' 
-      }));
-      this.router.navigate(['/auth/login']);
+      this.handleAuthFailure();
     }
+  }
+
+  private createProfileAndLogin(user: any, token: string): void {
+    const displayName = user.user_metadata?.['full_name'] ||
+                       user.user_metadata?.['name'] ||
+                       user.email?.split('@')[0] || 'User';
+
+    this.apiService.createUserProfile({
+      supabaseUserId: user.id,
+      email: user.email || '',
+      displayName,
+      county: 'București',
+      city: 'București',
+      district: 'Sector 5',
+      residenceType: 'Apartment'
+    }).subscribe({
+      next: (profile) => {
+        this.dispatchLoginSuccess(user, profile, token);
+      },
+      error: (error) => {
+        console.error('Profile creation error:', error);
+        // Even if profile creation fails, dispatch login with basic user data
+        this.store.dispatch(AuthActions.loginWithGoogleSuccess({
+          user: {
+            id: user.id,
+            email: user.email || '',
+            displayName: displayName,
+            photoUrl: user.user_metadata?.['avatar_url'] || null,
+            authProvider: 'google',
+            emailVerified: true,
+            createdAt: new Date(user.created_at),
+            lastLoginAt: new Date()
+          },
+          token,
+          refreshToken: ''
+        }));
+      }
+    });
+  }
+
+  private dispatchLoginSuccess(user: any, profile: any, token: string): void {
+    this.store.dispatch(AuthActions.loginWithGoogleSuccess({
+      user: {
+        ...profile,
+        id: user.id,
+        email: user.email || profile.email || '',
+        displayName: profile.displayName || user.email || '',
+        photoUrl: user.user_metadata?.['avatar_url'] || profile.photoUrl || null,
+        authProvider: 'google',
+        emailVerified: true,
+        createdAt: new Date(user.created_at),
+        lastLoginAt: new Date()
+      },
+      token,
+      refreshToken: ''
+    }));
+  }
+
+  private handleAuthFailure(): void {
+    this.store.dispatch(AuthActions.loginWithGoogleFailure({
+      error: 'Authentication failed. Please try again.'
+    }));
+    this.router.navigate(['/auth/login']);
   }
 }

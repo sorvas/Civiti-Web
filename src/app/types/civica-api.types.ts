@@ -30,9 +30,7 @@ export type IssueStatus =
   | 'Resolved'
   | 'Rejected';
 
-export type ResidenceType = 'urban' | 'rural';
-
-export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+export type ResidenceType = 'Apartment' | 'House' | 'Business';
 
 export type LeaderboardPeriod = 'all-time' | 'monthly' | 'weekly';
 
@@ -107,8 +105,7 @@ export interface UpdateUserProfileRequest {
   county?: string;
   city?: string;
   district?: string;
-  residenceType?: ResidenceType;
-  birthYear?: number;
+  residenceType?: string;
 }
 
 export interface CreateIssueRequest {
@@ -178,19 +175,26 @@ export interface HealthResponse {
 
 export interface UserProfileResponse {
   id: string;
-  supabaseUserId: string;
   email: string;
-  photoURL?: string;
   displayName: string;
+  photoUrl?: string;
   county: string;
   city: string;
-  district?: string;
-  residenceType: ResidenceType;
-  birthYear?: number;
+  district: string;
+  residenceType?: string;
   points: number;
   level: number;
   createdAt: string;
-  updatedAt: string;
+  emailVerified: boolean;
+
+  // Notification preferences
+  issueUpdatesEnabled: boolean;
+  communityNewsEnabled: boolean;
+  monthlyDigestEnabled: boolean;
+  achievementsEnabled: boolean;
+
+  // Gamification data
+  gamification?: UserGamificationResponse;
 }
 
 export interface IssueItem {
@@ -276,73 +280,57 @@ export interface TrackEmailResponse {
   newTotalEmails: number;
 }
 
-// Badge interfaces matching backend
 export interface BadgeResponse {
-  id: string;  // Guid in backend becomes string
+  id: string;
   name: string;
   description: string;
-  iconUrl?: string;  // Changed from imageUrl
-  category: string;  // New property
-  rarity: string;    // New property replacing tier
-  requirementDescription?: string;  // Changed from requirement
-  earnedAt?: string;  // DateTime? becomes string (ISO date)
-  isEarned: boolean;  // New property
+  iconUrl?: string;
+  category: string;
+  rarity: string;
+  requirementDescription?: string;
+  earnedAt?: string;
+  isEarned: boolean;
 }
 
-// Keep the old Badge interface for backward compatibility during migration
-export interface Badge extends BadgeResponse {
-  // Deprecated properties - to be removed
-  imageUrl?: string;
-  tier?: BadgeTier;
-  pointValue?: number;
-  requirement?: string;
-  createdAt?: string;
-}
-
-// Achievement interfaces matching backend
 export interface AchievementResponse {
-  id: string;  // Guid in backend becomes string
-  title: string;  // Changed from name
+  id: string;
+  title: string;
   description: string;
-  maxProgress: number;  // Changed from target
-  rewardPoints: number;  // Changed from pointReward
-  rewardBadge?: BadgeResponse;  // New property
-  achievementType: string;  // New property
+  maxProgress: number;
+  rewardPoints: number;
+  rewardBadge?: BadgeResponse;
+  achievementType: string;
 }
 
 export interface AchievementProgressResponse {
-  id: string;  // Guid in backend becomes string
-  title: string;  // Changed from name
+  id: string;
+  title: string;
   description: string;
   progress: number;
-  maxProgress: number;  // Changed from target
-  rewardPoints: number;  // Changed from pointReward
-  completed: boolean;  // New property
-  completedAt?: string;  // DateTime? becomes string (ISO date)
-  percentageComplete: number;  // decimal becomes number
-}
-
-// Keep the old Achievement interface for backward compatibility during migration
-export interface Achievement extends AchievementProgressResponse {
-  // Deprecated properties - to be removed
-  name?: string;
-  target?: number;
-  pointReward?: number;
+  maxProgress: number;
+  rewardPoints: number;
+  completed: boolean;
+  completedAt?: string;
+  percentageComplete: number;
 }
 
 export interface UserGamificationResponse {
-  totalPoints: number;
-  currentLevel: number;
+  points: number;
+  level: number;
+  issuesReported: number;
+  issuesResolved: number;
+  communityVotes: number;
+  currentLoginStreak: number;
+  longestLoginStreak: number;
+  recentBadges: BadgeResponse[];
+  activeAchievements: AchievementProgressResponse[];
+  currentLevelPoints: number;
+  nextLevelPoints: number;
   pointsToNextLevel: number;
-  rank: number;
-  recentBadges: BadgeResponse[];  // Updated to use BadgeResponse
-  activeAchievements: AchievementProgressResponse[];  // Updated to use AchievementProgressResponse
+  pointsInCurrentLevel: number;
+  levelProgressPercentage: number;
 }
 
-export interface UserFullProfileResponse {
-  profile: UserProfileResponse;
-  gamification: UserGamificationResponse;
-}
 
 export interface LeaderboardEntry {
   rank: number;
@@ -568,24 +556,23 @@ export interface CivicaApiEndpoints {
   // Health
   health: () => Promise<HealthResponse>;
 
-  // Authentication
-  createProfile: (data: CreateUserProfileRequest) => Promise<UserProfileResponse>;
+  // User Profile (unified endpoint)
   getProfile: () => Promise<UserProfileResponse>;
+  createProfile: (data: CreateUserProfileRequest) => Promise<UserProfileResponse>;
   updateProfile: (data: UpdateUserProfileRequest) => Promise<UserProfileResponse>;
-  deleteProfile: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 
-  // Issues
+  // User Issues
+  getUserIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueItem>>;
+
+  // Issues (public)
   getIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueItem>>;
   getIssueById: (id: string) => Promise<IssueDetailResponse>;
   createIssue: (data: CreateIssueRequest) => Promise<CreateIssueResponse>;
   trackEmailSent: (id: string, data: TrackEmailRequest) => Promise<TrackEmailResponse>;
 
-  // User
-  getUserFullProfile: () => Promise<UserFullProfileResponse>;
-  getUserIssues: (params?: IssueQueryParams) => Promise<PagedResult<IssueItem>>;
-
   // Gamification
-  getBadges: () => Promise<Badge[]>;
+  getGamification: () => Promise<UserGamificationResponse>;
   getLeaderboard: (params?: LeaderboardQueryParams) => Promise<LeaderboardResponse>;
 
   // Admin
@@ -662,21 +649,19 @@ export const API_ENDPOINTS = {
   HEALTH: '/api/health',
 
   // Auth
-  CREATE_PROFILE: '/api/auth/create-profile',
-  PROFILE: '/api/auth/profile',
+  AUTH_STATUS: '/api/auth/status',
+
+  // User
+  USER_PROFILE: '/api/user/profile',       // GET, POST, PUT
+  USER_ISSUES: '/api/user/issues',
+  USER_GAMIFICATION: '/api/user/gamification',
+  USER_LEADERBOARD: '/api/user/leaderboard',
+  USER_ACCOUNT: '/api/user/account',
 
   // Issues
   ISSUES: '/api/issues',
   ISSUE_BY_ID: (id: string) => `/api/issues/${id}`,
   TRACK_EMAIL: (id: string) => `/api/issues/${id}/email-sent`,
-
-  // User
-  USER_PROFILE: '/api/user/profile',
-  USER_ISSUES: '/api/user/issues',
-
-  // Gamification
-  BADGES: '/api/gamification/badges',
-  LEADERBOARD: '/api/gamification/leaderboard',
 
   // Admin
   PENDING_ISSUES: '/api/admin/pending-issues',

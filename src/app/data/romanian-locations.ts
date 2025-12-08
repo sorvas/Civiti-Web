@@ -234,8 +234,9 @@ export const BUCHAREST_DISTRICTS = [
 ];
 
 export const RESIDENCE_TYPES = [
-  { value: 'urban', label: 'Urban' },
-  { value: 'rural', label: 'Rural' }
+  { value: 'Apartment', label: 'Apartament' },
+  { value: 'House', label: 'Casă' },
+  { value: 'Business', label: 'Spațiu comercial' }
 ];
 
 /**

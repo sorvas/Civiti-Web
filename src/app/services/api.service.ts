@@ -7,14 +7,13 @@ import {
   CreateUserProfileRequest,
   UpdateUserProfileRequest,
   UserProfileResponse,
+  UserGamificationResponse,
   CreateIssueRequest,
   CreateIssueResponse,
   IssueItem,
   IssueDetailResponse,
   TrackEmailRequest,
   TrackEmailResponse,
-  UserFullProfileResponse,
-  BadgeResponse,
   LeaderboardResponse,
   AdminIssueListItem,
   AdminIssueDetailResponse,
@@ -50,23 +49,47 @@ export class ApiService {
   }
 
   // ============================================
-  // Authentication Endpoints
+  // User Profile Endpoints (unified /api/user/profile)
   // ============================================
 
-  createUserProfile(data: CreateUserProfileRequest): Observable<UserProfileResponse> {
-    return this.http.post<UserProfileResponse>(`${this.baseUrl}/auth/create-profile`, data);
-  }
-
+  /**
+   * Get user profile with gamification data
+   * GET /api/user/profile
+   */
   getUserProfile(): Observable<UserProfileResponse> {
-    return this.http.get<UserProfileResponse>(`${this.baseUrl}/auth/profile`);
+    return this.http.get<UserProfileResponse>(`${this.baseUrl}/user/profile`);
   }
 
+  /**
+   * Create user profile after OAuth/registration
+   * POST /api/user/profile
+   */
+  createUserProfile(data: CreateUserProfileRequest): Observable<UserProfileResponse> {
+    return this.http.post<UserProfileResponse>(`${this.baseUrl}/user/profile`, data);
+  }
+
+  /**
+   * Update user profile
+   * PUT /api/user/profile
+   */
   updateUserProfile(data: UpdateUserProfileRequest): Observable<UserProfileResponse> {
-    return this.http.put<UserProfileResponse>(`${this.baseUrl}/auth/profile`, data);
+    return this.http.put<UserProfileResponse>(`${this.baseUrl}/user/profile`, data);
   }
 
-  deleteUserProfile(): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/auth/profile`);
+  /**
+   * Soft delete user account
+   * DELETE /api/user/account
+   */
+  deleteUserAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/user/account`);
+  }
+
+  /**
+   * Get gamification data only
+   * GET /api/user/gamification
+   */
+  getGamification(): Observable<UserGamificationResponse> {
+    return this.http.get<UserGamificationResponse>(`${this.baseUrl}/user/gamification`);
   }
 
   // ============================================
@@ -119,16 +142,16 @@ export class ApiService {
   }
 
   // ============================================
-  // User Endpoints
+  // User Issues Endpoint
   // ============================================
 
-  getUserFullProfile(): Observable<UserFullProfileResponse> {
-    return this.http.get<UserFullProfileResponse>(`${this.baseUrl}/user/profile`);
-  }
-
+  /**
+   * Get user's own issues
+   * GET /api/user/issues
+   */
   getUserIssues(params?: IssueQueryParams): Observable<PagedResult<IssueItem>> {
     let httpParams = new HttpParams();
-    
+
     if (params) {
       Object.keys(params).forEach(key => {
         const value = params[key as keyof IssueQueryParams];
@@ -142,16 +165,16 @@ export class ApiService {
   }
 
   // ============================================
-  // Gamification Endpoints
+  // Leaderboard Endpoint
   // ============================================
 
-  getBadges(): Observable<BadgeResponse[]> {
-    return this.http.get<BadgeResponse[]>(`${this.baseUrl}/gamification/badges`);
-  }
-
+  /**
+   * Get public leaderboard
+   * GET /api/user/leaderboard
+   */
   getLeaderboard(params?: LeaderboardQueryParams): Observable<LeaderboardResponse> {
     let httpParams = new HttpParams();
-    
+
     if (params) {
       Object.keys(params).forEach(key => {
         const value = params[key as keyof LeaderboardQueryParams];
@@ -161,7 +184,7 @@ export class ApiService {
       });
     }
 
-    return this.http.get<LeaderboardResponse>(`${this.baseUrl}/gamification/leaderboard`, { params: httpParams });
+    return this.http.get<LeaderboardResponse>(`${this.baseUrl}/user/leaderboard`, { params: httpParams });
   }
 
   // ============================================

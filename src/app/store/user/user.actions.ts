@@ -1,5 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { UserProfile, GamificationData, UserPreferences } from './user.state';
+import { UpdateUserProfileRequest } from '../../types/civica-api.types';
 
 // Profile Management Actions
 export const loadUserProfile = createAction(
@@ -9,7 +10,7 @@ export const loadUserProfile = createAction(
 
 export const loadUserProfileSuccess = createAction(
   '[User] Load User Profile Success',
-  props<{ profile: UserProfile }>()
+  props<{ profile: UserProfile; gamification?: GamificationData }>()
 );
 
 export const loadUserProfileFailure = createAction(
@@ -19,7 +20,7 @@ export const loadUserProfileFailure = createAction(
 
 export const updateUserProfile = createAction(
   '[User] Update User Profile',
-  props<{ updates: Partial<UserProfile> }>()
+  props<{ updates: UpdateUserProfileRequest }>()
 );
 
 export const updateUserProfileSuccess = createAction(
@@ -55,7 +56,7 @@ export const updatePoints = createAction(
 
 export const updatePointsSuccess = createAction(
   '[User] Update Points Success',
-  props<{ newPoints: number; totalPoints: number }>()
+  props<{ newPoints: number; points: number }>()
 );
 
 export const awardBadge = createAction(

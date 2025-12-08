@@ -13,13 +13,19 @@ export class UserEffects {
   private apiService = inject(ApiService);
   private message = inject(NzMessageService);
 
-  // Load User Profile Effects
+  /**
+   * Load user profile - now includes gamification data
+   * GET /api/user/profile returns profile WITH gamification
+   */
   loadUserProfile$ = createEffect(() =>
     this.actions$.pipe(
       ofType(UserActions.loadUserProfile),
       switchMap(() =>
         this.apiService.getUserProfile().pipe(
-          map(profile => UserActions.loadUserProfileSuccess({ profile })),
+          map(profile => UserActions.loadUserProfileSuccess({
+            profile,
+            gamification: profile.gamification
+          })),
           catchError(error => of(UserActions.loadUserProfileFailure({
             error: error.message || 'Failed to load user profile'
           })))
@@ -43,15 +49,16 @@ export class UserEffects {
     )
   );
 
-  // Load Gamification Data Effects
+  /**
+   * Load gamification data only
+   * GET /api/user/gamification
+   */
   loadGamificationData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(UserActions.loadGamificationData),
       switchMap(() =>
-        this.apiService.getUserFullProfile().pipe(
-          map(fullProfile => UserActions.loadGamificationDataSuccess({
-            gamification: fullProfile.gamification
-          })),
+        this.apiService.getGamification().pipe(
+          map(gamification => UserActions.loadGamificationDataSuccess({ gamification })),
           catchError(error => of(UserActions.loadGamificationDataFailure({
             error: error.message || 'Failed to load gamification data'
           })))
@@ -65,12 +72,10 @@ export class UserEffects {
     this.actions$.pipe(
       ofType(UserActions.updatePoints),
       switchMap(({ points, reason }) => {
-        // For now, simulate point update since backend may not have this specific endpoint
-        // This will be replaced when backend implements point tracking
-        this.message.success(`+${points} points earned! ${reason}`);
+        this.message.success(`+${points} puncte câștigate! ${reason}`);
         return of(UserActions.updatePointsSuccess({
           newPoints: points,
-          totalPoints: points // This should be updated once we have real data
+          points
         }));
       })
     )
@@ -81,14 +86,11 @@ export class UserEffects {
     this.actions$.pipe(
       ofType(UserActions.awardBadge),
       switchMap(({ badgeId, reason }) => {
-        // For now, simulate badge award since backend may not have this specific endpoint
         this.message.success(`🏆 New badge earned! ${reason}`, { nzDuration: 5000 });
 
-        // Return updated gamification data by fetching full profile
-        return this.apiService.getUserFullProfile().pipe(
-          map(fullProfile => UserActions.awardBadgeSuccess({
-            gamification: fullProfile.gamification
-          })),
+        // Refresh gamification data after badge award
+        return this.apiService.getGamification().pipe(
+          map(gamification => UserActions.awardBadgeSuccess({ gamification })),
           catchError(error => {
             this.message.error('Failed to award badge');
             return of({ type: '[User] Award Badge Error' });
@@ -103,14 +105,11 @@ export class UserEffects {
     this.actions$.pipe(
       ofType(UserActions.updateStreak),
       switchMap(({ streakType, increment }) => {
-        // For now, simulate streak update since backend may not have this specific endpoint
         console.log(`Updated ${streakType} streak by ${increment}`);
 
-        // Return updated gamification data by fetching full profile
-        return this.apiService.getUserFullProfile().pipe(
-          map(fullProfile => UserActions.updateStreakSuccess({
-            gamification: fullProfile.gamification
-          })),
+        // Refresh gamification data after streak update
+        return this.apiService.getGamification().pipe(
+          map(gamification => UserActions.updateStreakSuccess({ gamification })),
           catchError(error => {
             console.error('Failed to update streak:', error);
             return of({ type: '[User] Update Streak Error' });

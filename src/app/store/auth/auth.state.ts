@@ -14,7 +14,7 @@ export interface AuthUser {
   id: string;
   email: string | null;
   displayName: string | null;
-  photoURL: string | null;
+  photoUrl: string | null;
   authProvider: 'google' | 'email';
   emailVerified: boolean;
   createdAt: Date;

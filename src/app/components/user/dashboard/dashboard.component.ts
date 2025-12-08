@@ -37,13 +37,11 @@ import {
 } from '../../../store/user/user.state';
 import { BadgeResponse } from '../../../types/civica-api.types';
 
-// Interface for user statistics (not part of UserProfile)
+// Interface for user statistics from gamification data
 interface UserStats {
   issuesReported: number;
   issuesResolved: number;
   communityVotes: number;
-  approvalRate: number;
-  qualityScore: number;
 }
 import {
   selectGamificationData,
@@ -144,10 +142,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Load user data when component initializes
+    // Profile now includes gamification data - single API call
     this.user$.pipe(takeUntil(this.destroy$)).subscribe(user => {
       if (user) {
+        // loadUserProfile now returns profile WITH gamification
         this.store.dispatch(UserActions.loadUserProfile({ userId: user.id }));
-        this.store.dispatch(UserActions.loadGamificationData({ userId: user.id }));
         this.store.dispatch(UserActions.loadUserPreferences({ userId: user.id }));
 
         // Update login streak

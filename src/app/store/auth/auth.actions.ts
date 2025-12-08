@@ -35,12 +35,12 @@ export const registerWithEmail = createAction(
   '[Auth] Register with Email',
   props<{ 
     email: string; 
-    password: string; 
+    password: string;
     displayName: string;
     county: string;
     city: string;
     district?: string;
-    residenceType: 'urban' | 'rural';
+    residenceType: 'Apartment' | 'House' | 'Business';
     birthYear?: number;
   }>()
 );

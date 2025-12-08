@@ -28,12 +28,12 @@ export const selectGamificationData = createSelector(
 
 export const selectUserPoints = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.totalPoints || 0
+  (gamification) => gamification?.points || 0
 );
 
 export const selectUserLevel = createSelector(
   selectGamificationData,
-  (gamification) => gamification?.currentLevel || 1
+  (gamification) => gamification?.level || 1
 );
 
 export const selectUserBadges = createSelector(
@@ -44,11 +44,9 @@ export const selectUserBadges = createSelector(
 export const selectUserStats = createSelector(
   selectGamificationData,
   (gamification) => gamification ? {
-    issuesReported: 0,
-    issuesResolved: 0,
-    communityVotes: 0,
-    approvalRate: 0,
-    qualityScore: 0
+    issuesReported: gamification.issuesReported,
+    issuesResolved: gamification.issuesResolved,
+    communityVotes: gamification.communityVotes
   } : null
 );
 
@@ -59,38 +57,26 @@ export const selectUserAchievements = createSelector(
 
 export const selectUserStreaks = createSelector(
   selectGamificationData,
-  (gamification) => null // No streaks property in current GamificationData
-);
-
-export const selectLeaderboardPosition = createSelector(
-  selectGamificationData,
-  (gamification) => gamification?.rank
+  (gamification) => gamification ? {
+    currentLoginStreak: gamification.currentLoginStreak,
+    longestLoginStreak: gamification.longestLoginStreak
+  } : null
 );
 
 // Progress and Stats Selectors
 export const selectIssuesReported = createSelector(
-  selectUserStats,
-  (stats) => stats?.issuesReported || 0
+  selectGamificationData,
+  (gamification) => gamification?.issuesReported || 0
 );
 
 export const selectIssuesResolved = createSelector(
-  selectUserStats,
-  (stats) => stats?.issuesResolved || 0
+  selectGamificationData,
+  (gamification) => gamification?.issuesResolved || 0
 );
 
 export const selectCommunityVotes = createSelector(
-  selectUserStats,
-  (stats) => stats?.communityVotes || 0
-);
-
-export const selectApprovalRate = createSelector(
-  selectUserStats,
-  (stats) => stats?.approvalRate || 0
-);
-
-export const selectQualityScore = createSelector(
-  selectUserStats,
-  (stats) => stats?.qualityScore || 0
+  selectGamificationData,
+  (gamification) => gamification?.communityVotes || 0
 );
 
 // Preferences Selectors
@@ -132,17 +118,12 @@ export const selectUserError = createSelector(
 
 // Computed Selectors
 export const selectNextLevelProgress = createSelector(
-  selectUserPoints,
-  selectUserLevel,
-  (points, level) => {
-    const pointsForNextLevel = level * 1000; // 1000 points per level
-    const pointsInCurrentLevel = points % 1000;
-    return {
-      current: pointsInCurrentLevel,
-      required: 1000,
-      percentage: (pointsInCurrentLevel / 1000) * 100
-    };
-  }
+  selectGamificationData,
+  (gamification) => ({
+    current: gamification?.pointsInCurrentLevel || 0,
+    required: gamification?.nextLevelPoints || 1000,
+    percentage: gamification?.levelProgressPercentage || 0
+  })
 );
 
 export const selectRecentBadges = createSelector(
