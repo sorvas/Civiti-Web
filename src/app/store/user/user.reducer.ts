@@ -32,9 +32,10 @@ export const userReducer = createReducer(
     error: null
   })),
 
-  on(UserActions.updateUserProfileSuccess, (state, { profile }) => ({
+  on(UserActions.updateUserProfileSuccess, (state, { profile, gamification }) => ({
     ...state,
     profile,
+    gamification: gamification ?? state.gamification,
     isLoading: false,
     error: null
   })),

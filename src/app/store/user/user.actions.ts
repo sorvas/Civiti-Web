@@ -25,7 +25,7 @@ export const updateUserProfile = createAction(
 
 export const updateUserProfileSuccess = createAction(
   '[User] Update User Profile Success',
-  props<{ profile: UserProfile }>()
+  props<{ profile: UserProfile; gamification?: GamificationData }>()
 );
 
 export const updateUserProfileFailure = createAction(

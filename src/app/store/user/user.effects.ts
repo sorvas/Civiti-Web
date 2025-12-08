@@ -40,7 +40,10 @@ export class UserEffects {
       ofType(UserActions.updateUserProfile),
       switchMap(({ updates }) =>
         this.apiService.updateUserProfile(updates).pipe(
-          map(profile => UserActions.updateUserProfileSuccess({ profile })),
+          map(profile => UserActions.updateUserProfileSuccess({
+            profile,
+            gamification: profile.gamification
+          })),
           catchError(error => of(UserActions.updateUserProfileFailure({
             error: error.message || 'Failed to update user profile'
           })))
