@@ -15,13 +15,18 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
 import * as IssueSelectors from '../../store/issues/issue.selectors';
+import * as AuthActions from '../../store/auth/auth.actions';
+import { selectIsAuthenticated, selectAuthUser, selectUserDisplayName } from '../../store/auth/auth.selectors';
 import { IssueItem } from '../../types/civica-api.types';
+import { AuthUser } from '../../store/auth/auth.state';
 
 @Component({
   selector: 'app-issues-list',
@@ -43,6 +48,8 @@ import { IssueItem } from '../../types/civica-api.types';
     NzToolTipModule,
     NzSpaceModule,
     NzModalModule,
+    NzAvatarModule,
+    NzDropDownModule,
   ],
   templateUrl: './issues-list.component.html',
   styleUrl: './issues-list.component.scss'
@@ -59,6 +66,11 @@ export class IssuesListComponent implements OnInit {
   sortBy$!: Observable<string>;
   totalIssues$!: Observable<number>;
 
+  // Auth state observables
+  isAuthenticated$!: Observable<boolean>;
+  user$!: Observable<AuthUser | null>;
+  displayName$!: Observable<string>;
+
   sortBy = 'date';
 
   constructor() {
@@ -67,7 +79,12 @@ export class IssuesListComponent implements OnInit {
     this.error$ = this._store.select(IssueSelectors.selectIssuesError);
     this.sortBy$ = this._store.select(IssueSelectors.selectSortBy);
     this.totalIssues$ = this._store.select(IssueSelectors.selectTotal);
-    
+
+    // Auth state observables
+    this.isAuthenticated$ = this._store.select(selectIsAuthenticated);
+    this.user$ = this._store.select(selectAuthUser);
+    this.displayName$ = this._store.select(selectUserDisplayName);
+
     // Sync local sortBy with store state using takeUntilDestroyed (Angular 19 best practice)
     this.sortBy$
       .pipe(takeUntilDestroyed())
@@ -157,38 +174,56 @@ export class IssuesListComponent implements OnInit {
     this._router.navigate(['/auth/register'], { queryParams: { returnUrl: '/issues' } });
   }
 
+  navigateToDashboard(): void {
+    this._router.navigate(['/dashboard']);
+  }
+
+  logout(): void {
+    this._store.dispatch(AuthActions.logout());
+  }
+
   promptToCreateIssue(): void {
-    this._modal.create({
-      nzTitle: 'Conectare necesară pentru crearea unei probleme',
-      nzContent: 'Pentru a raporta o problemă nouă, este necesar să ai un cont. Poți să te conectezi dacă ai deja unul sau să îți creezi un cont nou.',
-      nzFooter: [
-        {
-          label: 'Mai târziu',
-          type: 'text',
-          onClick: () => {
-            // Modal closes automatically
-          }
-        },
-        {
-          label: 'Am deja cont',
-          type: 'default',
-          onClick: () => {
-            this._router.navigate(['/auth/login'], { queryParams: { returnUrl: '/create-issue' } });
-            return Promise.resolve();
-          }
-        },
-        {
-          label: 'Creează cont nou',
-          type: 'primary',
-          onClick: () => {
-            this._router.navigate(['/auth/register'], { queryParams: { returnUrl: '/create-issue' } });
-            return Promise.resolve();
-          }
+    // Check auth state and navigate directly if authenticated
+    this.isAuthenticated$
+      .pipe(take(1))
+      .subscribe(isAuthenticated => {
+        if (isAuthenticated) {
+          this._router.navigate(['/create-issue']);
+        } else {
+          // Show auth modal for unauthenticated users
+          this._modal.create({
+            nzTitle: 'Conectare necesară pentru crearea unei probleme',
+            nzContent: 'Pentru a raporta o problemă nouă, este necesar să ai un cont. Poți să te conectezi dacă ai deja unul sau să îți creezi un cont nou.',
+            nzFooter: [
+              {
+                label: 'Mai târziu',
+                type: 'text',
+                onClick: () => {
+                  // Modal closes automatically
+                }
+              },
+              {
+                label: 'Am deja cont',
+                type: 'default',
+                onClick: () => {
+                  this._router.navigate(['/auth/login'], { queryParams: { returnUrl: '/create-issue' } });
+                  return Promise.resolve();
+                }
+              },
+              {
+                label: 'Creează cont nou',
+                type: 'primary',
+                onClick: () => {
+                  this._router.navigate(['/auth/register'], { queryParams: { returnUrl: '/create-issue' } });
+                  return Promise.resolve();
+                }
+              }
+            ],
+            nzIconType: 'user',
+            nzWidth: 500,
+            nzCentered: true
+          });
         }
-      ],
-      nzIconType: 'user',
-      nzWidth: 500,
-      nzCentered: true
-    });
+      });
   }
 } 

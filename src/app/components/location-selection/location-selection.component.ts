@@ -11,10 +11,16 @@ import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { AppState } from '../../store/app.state';
 import * as LocationActions from '../../store/location/location.actions';
+import * as AuthActions from '../../store/auth/auth.actions';
+import { selectIsAuthenticated, selectAuthUser, selectUserDisplayName } from '../../store/auth/auth.selectors';
+import { AuthUser } from '../../store/auth/auth.state';
 import { ROMANIAN_COUNTIES, getDistrictsForCity, getCitiesForCounty } from '../../data/romanian-locations';
 import { SanitizationService } from '../../services/sanitization.service';
 
@@ -40,6 +46,8 @@ interface LocationData {
     NzGridModule,
     NzTypographyModule,
     NzSpaceModule,
+    NzAvatarModule,
+    NzDropDownModule,
   ],
   templateUrl: './location-selection.component.html',
   styleUrls: ['./location-selection.component.scss']
@@ -52,6 +60,17 @@ export class LocationSelectionComponent implements OnInit {
 
   locationData: LocationData | null = null;
   isLoading = false;
+
+  // Auth state observables
+  isAuthenticated$: Observable<boolean>;
+  user$: Observable<AuthUser | null>;
+  displayName$: Observable<string>;
+
+  constructor() {
+    this.isAuthenticated$ = this._store.select(selectIsAuthenticated);
+    this.user$ = this._store.select(selectAuthUser);
+    this.displayName$ = this._store.select(selectUserDisplayName);
+  }
 
   locationForm = this._fb.group({
     county: [{ value: 'B', disabled: true }, Validators.required],
@@ -104,5 +123,13 @@ export class LocationSelectionComponent implements OnInit {
 
   navigateToRegister(): void {
     this._router.navigate(['/auth/register'], { queryParams: { returnUrl: '/location' } });
+  }
+
+  navigateToDashboard(): void {
+    this._router.navigate(['/dashboard']);
+  }
+
+  logout(): void {
+    this._store.dispatch(AuthActions.logout());
   }
 } 
