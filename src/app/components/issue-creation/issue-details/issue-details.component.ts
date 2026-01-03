@@ -221,12 +221,18 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   }
 
   saveDescription(newDescription: string): void {
-    if (this.aiAnalysis && newDescription.trim()) {
-      this.aiAnalysis.aiGeneratedDescription = newDescription.trim();
-      this.isEditingDescription = false;
-      this.saveFormToSession();
-      this.message.success('Descrierea a fost actualizată');
+    if (!this.aiAnalysis) {
+      return;
     }
+    const trimmed = newDescription.trim();
+    if (!trimmed) {
+      this.message.warning('Descrierea nu poate fi goală');
+      return;
+    }
+    this.aiAnalysis.aiGeneratedDescription = trimmed;
+    this.isEditingDescription = false;
+    this.saveFormToSession();
+    this.message.success('Descrierea a fost actualizată');
   }
 
   cancelEditDescription(): void {
@@ -238,12 +244,18 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   }
 
   saveSolution(newSolution: string): void {
-    if (this.aiAnalysis && newSolution.trim()) {
-      this.aiAnalysis.aiProposedSolution = newSolution.trim();
-      this.isEditingSolution = false;
-      this.saveFormToSession();
-      this.message.success('Soluția a fost actualizată');
+    if (!this.aiAnalysis) {
+      return;
     }
+    const trimmed = newSolution.trim();
+    if (!trimmed) {
+      this.message.warning('Soluția propusă nu poate fi goală');
+      return;
+    }
+    this.aiAnalysis.aiProposedSolution = trimmed;
+    this.isEditingSolution = false;
+    this.saveFormToSession();
+    this.message.success('Soluția a fost actualizată');
   }
 
   cancelEditSolution(): void {

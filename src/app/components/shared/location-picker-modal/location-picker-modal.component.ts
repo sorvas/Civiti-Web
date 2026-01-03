@@ -466,14 +466,9 @@ export class LocationPickerModalComponent implements OnInit, AfterViewInit, OnDe
     if (!this.selectedLocation) {
       return false;
     }
-    // For MVP, only Sector 5 is allowed
-    const district = this.selectedLocation.district;
-    if (!district) {
-      // No district info - check if city is București (might be edge of sector)
-      // Be permissive if we can't determine district but it's in București
-      return this.selectedLocation.city === 'București';
-    }
-    return district === 'Sector 5';
+    // For MVP, strictly require Sector 5
+    // If district can't be determined, don't allow (user must select more specific location)
+    return this.selectedLocation.district === 'Sector 5';
   }
 
   /**
