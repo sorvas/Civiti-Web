@@ -75,6 +75,9 @@ interface PhotoData {
 export class IssueDetailsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
+  // Issue ID - generated once and reused across saves
+  private issueId: string | null = null;
+
   selectedCategory: IssueCategoryInfo | null = null;
   uploadedPhotos: PhotoData[] = [];
   currentLocation: { address: string; coordinates: { lat: number; lng: number }; district?: string } | null = null;
@@ -136,6 +139,10 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
     if (completeIssueData) {
       try {
         const issueData = JSON.parse(completeIssueData);
+        // Restore issue ID to maintain consistency across saves
+        if (issueData.id) {
+          this.issueId = issueData.id;
+        }
         // Restore form fields
         if (issueData.briefDescription) {
           this.detailsForm.patchValue({
@@ -148,7 +155,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
         if (issueData.aiAnalysis) {
           this.aiAnalysis = issueData.aiAnalysis;
         }
-        console.log('[ISSUE DETAILS] Restored form data from session');
+        console.log('[ISSUE DETAILS] Restored form data from session, ID:', this.issueId);
       } catch (e) {
         console.warn('[ISSUE DETAILS] Failed to parse saved issue data:', e);
       }
@@ -166,7 +173,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
    */
   private saveFormToSession(): void {
     const issueData = {
-      id: this.generateIssueId(),
+      id: this.getOrCreateIssueId(),
       category: this.selectedCategory,
       photos: this.uploadedPhotos,
       location: this.currentLocation,
@@ -272,7 +279,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
 
     // Store form data and AI analysis in session
     const issueData = {
-      id: this.generateIssueId(), // Generate ID here to be used in submission
+      id: this.getOrCreateIssueId(), // Generate ID here to be used in submission
       category: this.selectedCategory,
       photos: this.uploadedPhotos,
       location: this.currentLocation,
@@ -287,7 +294,14 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/create-issue/authorities']);
   }
 
-  private generateIssueId(): string {
-    return 'issue-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+  /**
+   * Get existing issue ID or create a new one.
+   * Ensures the same ID is used throughout the issue creation flow.
+   */
+  private getOrCreateIssueId(): string {
+    if (!this.issueId) {
+      this.issueId = 'issue-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    }
+    return this.issueId;
   }
 }
