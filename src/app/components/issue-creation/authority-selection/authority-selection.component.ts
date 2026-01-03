@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { takeUntil, debounceTime, distinctUntilChanged, switchMap, tap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -132,10 +133,33 @@ export class AuthoritySelectionComponent implements OnInit, OnDestroy {
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
+        tap(() => {
+          this.isLoadingAuthorities = true;
+          this.isSearching = true;
+        }),
+        switchMap(searchTerm => {
+          const params = {
+            city: this.issueCity,
+            district: this.issueDistrict || undefined,
+            search: searchTerm.trim() || undefined
+          };
+          console.log('[AUTHORITY SELECTION] Searching authorities with params:', params);
+          return this.apiService.getAuthorities(params).pipe(
+            catchError(error => {
+              console.error('[AUTHORITY SELECTION] Search failed:', error);
+              this.message.warning('Nu s-au putut încărca autoritățile. Poți adăuga manual.');
+              return of([]);
+            })
+          );
+        }),
         takeUntil(this.destroy$)
       )
-      .subscribe(searchTerm => {
-        this.performSearch(searchTerm);
+      .subscribe(authorities => {
+        console.log('[AUTHORITY SELECTION] Search results:', authorities);
+        this.availableAuthorities = authorities;
+        this.filteredAuthorities = [...authorities];
+        this.isLoadingAuthorities = false;
+        this.isSearching = false;
       });
   }
 
@@ -223,10 +247,6 @@ export class AuthoritySelectionComponent implements OnInit, OnDestroy {
           this.isSearching = false;
         }
       });
-  }
-
-  private performSearch(searchTerm: string): void {
-    this.loadAuthorities(searchTerm.trim() || undefined);
   }
 
   filterAuthorities(): void {

@@ -148,8 +148,8 @@ export class LocationPickerModalComponent implements OnInit, AfterViewInit, OnDe
           address: this.data.config.initialAddress,
           latitude: lat,
           longitude: lng,
-          city: 'București',
-          district: null
+          city: this.data.config.initialCity || 'București',
+          district: this.data.config.initialDistrict || null
         };
       } else {
         // No address provided - mark for reverse geocoding after Maps loads

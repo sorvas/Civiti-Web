@@ -29,6 +29,10 @@ export interface LocationPickerConfig {
   };
   /** Initial address to display */
   initialAddress?: string;
+  /** Initial city to preserve when user confirms without changes */
+  initialCity?: string;
+  /** Initial district to preserve when user confirms without changes */
+  initialDistrict?: string;
 }
 
 /**

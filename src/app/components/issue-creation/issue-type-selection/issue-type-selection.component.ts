@@ -148,7 +148,9 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
       nzData: {
         config: {
           initialLocation: this.currentLocation?.coordinates,
-          initialAddress: this.currentLocation?.address
+          initialAddress: this.currentLocation?.address,
+          initialCity: this.currentLocation?.city,
+          initialDistrict: this.currentLocation?.district
         }
       },
       nzFooter: null // Footer is in the component
