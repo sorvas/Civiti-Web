@@ -250,8 +250,8 @@ export class AuthoritySelectionComponent implements OnInit, OnDestroy {
   }
 
   filterAuthorities(): void {
-    // Use server-side search with debounce
-    this.isSearching = true;
+    // Push to subject - isSearching is set in tap() after debounce
+    // to avoid stuck spinner when distinctUntilChanged blocks
     this.searchSubject$.next(this.searchTerm);
   }
 
