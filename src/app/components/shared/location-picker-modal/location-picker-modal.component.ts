@@ -451,10 +451,46 @@ export class LocationPickerModalComponent implements OnInit, AfterViewInit, OnDe
   }
 
   /**
-   * Check if location is valid (has been selected)
+   * Check if location is valid (has been selected AND is in Sector 5 for MVP)
    */
   isLocationValid(): boolean {
-    return this.selectedLocation !== null && this.markerPosition !== null;
+    return this.selectedLocation !== null &&
+           this.markerPosition !== null &&
+           this.isInAllowedArea();
+  }
+
+  /**
+   * Check if selected location is within allowed area (Sector 5 for MVP)
+   */
+  isInAllowedArea(): boolean {
+    if (!this.selectedLocation) {
+      return false;
+    }
+    // For MVP, only Sector 5 is allowed
+    const district = this.selectedLocation.district;
+    if (!district) {
+      // No district info - check if city is București (might be edge of sector)
+      // Be permissive if we can't determine district but it's in București
+      return this.selectedLocation.city === 'București';
+    }
+    return district === 'Sector 5';
+  }
+
+  /**
+   * Get validation message for location restriction
+   */
+  getLocationRestrictionMessage(): string | null {
+    if (!this.selectedLocation) {
+      return null;
+    }
+    if (!this.isInAllowedArea()) {
+      const district = this.selectedLocation.district;
+      if (district) {
+        return `Locația selectată este în ${district}. Pentru MVP, acceptăm doar adrese din Sectorul 5.`;
+      }
+      return 'Nu am putut determina sectorul. Vă rugăm să selectați o adresă din Sectorul 5.';
+    }
+    return null;
   }
 
   /**

@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { takeUntil, debounceTime, distinctUntilChanged, switchMap, tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { Subject, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, tap, catchError } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -83,9 +83,16 @@ interface IssueCategoryInfo {
   templateUrl: './authority-selection.component.html',
   styleUrls: ['./authority-selection.component.scss']
 })
-export class AuthoritySelectionComponent implements OnInit, OnDestroy {
-  private destroy$ = new Subject<void>();
-  private searchSubject$ = new Subject<string>();
+export class AuthoritySelectionComponent implements OnInit {
+  // Angular 19+ inject pattern
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly message = inject(NzMessageService);
+  private readonly apiService = inject(ApiService);
+
+  // Unified stream for all authority requests (initial load + search)
+  private readonly loadTrigger$ = new Subject<string>();
 
   // Data from previous steps
   selectedCategory: IssueCategoryInfo | null = null;
@@ -111,61 +118,57 @@ export class AuthoritySelectionComponent implements OnInit, OnDestroy {
   readonly MAX_AUTHORITIES = 5;
   readonly MIN_AUTHORITIES = 1;
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router,
-    private message: NzMessageService,
-    private apiService: ApiService
-  ) {
+  constructor() {
     this.initializeForm();
+    this.setupAuthorityStream();
   }
 
   ngOnInit(): void {
-    this.setupSearchSubscription();
     const hasRequiredData = this.loadSessionData();
     if (hasRequiredData) {
-      this.loadAuthorities();
+      // Trigger initial load through unified stream
+      this.loadTrigger$.next('');
     }
   }
 
-  private setupSearchSubscription(): void {
-    this.searchSubject$
+  /**
+   * Unified stream for all authority requests.
+   * Uses switchMap to automatically cancel in-flight requests when new ones arrive.
+   * Both initial load and search go through this single stream.
+   */
+  private setupAuthorityStream(): void {
+    this.loadTrigger$
       .pipe(
+        tap(search => {
+          this.isLoadingAuthorities = true;
+          this.isSearching = search.length > 0;
+        }),
         debounceTime(300),
         distinctUntilChanged(),
-        tap(() => {
-          this.isLoadingAuthorities = true;
-          this.isSearching = true;
-        }),
-        switchMap(searchTerm => {
+        switchMap(search => {
           const params = {
             city: this.issueCity,
             district: this.issueDistrict || undefined,
-            search: searchTerm.trim() || undefined
+            search: search.trim() || undefined
           };
-          console.log('[AUTHORITY SELECTION] Searching authorities with params:', params);
+          console.log('[AUTHORITY SELECTION] Loading authorities with params:', params);
           return this.apiService.getAuthorities(params).pipe(
             catchError(error => {
-              console.error('[AUTHORITY SELECTION] Search failed:', error);
+              console.error('[AUTHORITY SELECTION] Failed to load authorities:', error);
               this.message.warning('Nu s-au putut încărca autoritățile. Poți adăuga manual.');
               return of([]);
             })
           );
         }),
-        takeUntil(this.destroy$)
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(authorities => {
-        console.log('[AUTHORITY SELECTION] Search results:', authorities);
+        console.log('[AUTHORITY SELECTION] Loaded authorities:', authorities);
         this.availableAuthorities = authorities;
         this.filteredAuthorities = [...authorities];
         this.isLoadingAuthorities = false;
         this.isSearching = false;
       });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private initializeForm(): void {
@@ -216,43 +219,9 @@ export class AuthoritySelectionComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  private loadAuthorities(search?: string): void {
-    this.isLoadingAuthorities = true;
-
-    // Build query params for location-based filtering
-    const params = {
-      city: this.issueCity,
-      district: this.issueDistrict || undefined,
-      search: search || undefined
-    };
-
-    console.log('[AUTHORITY SELECTION] Loading authorities with params:', params);
-
-    this.apiService.getAuthorities(params)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (authorities) => {
-          console.log('[AUTHORITY SELECTION] Loaded authorities from server:', authorities);
-          this.availableAuthorities = authorities;
-          this.filteredAuthorities = [...authorities];
-          this.isLoadingAuthorities = false;
-          this.isSearching = false;
-        },
-        error: (error) => {
-          console.error('[AUTHORITY SELECTION] Failed to load authorities:', error);
-          this.message.warning('Nu s-au putut încărca autoritățile. Poți adăuga manual.');
-          this.availableAuthorities = [];
-          this.filteredAuthorities = [];
-          this.isLoadingAuthorities = false;
-          this.isSearching = false;
-        }
-      });
-  }
-
   filterAuthorities(): void {
-    // Push to subject - isSearching is set in tap() after debounce
-    // to avoid stuck spinner when distinctUntilChanged blocks
-    this.searchSubject$.next(this.searchTerm);
+    // Trigger search through unified stream
+    this.loadTrigger$.next(this.searchTerm);
   }
 
   /**

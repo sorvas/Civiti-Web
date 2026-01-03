@@ -89,6 +89,23 @@
     flex-shrink: 0;
   }
 
+  .warning-icon {
+    color: #faad14;
+    font-size: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .location-card.invalid-location {
+    border-color: #faad14;
+    background: rgba(250, 173, 20, 0.05);
+  }
+
+  .restriction-alert {
+    margin-top: 12px;
+    border-radius: 8px;
+  }
+
   .location-text {
     flex: 1;
 
@@ -101,9 +118,6 @@
   }
 
   .district-tag {
-    background: var(--orange-web, #fca311);
-    color: var(--white, #ffffff);
-    border: none;
     font-weight: 600;
   }
 

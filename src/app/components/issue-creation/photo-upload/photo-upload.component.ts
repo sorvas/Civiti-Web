@@ -1,4 +1,14 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  AfterViewInit,
+  inject,
+  PLATFORM_ID,
+  ChangeDetectorRef,
+  afterNextRender,
+  Injector
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, from, merge, of } from 'rxjs';
@@ -66,9 +76,10 @@ interface PhotoData {
   styleUrls: ['./photo-upload.component.scss']
 })
 export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
-  private _platformId = inject(PLATFORM_ID);
-  private _cdr = inject(ChangeDetectorRef);
-  private destroy$ = new Subject<void>();
+  private readonly _platformId = inject(PLATFORM_ID);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _injector = inject(Injector);
+  private readonly destroy$ = new Subject<void>();
   private currentUserId: string | null = null;
 
   // Track ongoing uploads for cancellation (prevents orphaned files)
@@ -76,6 +87,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // GLightbox instance for photo gallery
   private _lightbox: any;
+  private _galleryInitPromise: Promise<void> | null = null;
+  private _galleryNeedsRefresh = false;
 
   // Compression settings for optimal storage/quality balance
   private readonly compressionOptions = {
@@ -129,7 +142,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Initialize GLightbox after view is ready (only in browser)
     if (isPlatformBrowser(this._platformId)) {
-      this.initializeGallery();
+      this._galleryInitPromise = this.initializeGallery();
     }
   }
 
@@ -182,9 +195,42 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Refresh GLightbox after photos are added/removed
+   * Schedule gallery refresh after next render cycle.
+   * Uses Angular's afterNextRender for proper integration with change detection.
    */
-  refreshGallery(): void {
+  scheduleGalleryRefresh(): void {
+    if (!isPlatformBrowser(this._platformId)) {
+      return;
+    }
+
+    // Prevent multiple scheduled refreshes
+    if (this._galleryNeedsRefresh) {
+      return;
+    }
+
+    this._galleryNeedsRefresh = true;
+
+    // Use Angular's afterNextRender to wait for DOM to be updated
+    afterNextRender(async () => {
+      this._galleryNeedsRefresh = false;
+      await this.executeGalleryRefresh();
+    }, { injector: this._injector });
+  }
+
+  /**
+   * Execute the actual gallery refresh.
+   * Awaits initialization to prevent race condition with dynamic import.
+   */
+  private async executeGalleryRefresh(): Promise<void> {
+    // Wait for GLightbox to be initialized
+    if (this._galleryInitPromise) {
+      await this._galleryInitPromise;
+    } else if (!this._lightbox) {
+      // Edge case: called before ngAfterViewInit - initialize now
+      this._galleryInitPromise = this.initializeGallery();
+      await this._galleryInitPromise;
+    }
+
     if (this._lightbox) {
       this._lightbox.reload();
     }
@@ -234,8 +280,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
           this.uploadedPhotos = photos.filter(photo => photo.storagePath);
           console.log('[PHOTO UPLOAD] Restored photos from session:', this.uploadedPhotos.length);
 
-          // Refresh GLightbox after restoring photos
-          setTimeout(() => this.refreshGallery(), 100);
+          // Schedule gallery refresh after Angular renders the restored photos
+          this.scheduleGalleryRefresh();
         }
       } catch (e) {
         console.warn('[PHOTO UPLOAD] Failed to parse saved photos:', e);
@@ -389,8 +435,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
             // Save to sessionStorage for back navigation support
             this.savePhotosToSession();
 
-            // Refresh GLightbox to include the new photo
-            setTimeout(() => this.refreshGallery(), 100);
+            // Schedule gallery refresh after Angular renders the new photo
+            this.scheduleGalleryRefresh();
 
             return of(result);
           }),
@@ -539,8 +585,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     // Save updated state to sessionStorage
     this.savePhotosToSession();
 
-    // Refresh GLightbox to update the gallery
-    setTimeout(() => this.refreshGallery(), 100);
+    // Schedule gallery refresh after Angular updates the DOM
+    this.scheduleGalleryRefresh();
 
     // If photo was uploaded to storage, delete it (with automatic retry)
     if (photo.storagePath) {
