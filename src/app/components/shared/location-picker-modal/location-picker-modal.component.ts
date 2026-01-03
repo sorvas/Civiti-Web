@@ -90,8 +90,7 @@ export class LocationPickerModalComponent implements OnInit, AfterViewInit, OnDe
   };
 
   markerOptions: google.maps.MarkerOptions = {
-    draggable: true,
-    animation: google.maps.Animation?.DROP
+    draggable: true
   };
 
   // Autocomplete state
