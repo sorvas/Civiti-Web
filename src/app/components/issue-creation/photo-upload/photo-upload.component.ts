@@ -551,14 +551,33 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * Handle direct clicks on gallery item anchors.
+   * If GLightbox is ready, let it intercept; otherwise prevent navigation and open in new tab.
+   */
+  onGalleryItemClick(event: Event, photo: PhotoData): void {
+    if (!this._lightbox) {
+      // Prevent anchor navigation when GLightbox not ready
+      event.preventDefault();
+      window.open(photo.url, '_blank');
+    }
+    // If _lightbox exists, let the event propagate for GLightbox to handle
+  }
+
   viewPhoto(photo: PhotoData, index: number): void {
     console.log('[PHOTO UPLOAD] View photo:', photo.id);
-    // GLightbox handles opening the photo via the anchor element
-    // This method triggers a click on the gallery item to open the lightbox
-    const galleryItem = document.querySelector(`#photo-gallery-${index}`) as HTMLElement;
-    if (galleryItem) {
-      galleryItem.click();
+
+    // If GLightbox is initialized, trigger it via the anchor element
+    if (this._lightbox) {
+      const galleryItem = document.querySelector(`#photo-gallery-${index}`) as HTMLElement;
+      if (galleryItem) {
+        galleryItem.click();
+        return;
+      }
     }
+
+    // Fallback: open in new tab if GLightbox not ready (prevents navigation away)
+    window.open(photo.url, '_blank');
   }
 
   removePhoto(index: number): void {
