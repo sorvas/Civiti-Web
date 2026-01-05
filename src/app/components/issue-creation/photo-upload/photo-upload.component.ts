@@ -7,12 +7,14 @@ import {
   PLATFORM_ID,
   ChangeDetectorRef,
   afterNextRender,
-  Injector
+  Injector,
+  DestroyRef
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, from, merge, of } from 'rxjs';
 import { takeUntil, switchMap, catchError, finalize, toArray } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -79,7 +81,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _platformId = inject(PLATFORM_ID);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _injector = inject(Injector);
-  private readonly destroy$ = new Subject<void>();
+  private readonly _destroyRef = inject(DestroyRef);
+  private _isDestroyed = false;
   private currentUserId: string | null = null;
 
   // Track ongoing uploads for cancellation (prevents orphaned files)
@@ -127,7 +130,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     // Use getCurrentUserOnceReady to wait for initial auth check to complete
     // This prevents race condition where BehaviorSubject emits null before session is loaded
     this.authService.getCurrentUserOnceReady()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(user => {
         if (user) {
           this.currentUserId = user.id;
@@ -147,6 +150,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._isDestroyed = true;
+
     // Cancel all ongoing uploads to prevent orphaned files
     this.ongoingUploads.forEach((cancel$, photoId) => {
       console.log('[PHOTO UPLOAD] Cancelling upload on destroy:', photoId);
@@ -160,9 +165,6 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
       this._lightbox.destroy();
       this._lightbox = null;  // Clear reference to prevent calls on destroyed instance
     }
-
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   /**
@@ -176,6 +178,11 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       // Dynamically import GLightbox to avoid SSR issues
       const GLightbox = (await import('glightbox')).default;
+
+      // Guard against initialization after component destruction
+      if (this._isDestroyed) {
+        return;
+      }
 
       this._lightbox = GLightbox({
         selector: '.photo-gallery-item',
@@ -223,6 +230,11 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
    * Awaits initialization to prevent race condition with dynamic import.
    */
   private async executeGalleryRefresh(): Promise<void> {
+    // Guard against execution after component destruction
+    if (this._isDestroyed) {
+      return;
+    }
+
     // Wait for GLightbox to be initialized
     if (this._galleryInitPromise) {
       await this._galleryInitPromise;
@@ -230,6 +242,11 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
       // Edge case: called before ngAfterViewInit - initialize now
       this._galleryInitPromise = this.initializeGallery();
       await this._galleryInitPromise;
+    }
+
+    // Re-check after async operations in case component was destroyed while waiting
+    if (this._isDestroyed) {
+      return;
     }
 
     if (this._lightbox) {
@@ -325,7 +342,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     // merge lets each upload complete independently, preventing orphaned files
     merge(...uploadObservables)
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this._destroyRef),
         toArray(),  // Wait for all to complete
         finalize(() => {
           this.isUploading = false;
@@ -404,7 +421,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
               // Photo was removed during upload - delete orphaned file from storage
               console.log('[PHOTO UPLOAD] Photo removed during upload, cleaning up storage:', result.path);
               this.storageService.deletePhotoWithRetry(result.path)
-                .pipe(takeUntil(this.destroy$))
+                .pipe(takeUntilDestroyed(this._destroyRef))
                 .subscribe({
                   next: () => console.log('[PHOTO UPLOAD] Orphaned file cleaned up:', result.path),
                   error: (err) => console.error('[PHOTO UPLOAD] Failed to clean up orphaned file:', err)
@@ -611,7 +628,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     // If photo was uploaded to storage, delete it (with automatic retry)
     if (photo.storagePath) {
       this.storageService.deletePhotoWithRetry(photo.storagePath)
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe({
           next: () => {
             console.log('[PHOTO UPLOAD] Photo deleted from storage:', photo.storagePath);
