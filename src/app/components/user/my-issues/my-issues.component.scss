@@ -153,6 +153,29 @@
   }
 }
 
+// Error State
+.error-state {
+  padding: 48px 24px;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+
+  nz-alert {
+    text-align: left;
+  }
+
+  .retry-button {
+    margin-top: 16px;
+    background: var(--orange-web);
+    border-color: var(--orange-web);
+
+    &:hover {
+      background: #e59400;
+      border-color: #e59400;
+    }
+  }
+}
+
 // Empty State
 .empty-state {
   padding: 48px 24px;

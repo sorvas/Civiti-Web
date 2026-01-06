@@ -84,8 +84,22 @@
       </nz-col>
     </nz-row>
 
+    <!-- Error State -->
+    <div *ngIf="!(isLoading$ | async) && (error$ | async) as error" class="error-state">
+      <nz-alert
+        nzType="error"
+        nzMessage="Eroare la încărcarea problemelor"
+        [nzDescription]="error"
+        nzShowIcon>
+      </nz-alert>
+      <button nz-button nzType="primary" (click)="retryLoad()" class="retry-button">
+        <i nz-icon nzType="reload" nzTheme="outline"></i>
+        Încearcă din nou
+      </button>
+    </div>
+
     <!-- Empty State -->
-    <div *ngIf="!(isLoading$ | async) && ((issues$ | async)?.length || 0) === 0" class="empty-state">
+    <div *ngIf="!(isLoading$ | async) && !(error$ | async) && ((issues$ | async)?.length || 0) === 0" class="empty-state">
       <nz-empty
         nzNotFoundImage="simple"
         [nzNotFoundContent]="emptyContent"

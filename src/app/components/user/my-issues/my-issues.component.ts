@@ -18,6 +18,7 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 
 import { AppState } from '../../../store/app.state';
 import * as UserIssuesActions from '../../../store/user-issues/user-issues.actions';
@@ -47,7 +48,8 @@ import {
     NzStatisticModule,
     NzSegmentedModule,
     NzModalModule,
-    NzToolTipModule
+    NzToolTipModule,
+    NzAlertModule
   ],
   templateUrl: './my-issues.component.html',
   styleUrls: ['./my-issues.component.scss']
@@ -201,5 +203,9 @@ export class MyIssuesComponent implements OnInit, OnDestroy {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = '/images/placeholders/issue-placeholder.svg';
+  }
+
+  retryLoad(): void {
+    this.store.dispatch(UserIssuesActions.loadUserIssues({}));
   }
 }

@@ -86,21 +86,25 @@ export class EditIssueComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Load current user
+    // Load current user first, then load issue
     this.authService.getCurrentUserOnceReady()
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         if (user) {
           this.currentUserId = user.id;
+          // Now that we have the user, check for issue ID and load
+          this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+            this.issueId = params['id'];
+            if (this.issueId) {
+              this.loadIssue();
+            }
+          });
+        } else {
+          // Not authenticated
+          this.isLoading = false;
+          this.loadError = 'Trebuie să fiți autentificat pentru a edita o problemă.';
         }
       });
-
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.issueId = params['id'];
-      if (this.issueId) {
-        this.loadIssue();
-      }
-    });
   }
 
   ngOnDestroy(): void {
@@ -114,14 +118,22 @@ export class EditIssueComponent implements OnInit, OnDestroy {
 
     this.apiService.getIssueById(this.issueId).subscribe({
       next: (issue) => {
-        this.issue = issue;
         this.isLoading = false;
+
+        // Check ownership - user can only edit their own issues
+        if (issue.user.id !== this.currentUserId) {
+          this.loadError = 'Nu aveți permisiunea de a edita această problemă.';
+          return;
+        }
 
         // Check if issue can be edited (only Rejected status)
         if (issue.status.toLowerCase() !== 'rejected') {
           this.loadError = 'Doar problemele respinse pot fi editate.';
           return;
         }
+
+        // All checks passed - populate the form
+        this.issue = issue;
 
         // Populate form
         this.editForm.patchValue({
@@ -143,7 +155,7 @@ export class EditIssueComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('[EditIssue] Failed to load issue:', error);
         this.isLoading = false;
-        this.loadError = 'Nu am putut incarca problema. Incearca din nou.';
+        this.loadError = 'Nu am putut încărca problema. Încercați din nou.';
       }
     });
   }
