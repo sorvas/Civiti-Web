@@ -162,21 +162,25 @@ export class EditIssueComponent implements OnInit, OnDestroy {
 
   // Photo upload handling
   beforeUpload = (file: NzUploadFile): boolean => {
-    // For now, we'll handle photo uploads similarly to the photo-upload component
-    // This is a simplified version - in production you'd upload to storage
+    // Check photo limit (max 5 photos)
+    if (this.photoList.length >= 5) {
+      this.message.warning('Maxim 5 fotografii permise. Ștergeți una pentru a adăuga alta.');
+      return false;
+    }
+
     const isImage = file.type?.startsWith('image/');
     if (!isImage) {
-      this.message.error('Poti incarca doar imagini!');
+      this.message.error('Poți încărca doar imagini!');
       return false;
     }
 
     const isLt5M = (file.size || 0) / 1024 / 1024 < 5;
     if (!isLt5M) {
-      this.message.error('Imaginea trebuie sa fie mai mica de 5MB!');
+      this.message.error('Imaginea trebuie să fie mai mică de 5MB!');
       return false;
     }
 
-    // Add to list (in real implementation, upload to storage first)
+    // Add to list
     this.photoList = [...this.photoList, file];
     return false; // Prevent auto upload
   };
