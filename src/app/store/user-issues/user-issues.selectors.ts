@@ -34,7 +34,9 @@ export const selectTotalCount = createSelector(
 );
 
 // Helper: Normalize status to handle case differences from backend
-const normalizeStatus = (status: string): IssueStatus => {
+const normalizeStatus = (status: string | null | undefined): IssueStatus => {
+  if (!status) return 'Unspecified';
+
   const statusMap: Record<string, IssueStatus> = {
     'unspecified': 'Unspecified',
     'draft': 'Draft',
