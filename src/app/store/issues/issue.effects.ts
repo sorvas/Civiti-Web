@@ -21,14 +21,17 @@ export class IssueEffects {
       ofType(IssueActions.loadIssues),
       mergeMap(({ params }) =>
         this.apiService.getIssues(params).pipe(
-          map(response => IssueActions.loadIssuesSuccess({ 
+          map(response => IssueActions.loadIssuesSuccess({
             issues: response.items,
-            totalCount: response.totalCount 
+            totalItems: response.totalItems,
+            page: response.page,
+            pageSize: response.pageSize,
+            totalPages: response.totalPages
           })),
           catchError(error => {
             console.error('[Issues Effects] Failed to load issues:', error);
-            return of(IssueActions.loadIssuesFailure({ 
-              error: error.message || 'Failed to load issues' 
+            return of(IssueActions.loadIssuesFailure({
+              error: error.message || 'Failed to load issues'
             }));
           })
         )

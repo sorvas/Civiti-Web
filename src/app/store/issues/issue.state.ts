@@ -7,6 +7,11 @@ export interface IssueState extends EntityState<IssueItem> {
   loading: boolean;
   error: string | null;
   sortBy: 'date' | 'emails' | 'urgency';
+  // Pagination
+  currentPage: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 export const issueAdapter: EntityAdapter<IssueItem> = createEntityAdapter<IssueItem>({
@@ -19,5 +24,10 @@ export const initialIssueState: IssueState = issueAdapter.getInitialState({
   selectedIssueDetail: null,
   loading: false,
   error: null,
-  sortBy: 'date'
+  sortBy: 'date',
+  // Pagination defaults
+  currentPage: 1,
+  pageSize: 12,
+  totalItems: 0,
+  totalPages: 0
 });

@@ -23,7 +23,7 @@ export class UserIssuesEffects {
         return this.apiService.getUserIssues(params).pipe(
           map(response => UserIssuesActions.loadUserIssuesSuccess({
             issues: response.items,
-            totalCount: response.totalCount
+            totalCount: response.totalItems
           })),
           catchError(error => {
             console.error('[UserIssues Effects] Failed to load user issues:', error);

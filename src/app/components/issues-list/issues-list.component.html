@@ -7,8 +7,13 @@
           <h2 class="text-oxford-blue font-semibold text-lg mb-2">
             {{ (totalIssues$ | async) || 0 }} probleme documentate
           </h2>
-          <p class="text-oxford-blue opacity-75 text-sm">
-            Alege o problemă și ajută la rezolvarea ei prin trimiterea unui email către autorități
+          <p class="text-oxford-blue opacity-75 text-sm" *ngIf="paginationInfo$ | async as pagination">
+            <span *ngIf="pagination.totalCount > 0">
+              Se afișează {{ pagination.startItem }}-{{ pagination.endItem }} din {{ pagination.totalCount }} probleme
+            </span>
+            <span *ngIf="pagination.totalCount === 0">
+              Alege o problemă și ajută la rezolvarea ei prin trimiterea unui email către autorități
+            </span>
           </p>
         </nz-col>
         
@@ -120,7 +125,7 @@
 
     <!-- Empty State -->
     <div *ngIf="!(isLoading$ | async) && ((issues$ | async)?.length || 0) === 0">
-      <nz-empty 
+      <nz-empty
         nzNotFoundContent="Nu au fost găsite probleme"
         [nzNotFoundFooter]="emptyFooter">
       </nz-empty>
@@ -129,6 +134,28 @@
           Încearcă să schimbi criteriile de sortare sau revino mai târziu.
         </p>
       </ng-template>
+    </div>
+
+    <!-- Pagination Section -->
+    <div *ngIf="!(isLoading$ | async) && (paginationInfo$ | async) as pagination"
+         class="pagination-container mt-8 mb-20">
+      <div *ngIf="pagination.totalPages > 1"
+           class="bg-white rounded-lg shadow-sm border border-platinum p-4">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <!-- Pagination Component -->
+          <nz-pagination
+            [nzPageIndex]="pagination.currentPage"
+            [nzTotal]="pagination.totalCount"
+            [nzPageSize]="pagination.pageSize"
+            (nzPageIndexChange)="onPageChange($event)">
+          </nz-pagination>
+
+          <!-- Total pages info -->
+          <p class="text-oxford-blue opacity-60 text-sm">
+            Pagina {{ pagination.currentPage }} din {{ pagination.totalPages }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <!-- Create Issue Button - requires authentication -->

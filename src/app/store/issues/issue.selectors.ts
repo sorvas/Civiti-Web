@@ -38,6 +38,43 @@ export const selectSelectedIssue = createSelector(
   (state: IssueState) => state.selectedIssueDetail
 );
 
+// Pagination selectors
+export const selectCurrentPage = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.currentPage
+);
+
+export const selectPageSize = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.pageSize
+);
+
+export const selectTotalItems = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.totalItems
+);
+
+export const selectTotalPages = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.totalPages
+);
+
+// Combined pagination info for template
+export const selectPaginationInfo = createSelector(
+  selectCurrentPage,
+  selectPageSize,
+  selectTotalItems,
+  selectTotalPages,
+  (currentPage, pageSize, totalItems, totalPages) => ({
+    currentPage,
+    pageSize,
+    totalCount: totalItems,
+    totalPages,
+    startItem: totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0,
+    endItem: Math.min(currentPage * pageSize, totalItems)
+  })
+);
+
 // Sorted issues selector
 export const selectSortedIssues = createSelector(
   selectAll,
