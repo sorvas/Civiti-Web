@@ -12,11 +12,15 @@ export const issueReducer = createReducer(
     error: null
   })),
   
-  on(IssueActions.loadIssuesSuccess, (state, { issues, totalCount }) => 
+  on(IssueActions.loadIssuesSuccess, (state, { issues, totalItems, page, pageSize, totalPages }) =>
     issueAdapter.setAll(issues, {
       ...state,
       loading: false,
-      error: null
+      error: null,
+      currentPage: page,
+      pageSize: pageSize,
+      totalItems: totalItems,
+      totalPages: totalPages
     })
   ),
   
@@ -53,10 +57,11 @@ export const issueReducer = createReducer(
     selectedIssueId: id
   })),
   
-  // Change Sort
+  // Change Sort - reset to page 1
   on(IssueActions.changeSortBy, (state, { sortBy }) => ({
     ...state,
-    sortBy
+    sortBy,
+    currentPage: 1
   })),
   
   // Track Email Sent

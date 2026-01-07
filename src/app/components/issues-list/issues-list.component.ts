@@ -1,7 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, inject, OnInit, OnDestroy, DestroyRef } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject } from 'rxjs';
+import { takeUntil, map, distinctUntilChanged } from 'rxjs/operators';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -13,6 +15,7 @@ import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable, take } from 'rxjs';
@@ -41,16 +44,19 @@ import { StatusTextPipe, StatusColorPipe } from '../../pipes/status.pipe';
     NzEmptyModule,
     NzToolTipModule,
     NzModalModule,
+    NzPaginationModule,
     StatusTextPipe,
     StatusColorPipe,
   ],
   templateUrl: './issues-list.component.html',
   styleUrl: './issues-list.component.scss'
 })
-export class IssuesListComponent implements OnInit {
+export class IssuesListComponent implements OnInit, OnDestroy {
   private _router = inject(Router);
+  private _route = inject(ActivatedRoute);
   private _store = inject(Store<AppState>);
   private _modal = inject(NzModalService);
+  private _destroy$ = new Subject<void>();
   private _imageErrorCount: Map<string, number> = new Map();
 
   issues$!: Observable<IssueItem[]>;
@@ -59,16 +65,26 @@ export class IssuesListComponent implements OnInit {
   sortBy$!: Observable<string>;
   totalIssues$!: Observable<number>;
   isAuthenticated$!: Observable<boolean>;
+  paginationInfo$!: Observable<{
+    currentPage: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+    startItem: number;
+    endItem: number;
+  }>;
 
   sortBy = 'date';
+  readonly PAGE_SIZE = 12;
 
   constructor() {
     this.issues$ = this._store.select(IssueSelectors.selectSortedIssues);
     this.isLoading$ = this._store.select(IssueSelectors.selectIssuesLoading);
     this.error$ = this._store.select(IssueSelectors.selectIssuesError);
     this.sortBy$ = this._store.select(IssueSelectors.selectSortBy);
-    this.totalIssues$ = this._store.select(IssueSelectors.selectTotal);
+    this.totalIssues$ = this._store.select(IssueSelectors.selectTotalItems);
     this.isAuthenticated$ = this._store.select(selectIsAuthenticated);
+    this.paginationInfo$ = this._store.select(IssueSelectors.selectPaginationInfo);
 
     // Sync local sortBy with store state using takeUntilDestroyed (Angular 19 best practice)
     this.sortBy$
@@ -81,14 +97,86 @@ export class IssuesListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load issues without filters initially
-    this._store.dispatch(IssueActions.loadIssues({ params: undefined }));
+    // Listen to URL query params and sync with store
+    this._route.queryParams
+      .pipe(
+        takeUntil(this._destroy$),
+        map(params => {
+          let page = params['page'] ? parseInt(params['page'], 10) : 1;
+          // Validate page number
+          if (isNaN(page) || page < 1) {
+            page = 1;
+          }
+          return {
+            page,
+            sortBy: params['sortBy'] || 'date'
+          };
+        }),
+        distinctUntilChanged((prev, curr) =>
+          prev.page === curr.page && prev.sortBy === curr.sortBy
+        )
+      )
+      .subscribe(({ page, sortBy }) => {
+        // Update local sortBy if different
+        if (sortBy !== this.sortBy) {
+          this.sortBy = sortBy;
+          this._store.dispatch(IssueActions.changeSortBy({
+            sortBy: sortBy as 'date' | 'emails' | 'urgency'
+          }));
+        }
+
+        // Load issues with pagination params
+        this._store.dispatch(IssueActions.loadIssues({
+          params: {
+            page,
+            pageSize: this.PAGE_SIZE,
+            ...this.getSortParams(sortBy)
+          }
+        }));
+      });
+  }
+
+  ngOnDestroy(): void {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  onPageChange(page: number): void {
+    // Update URL - this will trigger the queryParams subscription
+    this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: { page },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  private getSortParams(sortBy: string): { sortBy?: string; sortDescending?: boolean } {
+    switch (sortBy) {
+      case 'emails':
+        return { sortBy: 'emailsSent', sortDescending: true };
+      case 'urgency':
+        return { sortBy: 'urgency', sortDescending: true };
+      case 'date':
+      default:
+        return { sortBy: 'createdAt', sortDescending: true };
+    }
   }
 
   onSortChange(): void {
+    // Dispatch sort change to store first
     this._store.dispatch(IssueActions.changeSortBy({
       sortBy: this.sortBy as 'date' | 'emails' | 'urgency'
     }));
+
+    // Update URL with new sort and reset to page 1
+    this._router.navigate([], {
+      relativeTo: this._route,
+      queryParams: {
+        page: 1,
+        sortBy: this.sortBy
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
   getUrgencyLevel(issue: IssueItem): 'urgent' | 'normal' {

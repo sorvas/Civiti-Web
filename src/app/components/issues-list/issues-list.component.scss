@@ -144,3 +144,80 @@ nz-tag.priority-urgent,
     padding: 1rem;
   }
 }
+
+// Pagination styling
+.pagination-control {
+  ::ng-deep {
+    .ant-pagination-item {
+      border-color: var(--platinum);
+
+      &:hover {
+        border-color: var(--orange-web);
+
+        a {
+          color: var(--orange-web);
+        }
+      }
+
+      a {
+        color: var(--oxford-blue);
+      }
+    }
+
+    .ant-pagination-item-active {
+      background-color: var(--orange-web);
+      border-color: var(--orange-web);
+
+      a {
+        color: var(--white);
+      }
+
+      &:hover {
+        border-color: var(--orange-web);
+
+        a {
+          color: var(--white);
+        }
+      }
+    }
+
+    .ant-pagination-prev,
+    .ant-pagination-next {
+      .ant-pagination-item-link {
+        border-color: var(--platinum);
+        color: var(--oxford-blue);
+
+        &:hover {
+          border-color: var(--orange-web);
+          color: var(--orange-web);
+        }
+      }
+    }
+
+    .ant-pagination-disabled {
+      .ant-pagination-item-link {
+        color: var(--platinum);
+        border-color: var(--platinum);
+      }
+    }
+
+    .ant-pagination-jump-prev,
+    .ant-pagination-jump-next {
+      .ant-pagination-item-link-icon {
+        color: var(--orange-web);
+      }
+    }
+
+    .ant-pagination-options-quick-jumper {
+      input {
+        border-color: var(--platinum);
+        color: var(--oxford-blue);
+
+        &:hover,
+        &:focus {
+          border-color: var(--orange-web);
+        }
+      }
+    }
+  }
+}

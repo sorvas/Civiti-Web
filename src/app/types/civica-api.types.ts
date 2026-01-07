@@ -280,7 +280,7 @@ export interface IssueItem {
 
 export interface PagedResult<T> {
   items: T[];
-  totalCount: number;
+  totalItems: number;
   page: number;
   pageSize: number;
   totalPages: number;

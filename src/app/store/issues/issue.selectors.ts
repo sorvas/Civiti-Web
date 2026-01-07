@@ -38,32 +38,42 @@ export const selectSelectedIssue = createSelector(
   (state: IssueState) => state.selectedIssueDetail
 );
 
-// Sorted issues selector
-export const selectSortedIssues = createSelector(
-  selectAll,
-  selectSortBy,
-  (issues: IssueItem[], sortBy: string): IssueItem[] => {
-    if (!issues?.length) return [];
-
-    return [...issues].sort((a, b) => {
-      switch (sortBy) {
-        case 'emails':
-          return (b.emailsSent || 0) - (a.emailsSent || 0);
-        case 'urgency':
-          return getUrgencyScore(b) - getUrgencyScore(a);
-        case 'date':
-        default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-    });
-  }
+// Pagination selectors
+export const selectCurrentPage = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.currentPage
 );
 
-// Helper function for urgency calculation
-function getUrgencyScore(issue: IssueItem): number {
-  const daysSince = Math.ceil(
-    Math.abs(new Date().getTime() - new Date(issue.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const emailRatio = (issue.emailsSent || 0) / 100;
-  return emailRatio + (daysSince / 10);
-}
+export const selectPageSize = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.pageSize
+);
+
+export const selectTotalItems = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.totalItems
+);
+
+export const selectTotalPages = createSelector(
+  selectIssueState,
+  (state: IssueState) => state.totalPages
+);
+
+// Combined pagination info for template
+export const selectPaginationInfo = createSelector(
+  selectCurrentPage,
+  selectPageSize,
+  selectTotalItems,
+  selectTotalPages,
+  (currentPage, pageSize, totalItems, totalPages) => ({
+    currentPage,
+    pageSize,
+    totalCount: totalItems,
+    totalPages,
+    startItem: totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0,
+    endItem: Math.min(currentPage * pageSize, totalItems)
+  })
+);
+
+// Issues selector - server handles sorting, so just return as-is
+export const selectSortedIssues = selectAll;

@@ -9,7 +9,13 @@ export const loadIssues = createAction(
 
 export const loadIssuesSuccess = createAction(
   '[Issues] Load Issues Success',
-  props<{ issues: IssueItem[], totalCount: number }>()
+  props<{
+    issues: IssueItem[];
+    totalItems: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }>()
 );
 
 export const loadIssuesFailure = createAction(
