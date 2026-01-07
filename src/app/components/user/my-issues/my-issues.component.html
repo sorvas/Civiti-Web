@@ -10,8 +10,9 @@
     </div>
 
     <!-- Issues Grid -->
-    <nz-row [nzGutter]="[16, 16]" *ngIf="(issues$ | async) as issues">
-      <nz-col *ngFor="let issue of issues" [nzXs]="24" [nzMd]="12" [nzLg]="8">
+    <ng-container *ngIf="(issues$ | async) as issues">
+      <nz-row [nzGutter]="[16, 16]" *ngIf="issues.length > 0">
+        <nz-col *ngFor="let issue of issues" [nzXs]="24" [nzMd]="12" [nzLg]="8">
         <nz-card class="issue-card" [class.cancelled]="isCancelled(issue.status)" [nzCover]="coverTemplate">
           <!-- Card Cover -->
           <ng-template #coverTemplate>
@@ -82,7 +83,8 @@
           </div>
         </nz-card>
       </nz-col>
-    </nz-row>
+      </nz-row>
+    </ng-container>
 
     <!-- Error State -->
     <div *ngIf="!(isLoading$ | async) && (error$ | async) as error" class="error-state">
