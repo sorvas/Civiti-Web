@@ -1,17 +1,17 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, take, withLatestFrom } from 'rxjs/operators';
+import { filter, map, take, withLatestFrom } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {
   selectCanAccessAdminPanel,
   selectIsAuthenticated,
-  selectAuthUser,
-  selectUserRole
+  selectIsAuthInitialized
 } from '../store/auth/auth.selectors';
 
 /**
  * Guard that requires user to have admin role.
+ * Waits for auth initialization before evaluating.
  * Redirects to login if not authenticated, or shows error and redirects to dashboard if not admin.
  */
 export const adminGuard: CanActivateFn = (route, state) => {
@@ -19,22 +19,15 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const message = inject(NzMessageService);
 
-  return store.select(selectCanAccessAdminPanel).pipe(
+  // Wait for auth initialization before checking permissions
+  return store.select(selectIsAuthInitialized).pipe(
+    filter(isInitialized => isInitialized),
     take(1),
     withLatestFrom(
-      store.select(selectIsAuthenticated).pipe(take(1)),
-      store.select(selectAuthUser).pipe(take(1)),
-      store.select(selectUserRole).pipe(take(1))
+      store.select(selectCanAccessAdminPanel),
+      store.select(selectIsAuthenticated)
     ),
-    map(([canAccess, isAuthenticated, user, role]) => {
-      // Debug logging - remove after verification
-      console.log('[AdminGuard] Auth check:', {
-        canAccess,
-        isAuthenticated,
-        role,
-        user: user ? { id: user.id, email: user.email, role: user.role } : null
-      });
-
+    map(([_, canAccess, isAuthenticated]) => {
       if (canAccess) {
         return true;
       }

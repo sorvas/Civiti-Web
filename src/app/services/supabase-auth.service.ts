@@ -78,13 +78,6 @@ export class SupabaseAuthService {
     // Read role from app_metadata (set via Supabase Dashboard or custom claims)
     const role = (user.app_metadata?.['role'] as UserRole) || 'user';
 
-    console.log('[SupabaseAuth] Mapped user:', {
-      id: user.id,
-      email: user.email,
-      role,
-      app_metadata: user.app_metadata
-    });
-
     return {
       id: user.id,
       email: user.email || '',

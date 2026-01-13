@@ -211,11 +211,6 @@ export class AuthEffects {
               // Try to get user profile from backend
               return this.apiService.getUserProfile().pipe(
                 map(profile => {
-                  // Debug logging - remove after verification
-                  console.log('[AuthEffects] User loaded:', {
-                    supabaseRole: userData.user.role,
-                    profileEmail: profile.email
-                  });
                   // Merge profile data for display (displayName, photoUrl)
                   // Role stays from Supabase app_metadata (userData.user.role)
                   return AuthActions.loadUserFromStorageSuccess({

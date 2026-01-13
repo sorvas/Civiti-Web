@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, shareReplay } from 'rxjs/operators';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -74,7 +74,9 @@ export class AdminDashboardComponent implements OnInit {
       catchError(() => {
         this.isLoading = false;
         return of(null);
-      })
+      }),
+      // Share the result across multiple async pipe subscriptions
+      shareReplay(1)
     );
   }
 

@@ -1,20 +1,24 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, take } from 'rxjs/operators';
-import { selectIsAuthenticated } from '../store/auth/auth.selectors';
+import { filter, map, take, withLatestFrom } from 'rxjs/operators';
+import { selectIsAuthenticated, selectIsAuthInitialized } from '../store/auth/auth.selectors';
 
 /**
  * Guard that requires user to be authenticated.
+ * Waits for auth initialization before evaluating.
  * Redirects to login page if not authenticated.
  */
 export const authGuard: CanActivateFn = (route, state) => {
   const store = inject(Store);
   const router = inject(Router);
 
-  return store.select(selectIsAuthenticated).pipe(
+  // Wait for auth initialization before checking authentication
+  return store.select(selectIsAuthInitialized).pipe(
+    filter(isInitialized => isInitialized),
     take(1),
-    map(isAuthenticated => {
+    withLatestFrom(store.select(selectIsAuthenticated)),
+    map(([_, isAuthenticated]) => {
       if (isAuthenticated) {
         return true;
       }
