@@ -295,10 +295,11 @@ export class ApprovalInterfaceComponent implements OnInit, OnDestroy {
     // Clear from bulk selection if it was selected
     if (processedIssueId && this.selectedIssueIds.has(processedIssueId)) {
       this.selectedIssueIds.delete(processedIssueId);
-      // Update allSelected state
-      this.allSelected = this.pendingIssues.length > 0 &&
-                         this.selectedIssueIds.size === this.pendingIssues.length;
     }
+
+    // Always recalculate allSelected after removing an issue
+    this.allSelected = this.pendingIssues.length > 0 &&
+                       this.selectedIssueIds.size === this.pendingIssues.length;
 
     // Update stats
     if (this.adminStats) {
