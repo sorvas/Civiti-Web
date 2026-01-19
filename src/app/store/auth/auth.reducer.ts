@@ -28,6 +28,8 @@ export const authReducer = createReducer(
     ...state,
     isAuthenticated: false,
     isLoading: false,
+    emailConfirmationPending: false,
+    pendingEmail: null,
     error,
     user: null,
     token: null,
@@ -58,6 +60,8 @@ export const authReducer = createReducer(
     ...state,
     isAuthenticated: false,
     isLoading: false,
+    emailConfirmationPending: false,
+    pendingEmail: null,
     error,
     user: null,
     token: null,
@@ -77,6 +81,8 @@ export const authReducer = createReducer(
     isAuthenticated: true,
     isLoading: false,
     isInitialized: true,
+    emailConfirmationPending: false,
+    pendingEmail: null,
     user,
     token,
     refreshToken,
@@ -84,10 +90,32 @@ export const authReducer = createReducer(
     error: null
   })),
 
+  on(AuthActions.registerWithEmailPendingConfirmation, (state, { email }) => ({
+    ...state,
+    isAuthenticated: false,
+    isLoading: false,
+    isInitialized: true,
+    emailConfirmationPending: true,
+    pendingEmail: email,
+    user: null,
+    token: null,
+    refreshToken: null,
+    loginMethod: null,
+    error: null
+  })),
+
+  on(AuthActions.clearEmailConfirmationPending, (state) => ({
+    ...state,
+    emailConfirmationPending: false,
+    pendingEmail: null
+  })),
+
   on(AuthActions.registerWithEmailFailure, (state, { error }) => ({
     ...state,
     isAuthenticated: false,
     isLoading: false,
+    emailConfirmationPending: false,
+    pendingEmail: null,
     error,
     user: null,
     token: null,
@@ -114,6 +142,8 @@ export const authReducer = createReducer(
     isLoading: false,
     error,
     isAuthenticated: false,
+    emailConfirmationPending: false,
+    pendingEmail: null,
     user: null,
     token: null,
     refreshToken: null,
@@ -155,10 +185,65 @@ export const authReducer = createReducer(
     isAuthenticated: false,
     isLoading: false,
     isInitialized: true,
-    error,
+    emailConfirmationPending: false,
+    pendingEmail: null,
+    error: error || null, // Don't store empty strings as errors
     user: null,
     token: null,
     refreshToken: null,
     loginMethod: null
+  })),
+
+  // Password Reset Reducers
+  on(AuthActions.forgotPassword, (state) => ({
+    ...state,
+    passwordResetLoading: true,
+    passwordResetEmailSent: false,
+    passwordResetPendingEmail: null,
+    error: null
+  })),
+
+  on(AuthActions.forgotPasswordSuccess, (state, { email }) => ({
+    ...state,
+    passwordResetLoading: false,
+    passwordResetEmailSent: true,
+    passwordResetPendingEmail: email,
+    error: null
+  })),
+
+  on(AuthActions.forgotPasswordFailure, (state, { error }) => ({
+    ...state,
+    passwordResetLoading: false,
+    passwordResetEmailSent: false,
+    passwordResetPendingEmail: null,
+    error
+  })),
+
+  on(AuthActions.clearPasswordResetState, (state) => ({
+    ...state,
+    passwordResetEmailSent: false,
+    passwordResetPendingEmail: null,
+    passwordResetLoading: false,
+    error: null
+  })),
+
+  on(AuthActions.resetPassword, (state) => ({
+    ...state,
+    passwordResetLoading: true,
+    error: null
+  })),
+
+  on(AuthActions.resetPasswordSuccess, (state) => ({
+    ...state,
+    passwordResetLoading: false,
+    passwordResetEmailSent: false,
+    passwordResetPendingEmail: null,
+    error: null
+  })),
+
+  on(AuthActions.resetPasswordFailure, (state, { error }) => ({
+    ...state,
+    passwordResetLoading: false,
+    error
   }))
 );

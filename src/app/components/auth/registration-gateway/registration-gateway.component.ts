@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -49,14 +49,17 @@ export class RegistrationGatewayComponent implements OnInit, OnDestroy {
   isLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
   isAuthenticated$!: Observable<boolean>;
+  returnUrl: string | null = null;
 
   constructor(
     private store: Store<AppState>,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.isLoading$ = this.store.select(selectAuthLoading);
     this.error$ = this.store.select(selectAuthError);
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || null;
   }
 
   ngOnInit(): void {

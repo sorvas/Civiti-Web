@@ -52,7 +52,8 @@
           nzSize="large"
           nzBlock
           class="email-signup-btn"
-          routerLink="/auth/user-registration">
+          routerLink="/auth/signup"
+          [queryParams]="{ returnUrl: returnUrl }">
           <span nz-icon nzType="mail" nzTheme="outline"></span>
           Înregistrează-te cu email
         </button>

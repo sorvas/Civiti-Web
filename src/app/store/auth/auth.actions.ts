@@ -49,6 +49,15 @@ export const registerWithEmailSuccess = createAction(
   props<{ user: AuthUser; token: string; refreshToken: string }>()
 );
 
+export const registerWithEmailPendingConfirmation = createAction(
+  '[Auth] Register with Email Pending Confirmation',
+  props<{ email: string }>()
+);
+
+export const clearEmailConfirmationPending = createAction(
+  '[Auth] Clear Email Confirmation Pending'
+);
+
 export const registerWithEmailFailure = createAction(
   '[Auth] Register with Email Failure',
   props<{ error: string }>()
@@ -85,3 +94,33 @@ export const loadUserFromStorageFailure = createAction(
 export const clearAuthError = createAction('[Auth] Clear Auth Error');
 
 export const checkAuthStatus = createAction('[Auth] Check Auth Status');
+
+// Password Reset Actions
+export const forgotPassword = createAction(
+  '[Auth] Forgot Password',
+  props<{ email: string }>()
+);
+
+export const forgotPasswordSuccess = createAction(
+  '[Auth] Forgot Password Success',
+  props<{ email: string }>()
+);
+
+export const forgotPasswordFailure = createAction(
+  '[Auth] Forgot Password Failure',
+  props<{ error: string }>()
+);
+
+export const clearPasswordResetState = createAction('[Auth] Clear Password Reset State');
+
+export const resetPassword = createAction(
+  '[Auth] Reset Password',
+  props<{ password: string }>()
+);
+
+export const resetPasswordSuccess = createAction('[Auth] Reset Password Success');
+
+export const resetPasswordFailure = createAction(
+  '[Auth] Reset Password Failure',
+  props<{ error: string }>()
+);

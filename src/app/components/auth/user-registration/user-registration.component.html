@@ -1,18 +1,63 @@
 <div class="registration-container">
-  
-  <!-- Header -->
-  <div class="registration-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/auth/register" class="back-btn">
-      <span nz-icon nzType="arrow-left"></span>
-      Înapoi
-    </button>
-    <h1 class="page-title">Creează-ți contul</h1>
-    <p class="page-subtitle">Alătură-te comunității și începe să faci diferența</p>
-  </div>
 
-  <!-- Registration Form -->
-  <div class="registration-form-container">
-    <nz-card [nzBordered]="false" class="registration-form-card">
+  <!-- Email Confirmation Pending View -->
+  <ng-container *ngIf="emailConfirmationPending$ | async; else registrationView">
+    <div class="confirmation-pending-container">
+      <nz-card [nzBordered]="false" class="confirmation-card">
+        <div class="confirmation-content">
+          <div class="confirmation-icon">
+            <span nz-icon nzType="mail" nzTheme="outline"></span>
+          </div>
+          <h1 class="confirmation-title">Verifică-ți email-ul</h1>
+          <p class="confirmation-message">
+            Am trimis un link de confirmare la adresa:
+          </p>
+          <p class="confirmation-email">{{ pendingEmail$ | async }}</p>
+          <p class="confirmation-instructions">
+            Accesează link-ul din email pentru a-ți activa contul.
+            După confirmare, te poți autentifica.
+          </p>
+
+          <div class="confirmation-actions">
+            <button
+              nz-button
+              nzType="primary"
+              nzSize="large"
+              nzBlock
+              (click)="navigateToLogin()">
+              <span nz-icon nzType="login"></span>
+              Mergi la autentificare
+            </button>
+          </div>
+
+          <div class="confirmation-help">
+            <p>Nu ai primit email-ul?</p>
+            <ul>
+              <li>Verifică folderul Spam sau Junk</li>
+              <li>Asigură-te că adresa de email este corectă</li>
+              <li>Încearcă să te <button type="button" class="link-button" (click)="retryRegistration()">înregistrezi din nou</button></li>
+            </ul>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+  </ng-container>
+
+  <!-- Registration Form View -->
+  <ng-template #registrationView>
+    <!-- Header -->
+    <div class="registration-header">
+      <button nz-button nzType="text" nzSize="large" routerLink="/auth/register" class="back-btn">
+        <span nz-icon nzType="arrow-left"></span>
+        Înapoi
+      </button>
+      <h1 class="page-title">Creează-ți contul</h1>
+      <p class="page-subtitle">Alătură-te comunității și începe să faci diferența</p>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="registration-form-container">
+      <nz-card [nzBordered]="false" class="registration-form-card">
       
       <!-- Progress Steps -->
       <nz-steps [nzCurrent]="currentStep" nzSize="small" class="registration-steps">
@@ -297,5 +342,6 @@
 
       </nz-spin>
     </nz-card>
-  </div>
+    </div>
+  </ng-template>
 </div>

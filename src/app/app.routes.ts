@@ -32,6 +32,16 @@ export const routes: Routes = [
         path: 'callback',
         loadComponent: () => import('./components/auth/oauth-callback/oauth-callback.component').then(m => m.OauthCallbackComponent),
         data: { animation: 'CallbackPage', hideHeader: true }
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () => import('./components/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+        data: { animation: 'ForgotPasswordPage', hideHeader: true }
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () => import('./components/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+        data: { animation: 'ResetPasswordPage', hideHeader: true }
       }
     ]
   },

@@ -53,6 +53,17 @@ export const selectIsEmailVerified = createSelector(
   (user) => user?.emailVerified || false
 );
 
+// Email confirmation pending selectors
+export const selectEmailConfirmationPending = createSelector(
+  selectAuthState,
+  (state: AuthState) => state.emailConfirmationPending
+);
+
+export const selectPendingEmail = createSelector(
+  selectAuthState,
+  (state: AuthState) => state.pendingEmail
+);
+
 // Role-based selectors for admin access control
 export const selectUserRole = createSelector(
   selectAuthUser,
@@ -86,4 +97,20 @@ export const selectAdminGuardState = createSelector(
     isAuthenticated,
     canAccessAdminPanel
   })
+);
+
+// Password reset selectors
+export const selectPasswordResetEmailSent = createSelector(
+  selectAuthState,
+  (state: AuthState) => state.passwordResetEmailSent
+);
+
+export const selectPasswordResetPendingEmail = createSelector(
+  selectAuthState,
+  (state: AuthState) => state.passwordResetPendingEmail
+);
+
+export const selectPasswordResetLoading = createSelector(
+  selectAuthState,
+  (state: AuthState) => state.passwordResetLoading
 );

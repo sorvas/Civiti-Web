@@ -234,3 +234,127 @@
 :deep(.ant-checkbox-wrapper:hover .ant-checkbox-inner) {
   border-color: var(--orange-web);
 }
+
+// Email Confirmation Pending Styles
+.confirmation-pending-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 4rem);
+}
+
+.confirmation-card {
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.1);
+  border-radius: 16px;
+}
+
+.confirmation-content {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.confirmation-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--orange-web) 0%, #e8930f 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+
+  span {
+    font-size: 2.5rem;
+    color: white;
+  }
+}
+
+.confirmation-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--oxford-blue);
+  margin-bottom: 1rem;
+}
+
+.confirmation-message {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.confirmation-email {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--oxford-blue);
+  background: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  word-break: break-all;
+}
+
+.confirmation-instructions {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.confirmation-actions {
+  margin-bottom: 2rem;
+
+  button {
+    font-weight: 600;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+.confirmation-help {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: left;
+
+  p {
+    font-weight: 600;
+    color: var(--oxford-blue);
+    margin-bottom: 0.75rem;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.25rem;
+
+    li {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      a,
+      .link-button {
+        color: var(--orange-web);
+        font-weight: 600;
+        text-decoration: none;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: inherit;
+        cursor: pointer;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}

@@ -157,6 +157,14 @@ export class AuthService {
     );
   }
 
+  updatePassword(newPassword: string): Observable<void> {
+    return this.supabaseAuthService.updatePassword(newPassword).pipe(
+      catchError(error => {
+        throw new Error(error.message || 'Password update failed');
+      })
+    );
+  }
+
   // ============================================
   // Helper Methods
   // ============================================

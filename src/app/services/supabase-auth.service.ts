@@ -291,6 +291,17 @@ export class SupabaseAuthService {
   }
 
   /**
+   * Wait for auth to be ready and return the session.
+   * Used by password reset to ensure recovery token is processed.
+   */
+  getSessionOnceReady(): Observable<{ user: any; access_token: string; refresh_token?: string } | null> {
+    return this.authReady$.pipe(
+      take(1),
+      switchMap(() => from(this.getSession()))
+    );
+  }
+
+  /**
    * Get the current user from Supabase session
    * Used in OAuth callback to get authenticated user details
    */
@@ -339,7 +350,21 @@ export class SupabaseAuthService {
       }),
       catchError(error => {
         console.error('Reset password error:', error);
-        return throwError(() => error);
+        return throwError(() => new Error(this.getErrorMessage(error)));
+      })
+    );
+  }
+
+  updatePassword(newPassword: string): Observable<void> {
+    return from(this.supabase.auth.updateUser({ password: newPassword })).pipe(
+      map(({ error }) => {
+        if (error) {
+          throw error;
+        }
+      }),
+      catchError(error => {
+        console.error('Update password error:', error);
+        return throwError(() => new Error(this.getErrorMessage(error)));
       })
     );
   }
@@ -360,11 +385,17 @@ export class SupabaseAuthService {
           return 'Un cont cu acest email există deja. Încearcă să te autentifici.';
         case 'Password should be at least 6 characters':
           return 'Parola trebuie să aibă cel puțin 6 caractere.';
+        case 'New password should be different from the old password.':
+          return 'Noua parolă trebuie să fie diferită de cea veche.';
+        case 'Auth session missing!':
+          return 'Sesiunea a expirat. Te rugăm să soliciți un nou link de resetare.';
+        case 'Token has expired or is invalid':
+          return 'Link-ul de resetare a expirat sau este invalid. Te rugăm să soliciți unul nou.';
         default:
           return error.message;
       }
     }
-    
+
     return 'A apărut o eroare neprevăzută. Încearcă din nou.';
   }
 }

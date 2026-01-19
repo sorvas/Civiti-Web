@@ -121,13 +121,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  showForgotPassword(): void {
-    // TODO: Implement forgot password functionality
-    console.log('[LOGIN] Forgot password clicked');
-    // For now, just show an alert or navigate to forgot password page
-    alert('Funcționalitatea de recuperare a parolei va fi implementată în următoarea fază.');
-  }
-
   clearError(): void {
     this.store.dispatch(AuthActions.clearAuthError());
   }

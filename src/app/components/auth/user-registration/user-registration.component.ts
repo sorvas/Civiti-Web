@@ -25,7 +25,9 @@ import * as AuthActions from '../../../store/auth/auth.actions';
 import {
   selectAuthLoading,
   selectAuthError,
-  selectIsAuthenticated
+  selectIsAuthenticated,
+  selectEmailConfirmationPending,
+  selectPendingEmail
 } from '../../../store/auth/auth.selectors';
 import { 
   ROMANIAN_COUNTIES, 
@@ -98,6 +100,8 @@ export class UserRegistrationComponent implements OnInit, OnDestroy {
   isLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
   isAuthenticated$!: Observable<boolean>;
+  emailConfirmationPending$!: Observable<boolean>;
+  pendingEmail$!: Observable<string | null>;
 
   constructor(
     private fb: FormBuilder,
@@ -108,6 +112,8 @@ export class UserRegistrationComponent implements OnInit, OnDestroy {
     this.isLoading$ = this.store.select(selectAuthLoading);
     this.error$ = this.store.select(selectAuthError);
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
+    this.emailConfirmationPending$ = this.store.select(selectEmailConfirmationPending);
+    this.pendingEmail$ = this.store.select(selectPendingEmail);
 
     this.initializeForm();
   }
@@ -269,6 +275,15 @@ export class UserRegistrationComponent implements OnInit, OnDestroy {
 
   clearError(): void {
     this.store.dispatch(AuthActions.clearAuthError());
+  }
+
+  navigateToLogin(): void {
+    this.store.dispatch(AuthActions.clearEmailConfirmationPending());
+    this.router.navigate(['/auth/login']);
+  }
+
+  retryRegistration(): void {
+    this.store.dispatch(AuthActions.clearEmailConfirmationPending());
   }
 
   private navigateAfterRegistration(): void {
