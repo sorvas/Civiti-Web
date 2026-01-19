@@ -12,14 +12,6 @@
   margin-right: auto;
 }
 
-.back-btn {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  color: var(--oxford-blue);
-  font-weight: 600;
-}
-
 .page-title {
   font-size: 2.5rem;
   font-weight: 700;
@@ -453,13 +445,6 @@
 
   .page-subtitle {
     font-size: 1rem;
-  }
-
-  .back-btn {
-    position: relative;
-    left: auto;
-    top: auto;
-    margin-bottom: 1rem;
   }
 
   .page-header {

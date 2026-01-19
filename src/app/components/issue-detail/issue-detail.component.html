@@ -69,17 +69,19 @@
               <nz-tabset>
                 <nz-tab nzTitle="Situația Actuală">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.currentSituation || issue.description }}</p>
+                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.description }}</p>
                   </div>
                 </nz-tab>
                 <nz-tab nzTitle="Rezultat Dorit">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.desiredOutcome || 'Nu există detalii suplimentare.' }}</p>
+                    <p *ngIf="issue.desiredOutcome" class="text-oxford-blue whitespace-pre-wrap">{{ issue.desiredOutcome }}</p>
+                    <p *ngIf="!issue.desiredOutcome" class="text-gray-500">Nu a fost specificat un rezultat dorit.</p>
                   </div>
                 </nz-tab>
                 <nz-tab nzTitle="Impact Comunitar">
                   <div class="p-6">
-                    <p class="text-oxford-blue whitespace-pre-wrap">{{ issue.communityImpact || ('Problema a primit ' + issue.emailsSent + ' email-uri de susținere din partea comunității.') }}</p>
+                    <p *ngIf="issue.communityImpact" class="text-oxford-blue whitespace-pre-wrap">{{ issue.communityImpact }}</p>
+                    <p *ngIf="!issue.communityImpact" class="text-gray-500">Nu a fost specificat impactul comunitar.</p>
                   </div>
                 </nz-tab>
               </nz-tabset>

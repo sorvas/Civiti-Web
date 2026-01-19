@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -14,15 +13,10 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-import { ApiService } from '../../../services/api.service';
-import {
-  IssueCategory,
-  AIAnalysisResult
-} from '../../../types/civica-api.types';
+import { IssueCategory } from '../../../types/civica-api.types';
 
 // Interface for category data from session storage
 interface IssueCategoryInfo {
@@ -66,7 +60,6 @@ interface PhotoData {
     NzSelectModule,
     NzSpinModule,
     NzTypographyModule,
-    NzAlertModule,
     NzTagModule
   ],
   templateUrl: './issue-details.component.html',
@@ -82,18 +75,13 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   uploadedPhotos: PhotoData[] = [];
   currentLocation: { address: string; coordinates: { lat: number; lng: number }; district?: string } | null = null;
   detailsForm!: FormGroup;
-  aiAnalysis: AIAnalysisResult | null = null;
-  isGeneratingAI = false;
-
-  // Track if user is editing AI content
-  isEditingDescription = false;
-  isEditingSolution = false;
+  isEnhancingAI = false;
+  isAIEnhanced = false;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private message: NzMessageService,
-    private apiService: ApiService
+    private message: NzMessageService
   ) {
     this.initializeForm();
   }
@@ -109,7 +97,9 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
 
   private initializeForm(): void {
     this.detailsForm = this.fb.group({
-      briefDescription: ['', [Validators.required, Validators.minLength(10)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      desiredOutcome: ['', [Validators.required, Validators.minLength(10)]],
+      communityImpact: ['', [Validators.required, Validators.minLength(10)]],
       urgency: ['Medium'],
       whenOccurred: ['now']
     });
@@ -144,16 +134,18 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
           this.issueId = issueData.id;
         }
         // Restore form fields
-        if (issueData.briefDescription) {
+        if (issueData.description) {
           this.detailsForm.patchValue({
-            briefDescription: issueData.briefDescription,
+            description: issueData.description,
+            desiredOutcome: issueData.desiredOutcome || '',
+            communityImpact: issueData.communityImpact || '',
             urgency: this.normalizeUrgency(issueData.urgency),
             whenOccurred: issueData.whenOccurred || 'now'
           });
         }
-        // Restore AI analysis
-        if (issueData.aiAnalysis) {
-          this.aiAnalysis = issueData.aiAnalysis;
+        // Restore AI enhanced flag
+        if (issueData.isAIEnhanced) {
+          this.isAIEnhanced = issueData.isAIEnhanced;
         }
         console.log('[ISSUE DETAILS] Restored form data from session, ID:', this.issueId);
       } catch (e) {
@@ -177,116 +169,74 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
       category: this.selectedCategory,
       photos: this.uploadedPhotos,
       location: this.currentLocation,
-      briefDescription: this.detailsForm.get('briefDescription')?.value,
+      description: this.detailsForm.get('description')?.value,
+      desiredOutcome: this.detailsForm.get('desiredOutcome')?.value,
+      communityImpact: this.detailsForm.get('communityImpact')?.value,
       urgency: this.detailsForm.get('urgency')?.value,
       whenOccurred: this.detailsForm.get('whenOccurred')?.value,
-      aiAnalysis: this.aiAnalysis
+      isAIEnhanced: this.isAIEnhanced
     };
     sessionStorage.setItem('civica_complete_issue_data', JSON.stringify(issueData));
   }
 
-  generateAIDescription(): void {
+  enhanceWithAI(): void {
     if (!this.detailsForm.valid) {
       Object.keys(this.detailsForm.controls).forEach(key => {
         this.detailsForm.get(key)?.markAsTouched();
       });
+      this.message.warning('Te rugăm să completezi toate câmpurile obligatorii');
       return;
     }
 
-    const briefDescription = this.detailsForm.get('briefDescription')?.value;
-    console.log('[ISSUE DETAILS] Generating AI description...', briefDescription);
+    const description = this.detailsForm.get('description')?.value;
+    const desiredOutcome = this.detailsForm.get('desiredOutcome')?.value;
+    const communityImpact = this.detailsForm.get('communityImpact')?.value;
 
-    this.isGeneratingAI = true;
+    console.log('[ISSUE DETAILS] Enhancing text with AI...');
+    this.isEnhancingAI = true;
 
-    // For now, simulate AI description generation since the backend may not have this endpoint
-    // TODO: Replace with actual API call when backend implements AI description
+    // TODO: Replace with actual API call when backend implements AI enhancement
     setTimeout(() => {
-      this.aiAnalysis = {
-        aiGeneratedDescription: `${briefDescription} - Această problemă necesită atenția autorităților locale pentru rezolvarea rapidă și eficientă.`,
-        aiProposedSolution: 'Se recomandă contactarea serviciului de urgență al primăriei pentru intervenție rapidă.',
-        aiConfidence: 0.85
-      };
+      // Simulate AI enhancement - in production this would call an AI service
+      this.detailsForm.patchValue({
+        description: `${description} Această situație necesită atenția imediată a autorităților competente pentru a preveni agravarea problemei și pentru a asigura siguranța cetățenilor.`,
+        desiredOutcome: `${desiredOutcome} Se solicită intervenția promptă și profesionistă a echipelor specializate, cu raportarea progresului către cetățenii afectați.`,
+        communityImpact: `${communityImpact} Rezolvarea acestei probleme va contribui semnificativ la îmbunătățirea calității vieții în comunitate și va demonstra angajamentul autorităților față de nevoile cetățenilor.`
+      });
 
-      this.isGeneratingAI = false;
-      console.log('[ISSUE DETAILS] AI analysis generated:', this.aiAnalysis);
-      this.message.success('Descrierea AI a fost generată cu succes!');
+      this.isEnhancingAI = false;
+      this.isAIEnhanced = true;
+      console.log('[ISSUE DETAILS] Text enhanced with AI');
+      this.message.success('Textul a fost îmbunătățit cu succes!');
 
       // Save to session for back navigation support
       this.saveFormToSession();
-    }, 1500); // Simulate API delay
-  }
-
-  getConfidenceColor(confidence: number): string {
-    if (confidence >= 0.8) return 'green';
-    if (confidence >= 0.6) return 'orange';
-    return 'red';
-  }
-
-  // Inline editing methods
-  editDescription(): void {
-    this.isEditingDescription = true;
-  }
-
-  saveDescription(newDescription: string): void {
-    if (!this.aiAnalysis) {
-      return;
-    }
-    const trimmed = newDescription.trim();
-    if (!trimmed) {
-      this.message.warning('Descrierea nu poate fi goală');
-      return;
-    }
-    this.aiAnalysis.aiGeneratedDescription = trimmed;
-    this.isEditingDescription = false;
-    this.saveFormToSession();
-    this.message.success('Descrierea a fost actualizată');
-  }
-
-  cancelEditDescription(): void {
-    this.isEditingDescription = false;
-  }
-
-  editSolution(): void {
-    this.isEditingSolution = true;
-  }
-
-  saveSolution(newSolution: string): void {
-    if (!this.aiAnalysis) {
-      return;
-    }
-    const trimmed = newSolution.trim();
-    if (!trimmed) {
-      this.message.warning('Soluția propusă nu poate fi goală');
-      return;
-    }
-    this.aiAnalysis.aiProposedSolution = trimmed;
-    this.isEditingSolution = false;
-    this.saveFormToSession();
-    this.message.success('Soluția a fost actualizată');
-  }
-
-  cancelEditSolution(): void {
-    this.isEditingSolution = false;
+    }, 1500);
   }
 
   continueToReview(): void {
-    if (!this.aiAnalysis) {
-      this.message.warning('Vă rugăm să generați mai întâi o descriere AI');
+    if (!this.detailsForm.valid) {
+      Object.keys(this.detailsForm.controls).forEach(key => {
+        this.detailsForm.get(key)?.markAsTouched();
+      });
+      this.message.warning('Te rugăm să completezi toate câmpurile obligatorii');
       return;
     }
 
-    console.log('[ISSUE DETAILS] Continuing to review...');
+    console.log('[ISSUE DETAILS] Continuing to authorities...');
 
-    // Store form data and AI analysis in session
+    // Store form data in session
     const issueData = {
-      id: this.getOrCreateIssueId(), // Generate ID here to be used in submission
+      id: this.getOrCreateIssueId(),
       category: this.selectedCategory,
       photos: this.uploadedPhotos,
       location: this.currentLocation,
-      briefDescription: this.detailsForm.get('briefDescription')?.value,
+      description: this.detailsForm.get('description')?.value,
+      desiredOutcome: this.detailsForm.get('desiredOutcome')?.value,
+      communityImpact: this.detailsForm.get('communityImpact')?.value,
       urgency: this.detailsForm.get('urgency')?.value,
       whenOccurred: this.detailsForm.get('whenOccurred')?.value,
-      aiAnalysis: this.aiAnalysis
+      isAIEnhanced: this.isAIEnhanced
     };
 
     sessionStorage.setItem('civica_complete_issue_data', JSON.stringify(issueData));

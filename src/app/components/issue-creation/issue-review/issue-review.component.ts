@@ -179,17 +179,15 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     // Prepare issue data for submission using the API format
     const issueToSubmit: CreateIssueRequest = {
       title: this.generateIssueTitle(),
-      description: this.issueData.aiAnalysis?.aiGeneratedDescription || this.issueData.briefDescription,
+      description: this.issueData.description,
       category: this.issueData.category.id as IssueCategory,
       address: this.issueData.location.address,
       district: this.issueData.location.district || '',
       latitude: this.issueData.location.coordinates?.lat || 0,
       longitude: this.issueData.location.coordinates?.lng || 0,
       urgency: this.issueData.urgency as UrgencyLevel,
-      desiredOutcome: this.issueData.aiAnalysis?.aiProposedSolution,
-      aiGeneratedDescription: this.issueData.aiAnalysis?.aiGeneratedDescription,
-      aiProposedSolution: this.issueData.aiAnalysis?.aiProposedSolution,
-      aiConfidence: this.issueData.aiAnalysis?.aiConfidence,
+      desiredOutcome: this.issueData.desiredOutcome,
+      communityImpact: this.issueData.communityImpact,
       photoUrls: sortedPhotos.map((photo: any) => photo.url),
       authorities
     };

@@ -2,10 +2,6 @@
   
   <!-- Header -->
   <div class="page-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/dashboard" class="back-btn">
-      <span nz-icon nzType="arrow-left"></span>
-      Înapoi la panou
-    </button>
     <h1 class="page-title">Raportează o problemă din comunitate</h1>
     <p class="page-subtitle">Alege categoria care descrie cel mai bine problema ta</p>
   </div>
@@ -133,22 +129,36 @@
       </nz-card>
     </div>
 
-    <!-- Continue Button -->
-    <div class="continue-section">
-      <button 
-        nz-button 
-        nzType="primary" 
-        nzSize="large"
-        [disabled]="!selectedCategory || !(isAuthenticated$ | async)"
-        (click)="continueToPhotos()"
-        class="continue-btn">
-        <span>Continuă cu fotografiile</span>
-        <span nz-icon nzType="arrow-right"></span>
-      </button>
-      
-      <p class="help-text" *ngIf="!selectedCategory">
-        Te rugăm să selectezi o categorie pentru a continua
-      </p>
+    <!-- Navigation -->
+    <div class="navigation-section">
+      <div class="nav-buttons">
+        <button
+          nz-button
+          nzType="default"
+          nzSize="large"
+          routerLink="/dashboard"
+          class="nav-btn">
+          <span nz-icon nzType="arrow-left"></span>
+          Înapoi
+        </button>
+
+        <div class="nav-spacer"></div>
+
+        <button
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          [disabled]="!selectedCategory || !(isAuthenticated$ | async)"
+          (click)="continueToPhotos()"
+          class="nav-btn continue-btn">
+          Continuă cu fotografiile
+          <span nz-icon nzType="arrow-right"></span>
+        </button>
+      </div>
+
+      <div class="help-text" *ngIf="!selectedCategory">
+        <p>Te rugăm să selectezi o categorie pentru a continua</p>
+      </div>
     </div>
 
     </div>

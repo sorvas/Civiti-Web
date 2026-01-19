@@ -2,10 +2,6 @@
   
   <!-- Header -->
   <div class="page-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue/authorities" class="back-btn">
-      <span nz-icon nzType="arrow-left"></span>
-      Înapoi
-    </button>
     <h1 class="page-title">Verificare și trimitere</h1>
     <p class="page-subtitle">Verifică raportul înainte de a-l trimite către autorități</p>
   </div>
@@ -111,29 +107,31 @@
           </div>
         </div>
 
-        <div class="brief-description">
-          <h4>Descrierea ta</h4>
-          <p>{{ issueData.briefDescription }}</p>
-        </div>
-
       </div>
     </nz-card>
 
-    <!-- Message for Authorities -->
-    <nz-card nzTitle="Mesaj pentru autorități" class="review-card" *ngIf="issueData.aiAnalysis">
-      <div class="ai-report">
-        <div class="ai-sections">
-          <div class="ai-section">
-            <h4>Descriere profesională</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.aiGeneratedDescription }}</div>
-          </div>
-
-          <div class="ai-section">
-            <h4>Soluție propusă</h4>
-            <div class="ai-content">{{ issueData.aiAnalysis.aiProposedSolution }}</div>
-          </div>
+    <!-- Issue Content -->
+    <nz-card nzTitle="Conținutul raportului" class="review-card">
+      <div class="issue-content-sections">
+        <div class="content-section">
+          <h4>Descrierea problemei</h4>
+          <div class="content-text">{{ issueData.description }}</div>
         </div>
 
+        <div class="content-section">
+          <h4>Rezultatul dorit</h4>
+          <div class="content-text">{{ issueData.desiredOutcome }}</div>
+        </div>
+
+        <div class="content-section">
+          <h4>Impactul asupra comunității</h4>
+          <div class="content-text">{{ issueData.communityImpact }}</div>
+        </div>
+
+        <div class="ai-enhanced-badge" *ngIf="issueData.isAIEnhanced">
+          <span nz-icon nzType="robot" nzTheme="outline"></span>
+          Text îmbunătățit cu AI
+        </div>
       </div>
     </nz-card>
 

@@ -21,7 +21,7 @@ import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
 import * as IssueSelectors from '../../store/issues/issue.selectors';
 import { selectIsAdmin, selectIsAuthInitialized, selectAuthUser } from '../../store/auth/auth.selectors';
-import { IssueDetailResponse, IssueStatus } from '../../types/civica-api.types';
+import { IssueDetailResponse, isPubliclyViewableStatus } from '../../types/civica-api.types';
 import { EmailModalComponent } from './email-modal.component';
 import { GoogleMap, MapMarker, MapInfoWindow } from '@angular/google-maps';
 import { GoogleMapsConfigService } from '../../services/google-maps-config.service';
@@ -78,9 +78,6 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     isLoading$!: Observable<boolean>;
     error$!: Observable<string | null>;
     isAdmin$!: Observable<boolean>;
-
-    // Only Active and Resolved issues are publicly viewable (non-admin users)
-    private readonly PUBLIC_VIEWABLE_STATUSES: IssueStatus[] = ['Active', 'Resolved'];
 
     // Google Maps properties
     mapOptions: any = {
@@ -144,10 +141,10 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
                 take(1),
                 takeUntil(this._destroy$)
             ).subscribe(([issue, _initialized, isAdmin, currentUser]) => {
-                const isPubliclyViewable = this.PUBLIC_VIEWABLE_STATUSES.includes(issue.status);
+                const canView = isPubliclyViewableStatus(issue.status);
                 const isOwner = currentUser?.id === issue.user.id;
 
-                if (!isPubliclyViewable && !isAdmin && !isOwner) {
+                if (!canView && !isAdmin && !isOwner) {
                     console.warn(`[ACCESS DENIED] Issue ${issue.id} has status "${issue.status}" - redirecting (not owner, not admin)`);
                     this._router.navigate(['/issues']);
                     return;

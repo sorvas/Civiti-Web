@@ -27,7 +27,6 @@ export type IssueStatus =
   | 'Draft'
   | 'Submitted'
   | 'UnderReview'
-  | 'Approved'
   | 'Active'
   | 'Resolved'
   | 'Rejected'
@@ -40,7 +39,6 @@ export type UserFacingStatus = 'Activ' | 'Rezolvat' | 'Respins';
 export const ACTIVE_ISSUE_STATUSES: IssueStatus[] = [
   'Submitted',
   'UnderReview',
-  'Approved',
   'Active'
 ];
 
@@ -55,6 +53,40 @@ export function getDisplayStatus(status: IssueStatus): UserFacingStatus | null {
 /** Check if an issue status is considered "active" */
 export function isActiveStatus(status: IssueStatus): boolean {
   return ACTIVE_ISSUE_STATUSES.includes(status);
+}
+
+/**
+ * Normalize status string to canonical PascalCase IssueStatus.
+ * Handles case-insensitive matching from API responses.
+ */
+export function normalizeStatus(status: string | null | undefined): IssueStatus {
+  if (!status) return 'Unspecified';
+
+  const statusMap: Record<string, IssueStatus> = {
+    'unspecified': 'Unspecified',
+    'draft': 'Draft',
+    'submitted': 'Submitted',
+    'underreview': 'UnderReview',
+    'active': 'Active',
+    'resolved': 'Resolved',
+    'rejected': 'Rejected',
+    'cancelled': 'Cancelled',
+  };
+
+  return statusMap[status.toLowerCase()] || 'Unspecified';
+}
+
+/** Statuses that are publicly viewable (non-owners, non-admins can view) */
+export const PUBLIC_VIEWABLE_STATUSES: IssueStatus[] = ['Active', 'Resolved'];
+
+/**
+ * Check if an issue status is publicly viewable.
+ * Uses case-insensitive comparison for API response compatibility.
+ */
+export function isPubliclyViewableStatus(status: string | null | undefined): boolean {
+  if (!status) return false;
+  const normalized = normalizeStatus(status);
+  return PUBLIC_VIEWABLE_STATUSES.includes(normalized);
 }
 
 export type ResidenceType = 'Apartment' | 'House' | 'Business';
@@ -158,18 +190,9 @@ export interface CreateIssueRequest {
   district: string;
   latitude: number;
   longitude: number;
-  locationAccuracy?: number;
-  neighborhood?: string;
-  landmark?: string;
   urgency?: UrgencyLevel;
-  estimatedImpact?: number;
-  tags?: string[];
-  currentSituation?: string;
   desiredOutcome?: string;
   communityImpact?: string;
-  aiGeneratedDescription?: string;
-  aiProposedSolution?: string;
-  aiConfidence?: number;
   photoUrls?: string[];
   authorities?: IssueAuthorityInput[];
 }
@@ -292,19 +315,12 @@ export interface IssueDetailResponse {
   address: string;
   latitude: number;
   longitude: number;
-  neighborhood?: string;
   district?: string;
-  landmark?: string;
   urgency: UrgencyLevel;
-  estimatedImpact?: number;
-  tags?: string[];
   status: IssueStatus;
   emailsSent: number;
-  currentSituation?: string;
   desiredOutcome?: string;
   communityImpact?: string;
-  aiGeneratedDescription?: string;
-  aiProposedSolution?: string;
   publicVisibility: boolean;
   createdAt: string;
   updatedAt: string;
@@ -462,22 +478,11 @@ export interface AdminIssueDetailResponse {
   address: string;
   latitude: number;
   longitude: number;
-  locationAccuracy: number;
-  neighborhood?: string;
   district?: string;
-  landmark?: string;
-  estimatedImpact?: number;
-  tags?: string[];
 
   // Extended details
-  currentSituation?: string;
   desiredOutcome?: string;
   communityImpact?: string;
-
-  // AI analysis
-  aiGeneratedDescription?: string;
-  aiProposedSolution?: string;
-  aiConfidence?: number;
 
   // Admin details
   adminNotes?: string;
@@ -730,7 +735,6 @@ export const ISSUE_STATUSES: Record<IssueStatus, string> = {
   Draft: 'Ciornă',
   Submitted: 'Trimisă',
   UnderReview: 'În Evaluare',
-  Approved: 'Aprobată',
   Active: 'Activă',
   Resolved: 'Rezolvată',
   Rejected: 'Respinsă',
@@ -743,13 +747,6 @@ export const USER_FACING_STATUS_LABELS: Record<UserFacingStatus, string> = {
   Rezolvat: 'Rezolvat',
   Respins: 'Respins'
 };
-
-// AI Analysis interface matching backend
-export interface AIAnalysisResult {
-  aiGeneratedDescription?: string;
-  aiProposedSolution?: string;
-  aiConfidence?: number;
-}
 
 export const API_ENDPOINTS = {
   // Base URLs

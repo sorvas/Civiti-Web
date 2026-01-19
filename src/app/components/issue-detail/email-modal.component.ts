@@ -68,7 +68,6 @@ export class EmailModalComponent implements OnInit {
         // Build location string from available fields
         const locationParts = [this.issue.address];
         if (this.issue.district) locationParts.push(this.issue.district);
-        if (this.issue.neighborhood) locationParts.push(this.issue.neighborhood);
         const locationString = locationParts.filter(Boolean).join(', ') || 'Locație nespecificată';
 
         const body = `Stimată autoritate,
