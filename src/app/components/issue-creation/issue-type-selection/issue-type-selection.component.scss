@@ -12,14 +12,6 @@
   margin-right: auto;
 }
 
-.back-btn {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  color: var(--oxford-blue);
-  font-weight: 600;
-}
-
 .page-title {
   font-size: 2.5rem;
   font-weight: 700;
@@ -270,48 +262,58 @@
   color: var(--oxford-blue);
 }
 
-.continue-section {
-  text-align: center;
+.navigation-section {
+  max-width: 1200px;
+  margin: 0 auto;
   padding-top: 2rem;
   border-top: 1px solid rgba(20, 33, 61, 0.1);
+}
+
+.nav-buttons {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.nav-spacer {
+  flex: 1;
+}
+
+.nav-btn {
+  font-weight: 600;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 // Button styling with higher specificity to override NG-ZORRO defaults
 :host ::ng-deep button.continue-btn.ant-btn {
   background: var(--orange-web);
   border-color: var(--orange-web);
-  color: var(--white);
-  font-weight: 600;
-  font-size: 1.1rem;
-  height: 48px;
-  padding: 0 2rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
 
   &:hover:not(:disabled) {
     background: #e8930f;
     border-color: #e8930f;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(252, 163, 17, 0.3);
   }
 
   &:disabled {
     background: rgba(20, 33, 61, 0.3);
     border-color: rgba(20, 33, 61, 0.3);
     color: var(--white);
-    transform: none;
-    box-shadow: none;
   }
 }
 
 .help-text {
-  margin-top: 1rem;
-  color: rgba(20, 33, 61, 0.7);
-  font-size: 0.95rem;
+  text-align: center;
+
+  p {
+    color: rgba(20, 33, 61, 0.7);
+    font-size: 0.95rem;
+    margin: 0;
+  }
 }
 
 // Mobile responsiveness
@@ -326,13 +328,6 @@
 
   .page-subtitle {
     font-size: 1.1rem;
-  }
-
-  .back-btn {
-    position: relative;
-    left: auto;
-    top: auto;
-    margin-bottom: 1rem;
   }
 
   .page-header {

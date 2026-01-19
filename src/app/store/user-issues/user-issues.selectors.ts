@@ -42,9 +42,7 @@ const normalizeStatus = (status: string | null | undefined): IssueStatus => {
     'draft': 'Draft',
     'submitted': 'Submitted',
     'underreview': 'UnderReview',
-    'approved': 'Approved',
     'active': 'Active',
-    'inprogress': 'Active', // Legacy mapping
     'resolved': 'Resolved',
     'rejected': 'Rejected',
     'cancelled': 'Cancelled'

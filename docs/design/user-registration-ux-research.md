@@ -707,7 +707,7 @@ interface Issue {
     accuracy: number;
   };
   urgency: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'submitted' | 'under_review' | 'approved' | 'in_progress' | 'resolved' | 'rejected';
+  status: 'unspecified' | 'draft' | 'submitted' | 'under_review' | 'active' | 'resolved' | 'rejected' | 'cancelled';
   adminNotes?: string;
   communitySupport: {
     votes: number;

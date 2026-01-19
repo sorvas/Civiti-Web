@@ -1,13 +1,9 @@
 <div class="issue-details-container">
-  
+
   <!-- Header -->
   <div class="page-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue/photo" class="back-btn">
-      <span nz-icon nzType="arrow-left"></span>
-      Înapoi
-    </button>
     <h1 class="page-title">Detalii problemă</h1>
-    <p class="page-subtitle">Furnizează informații suplimentare și permite AI să te ajute să creezi un raport cuprinzător</p>
+    <p class="page-subtitle">Descrie problema, soluția dorită și impactul asupra comunității</p>
   </div>
 
   <!-- Progress Indicator -->
@@ -42,7 +38,7 @@
   <div class="summary-section">
     <nz-card nzTitle="Rezumat problemă" class="summary-card">
       <div class="summary-content">
-        
+
         <div class="summary-item" *ngIf="selectedCategory">
           <div class="summary-label">Categorie</div>
           <div class="summary-value">
@@ -68,201 +64,146 @@
   </div>
 
   <!-- Details Form -->
-  <nz-spin [nzSpinning]="isGeneratingAI">
+  <nz-spin [nzSpinning]="isEnhancingAI">
     <div class="details-form-section">
-    <nz-card nzTitle="Detalii problemă" class="details-card">
-      
-      <form nz-form [formGroup]="detailsForm" (ngSubmit)="generateAIDescription()">
-        
-        <!-- Brief Description -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzFor="briefDescription" nzRequired>
-            Descriere scurtă
-          </nz-form-label>
-          <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să descrii pe scurt problema">
-            <textarea
-              nz-input
-              formControlName="briefDescription"
-              id="briefDescription"
-              rows="3"
-              placeholder="Descrie pe scurt ce vezi și care este problema..."
-              maxlength="500">
-            </textarea>
-            <div class="char-count">{{ detailsForm.get('briefDescription')?.value?.length || 0 }}/500</div>
-          </nz-form-control>
-        </nz-form-item>
+      <nz-card nzTitle="Detalii problemă" class="details-card">
 
-        <!-- Urgency Level -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzFor="urgency">Nivel de urgență</nz-form-label>
-          <nz-form-control [nzSpan]="24">
-            <nz-select formControlName="urgency" id="urgency" nzPlaceHolder="Cât de urgentă este această problemă?">
-              <nz-option nzValue="Low" nzLabel="Scăzută - Poate aștepta întreținerea de rutină"></nz-option>
-              <nz-option nzValue="Medium" nzLabel="Medie - Ar trebui abordată curând"></nz-option>
-              <nz-option nzValue="High" nzLabel="Ridicată - Necesită atenție promptă"></nz-option>
-              <nz-option nzValue="Urgent" nzLabel="Urgentă - Pericol de siguranță sau urgență"></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
+        <form nz-form [formGroup]="detailsForm">
 
-        <!-- When Did This Happen -->
-        <nz-form-item>
-          <nz-form-label [nzSpan]="24" nzFor="whenOccurred">Când ai observat aceasta?</nz-form-label>
-          <nz-form-control [nzSpan]="24">
-            <nz-select formControlName="whenOccurred" id="whenOccurred">
-              <nz-option nzValue="now" nzLabel="Chiar acum"></nz-option>
-              <nz-option nzValue="today" nzLabel="Mai devreme astăzi"></nz-option>
-              <nz-option nzValue="yesterday" nzLabel="Ieri"></nz-option>
-              <nz-option nzValue="this-week" nzLabel="Săptămâna aceasta"></nz-option>
-              <nz-option nzValue="longer" nzLabel="Mai mult de o săptămână"></nz-option>
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
+          <!-- Description -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="description" nzRequired>
+              Descrierea problemei
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să descrii problema (minim 10 caractere)">
+              <textarea
+                nz-input
+                formControlName="description"
+                id="description"
+                rows="4"
+                placeholder="Descrie în detaliu problema observată: ce vezi, unde se află exact, de cât timp există..."
+                maxlength="2000">
+              </textarea>
+              <div class="char-count">{{ detailsForm.get('description')?.value?.length || 0 }}/2000</div>
+            </nz-form-control>
+          </nz-form-item>
 
-        <!-- Generate AI Description Button -->
-        <nz-form-item class="generate-section">
-          <nz-form-control [nzSpan]="24">
-            <nz-alert
-              nzMessage="Asistent AI pregătit"
-              nzDescription="Fă clic mai jos pentru a genera o descriere profesională și o soluție propusă bazate pe fotografiile și descrierea ta."
-              nzType="info"
-              nzShowIcon
-              class="ai-info-alert">
-            </nz-alert>
-            
-            <button 
-              nz-button 
-              nzType="primary" 
-              type="submit"
-              [disabled]="!detailsForm.get('briefDescription')?.value || isGeneratingAI"
-              class="generate-btn">
-              <span nz-icon nzType="robot" *ngIf="!isGeneratingAI"></span>
-              <span nz-icon nzType="loading" *ngIf="isGeneratingAI"></span>
-              {{ isGeneratingAI ? 'Se generează...' : 'Generează descriere AI' }}
-            </button>
-          </nz-form-control>
-        </nz-form-item>
+          <!-- Desired Outcome -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="desiredOutcome" nzRequired>
+              Rezultatul dorit
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să descrii soluția dorită (minim 10 caractere)">
+              <textarea
+                nz-input
+                formControlName="desiredOutcome"
+                id="desiredOutcome"
+                rows="3"
+                placeholder="Ce soluție propui? Ce acțiuni ar trebui să întreprindă autoritățile pentru a rezolva această problemă?"
+                maxlength="1000">
+              </textarea>
+              <div class="char-count">{{ detailsForm.get('desiredOutcome')?.value?.length || 0 }}/1000</div>
+            </nz-form-control>
+          </nz-form-item>
 
-      </form>
+          <!-- Community Impact -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="communityImpact" nzRequired>
+              Impactul asupra comunității
+            </nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Te rugăm să descrii impactul asupra comunității (minim 10 caractere)">
+              <textarea
+                nz-input
+                formControlName="communityImpact"
+                id="communityImpact"
+                rows="3"
+                placeholder="Cum afectează această problemă comunitatea? Câți oameni sunt afectați? Ce beneficii ar aduce rezolvarea ei?"
+                maxlength="1000">
+              </textarea>
+              <div class="char-count">{{ detailsForm.get('communityImpact')?.value?.length || 0 }}/1000</div>
+            </nz-form-control>
+          </nz-form-item>
 
-    </nz-card>
-  </div>
+          <!-- Urgency Level -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="urgency">Nivel de urgență</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select formControlName="urgency" id="urgency" nzPlaceHolder="Cât de urgentă este această problemă?">
+                <nz-option nzValue="Low" nzLabel="Scăzută - Poate aștepta întreținerea de rutină"></nz-option>
+                <nz-option nzValue="Medium" nzLabel="Medie - Ar trebui abordată curând"></nz-option>
+                <nz-option nzValue="High" nzLabel="Ridicată - Necesită atenție promptă"></nz-option>
+                <nz-option nzValue="Urgent" nzLabel="Urgentă - Pericol de siguranță sau urgență"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
 
-  <!-- AI Generated Content -->
-  <div class="ai-content-section" *ngIf="aiAnalysis">
-    <nz-card nzTitle="Raport generat de AI" class="ai-content-card">
-      
-      <div class="ai-confidence">
-        <nz-tag [nzColor]="getConfidenceColor(aiAnalysis.aiConfidence || 0)">
-          {{ ((aiAnalysis.aiConfidence || 0) * 100) | number:'1.0-0' }}% încredere
-        </nz-tag>
-      </div>
+          <!-- When Did This Happen -->
+          <nz-form-item>
+            <nz-form-label [nzSpan]="24" nzFor="whenOccurred">Când ai observat problema?</nz-form-label>
+            <nz-form-control [nzSpan]="24">
+              <nz-select formControlName="whenOccurred" id="whenOccurred">
+                <nz-option nzValue="now" nzLabel="Chiar acum"></nz-option>
+                <nz-option nzValue="today" nzLabel="Mai devreme astăzi"></nz-option>
+                <nz-option nzValue="yesterday" nzLabel="Ieri"></nz-option>
+                <nz-option nzValue="this-week" nzLabel="Săptămâna aceasta"></nz-option>
+                <nz-option nzValue="longer" nzLabel="Mai mult de o săptămână"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
 
-      <div class="ai-content">
-        
-        <div class="ai-section" *ngIf="aiAnalysis.aiGeneratedDescription">
-          <h4>Descriere profesională</h4>
-
-          <!-- View mode -->
-          <ng-container *ngIf="!isEditingDescription">
-            <div class="ai-text">{{ aiAnalysis.aiGeneratedDescription }}</div>
-            <button nz-button nzType="link" nzSize="small" (click)="editDescription()">
-              <span nz-icon nzType="edit"></span>
-              Editează descrierea
-            </button>
-          </ng-container>
-
-          <!-- Edit mode -->
-          <ng-container *ngIf="isEditingDescription">
-            <textarea
-              nz-input
-              #descriptionInput
-              [ngModel]="aiAnalysis.aiGeneratedDescription"
-              rows="4"
-              class="edit-textarea">
-            </textarea>
-            <div class="edit-actions">
-              <button nz-button nzType="primary" nzSize="small" (click)="saveDescription(descriptionInput.value)">
-                <span nz-icon nzType="check"></span>
-                Salvează
+          <!-- AI Enhancement Button -->
+          <div class="ai-section">
+            <div class="ai-button-wrapper">
+              <button
+                nz-button
+                nzType="default"
+                type="button"
+                [disabled]="!detailsForm.valid || isEnhancingAI || isAIEnhanced"
+                (click)="enhanceWithAI()"
+                class="enhance-btn">
+                <span nz-icon nzType="robot" *ngIf="!isEnhancingAI"></span>
+                <span nz-icon nzType="loading" *ngIf="isEnhancingAI"></span>
+                {{ isEnhancingAI ? 'Se îmbunătățește...' : 'Îmbunătățește cu AI' }}
               </button>
-              <button nz-button nzType="default" nzSize="small" (click)="cancelEditDescription()">
-                <span nz-icon nzType="close"></span>
-                Anulează
-              </button>
+              <p class="ai-helper-text">Opțional: Lasă AI-ul să îmbunătățească textul introdus</p>
             </div>
-          </ng-container>
-        </div>
-
-        <div class="ai-section" *ngIf="aiAnalysis.aiProposedSolution">
-          <h4>Soluție propusă</h4>
-
-          <!-- View mode -->
-          <ng-container *ngIf="!isEditingSolution">
-            <div class="ai-text">{{ aiAnalysis.aiProposedSolution }}</div>
-            <button nz-button nzType="link" nzSize="small" (click)="editSolution()">
-              <span nz-icon nzType="edit"></span>
-              Editează soluția
-            </button>
-          </ng-container>
-
-          <!-- Edit mode -->
-          <ng-container *ngIf="isEditingSolution">
-            <textarea
-              nz-input
-              #solutionInput
-              [ngModel]="aiAnalysis.aiProposedSolution"
-              rows="4"
-              class="edit-textarea">
-            </textarea>
-            <div class="edit-actions">
-              <button nz-button nzType="primary" nzSize="small" (click)="saveSolution(solutionInput.value)">
-                <span nz-icon nzType="check"></span>
-                Salvează
-              </button>
-              <button nz-button nzType="default" nzSize="small" (click)="cancelEditSolution()">
-                <span nz-icon nzType="close"></span>
-                Anulează
-              </button>
+            <div class="ai-success" *ngIf="isAIEnhanced">
+              <span nz-icon nzType="check-circle" nzTheme="fill" class="ai-check"></span>
+              <span>Text îmbunătățit cu AI</span>
             </div>
-          </ng-container>
-        </div>
+          </div>
 
+        </form>
+
+      </nz-card>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation-section">
+      <div class="nav-buttons">
+        <button
+          nz-button
+          nzType="default"
+          nzSize="large"
+          routerLink="/create-issue/photo"
+          class="nav-btn">
+          <span nz-icon nzType="arrow-left"></span>
+          Înapoi
+        </button>
+
+        <div class="nav-spacer"></div>
+
+        <button
+          nz-button
+          nzType="primary"
+          nzSize="large"
+          [disabled]="!detailsForm.valid || isEnhancingAI"
+          (click)="continueToReview()"
+          class="nav-btn continue-btn">
+          Selectează autorități
+          <span nz-icon nzType="arrow-right"></span>
+        </button>
       </div>
-
-    </nz-card>
-  </div>
-
-  <!-- Navigation -->
-  <div class="navigation-section">
-    <div class="nav-buttons">
-      <button 
-        nz-button 
-        nzType="default" 
-        nzSize="large"
-        routerLink="/create-issue/photo"
-        class="nav-btn">
-        <span nz-icon nzType="arrow-left"></span>
-        Înapoi
-      </button>
-      
-      <div class="nav-spacer"></div>
-      
-      <button
-        nz-button
-        nzType="primary"
-        nzSize="large"
-        [disabled]="!aiAnalysis"
-        (click)="continueToReview()"
-        class="nav-btn continue-btn">
-        Selectează autorități
-        <span nz-icon nzType="arrow-right"></span>
-      </button>
-    </div>
-    
-    <div class="requirement-note" *ngIf="!aiAnalysis">
-      <p>Te rugăm să generezi o descriere AI pentru a continua</p>
-    </div>
     </div>
   </nz-spin>
 

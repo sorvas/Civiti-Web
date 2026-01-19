@@ -136,7 +136,7 @@ CREATE TABLE public.issues (
     
     -- Issue metadata
     urgency VARCHAR(20) NOT NULL DEFAULT 'medium' CHECK (urgency IN ('low', 'medium', 'high', 'urgent')),
-    status VARCHAR(30) NOT NULL DEFAULT 'submitted' CHECK (status IN ('draft', 'submitted', 'under_review', 'approved', 'in_progress', 'resolved', 'rejected')),
+    status VARCHAR(30) NOT NULL DEFAULT 'submitted' CHECK (status IN ('unspecified', 'draft', 'submitted', 'under_review', 'active', 'resolved', 'rejected', 'cancelled')),
     emails_sent INTEGER NOT NULL DEFAULT 0 CHECK (emails_sent >= 0),
     
     -- Extended description fields

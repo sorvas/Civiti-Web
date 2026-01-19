@@ -12,14 +12,6 @@
   margin-right: auto;
 }
 
-.back-btn {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  color: var(--oxford-blue);
-  font-weight: 600;
-}
-
 .page-title {
   font-size: 2.5rem;
   font-weight: 700;
@@ -135,25 +127,6 @@
 .upload-card {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(20, 33, 61, 0.1);
-}
-
-.photo-tips {
-  margin-bottom: 2rem;
-}
-
-.tips-alert {
-  border-radius: 8px;
-}
-
-.tips-list {
-  margin: 0;
-  padding-left: 0;
-  list-style: none;
-
-  li {
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
 }
 
 .mock-upload-area {
@@ -360,13 +333,6 @@ p.upload-note {
 
   .page-title {
     font-size: 2rem;
-  }
-
-  .back-btn {
-    position: relative;
-    left: auto;
-    top: auto;
-    margin-bottom: 1rem;
   }
 
   .page-header {

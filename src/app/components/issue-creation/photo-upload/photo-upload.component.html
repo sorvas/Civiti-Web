@@ -2,10 +2,6 @@
   
   <!-- Header -->
   <div class="page-header">
-    <button nz-button nzType="text" nzSize="large" routerLink="/create-issue" class="back-btn">
-      <span nz-icon nzType="arrow-left"></span>
-      Înapoi
-    </button>
     <h1 class="page-title">Documentează problema</h1>
     <p class="page-subtitle">Fă sau încarcă fotografii pentru a ajuta autoritățile să înțeleagă problema</p>
   </div>
@@ -54,25 +50,6 @@
   <!-- Photo Upload Section -->
   <div class="upload-section">
     <nz-card nzTitle="Adaugă fotografii" class="upload-card">
-      
-      <!-- Photo Tips -->
-      <div class="photo-tips">
-        <nz-alert
-          nzMessage="Sfaturi pentru fotografii mai bune"
-          nzType="info"
-          nzShowIcon
-          nzCloseable="false"
-          class="tips-alert">
-          <div class="tips-content">
-            <ul class="tips-list">
-              <li>📸 Apropie-te pentru a arăta detaliile clar</li>
-              <li>🌅 Fă fotografii în lumină bună, dacă este posibil</li>
-              <li>📏 Include contextul din jur pentru perspectivă</li>
-              <li>🔄 Mai multe unghiuri ajută la relatarea poveștii</li>
-            </ul>
-          </div>
-        </nz-alert>
-      </div>
 
       <!-- Upload Area -->
       <nz-spin [nzSpinning]="isUploading">
