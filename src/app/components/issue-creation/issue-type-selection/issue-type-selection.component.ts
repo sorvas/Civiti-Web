@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -16,18 +17,10 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 
 import { AppState } from '../../../store/app.state';
 import { selectIsAuthenticated } from '../../../store/auth/auth.selectors';
-import { IssueCategory, ISSUE_CATEGORIES } from '../../../types/civica-api.types';
+import { CategoryService, CategoryInfo } from '../../../services/category.service';
 import { LocationPickerModalComponent } from '../../shared/location-picker-modal/location-picker-modal.component';
 import { LocationData, BUCHAREST_CENTER } from '../../../types/location.types';
 import { DEFAULT_CITY } from '../../../data/romanian-locations';
-
-interface IssueCategoryInfo {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  examples: string[];
-}
 
 @Component({
   selector: 'app-issue-type-selection',
@@ -51,8 +44,8 @@ interface IssueCategoryInfo {
 export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  categories: IssueCategoryInfo[] = [];
-  selectedCategory: IssueCategoryInfo | null = null;
+  categories: CategoryInfo[] = [];
+  selectedCategory: CategoryInfo | null = null;
   isLoading = false;
   currentLocation: {
     address: string;
@@ -67,7 +60,8 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private router: Router,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private categoryService: CategoryService
   ) {
     this.isAuthenticated$ = this.store.select(selectIsAuthenticated);
   }
@@ -85,17 +79,19 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   private loadCategories(): void {
     this.isLoading = true;
 
-    // Load categories from the constants defined in API types
-    this.categories = Object.entries(ISSUE_CATEGORIES).map(([id, name]) => ({
-      id: id as IssueCategory,
-      name,
-      description: `Probleme legate de ${name.toLowerCase()}`,
-      icon: this.getCategoryIcon(id as IssueCategory),
-      examples: this.getCategoryExamples(id as IssueCategory)
-    }));
-
-    this.isLoading = false;
-    console.log('[TIP PROBLEMĂ] Categorii încărcate:', this.categories.length);
+    this.categoryService.getCategoriesWithInfo()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (categories) => {
+          this.categories = categories;
+          this.isLoading = false;
+          console.log('[TIP PROBLEMĂ] Categorii încărcate:', this.categories.length);
+        },
+        error: (error) => {
+          console.error('[TIP PROBLEMĂ] Eroare la încărcarea categoriilor:', error);
+          this.isLoading = false;
+        }
+      });
   }
 
   private loadCurrentLocation(): void {
@@ -119,7 +115,7 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
     };
   }
 
-  selectCategory(category: IssueCategoryInfo): void {
+  selectCategory(category: CategoryInfo): void {
     this.selectedCategory = category;
     console.log('[TIP PROBLEMĂ] Categorie selectată:', category.name);
   }
@@ -202,27 +198,4 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getCategoryIcon(categoryId: IssueCategory): string {
-    const icons: { [key in IssueCategory]: string } = {
-      Infrastructure: 'build',
-      Environment: 'global',
-      Transportation: 'car',
-      PublicServices: 'tool',
-      Safety: 'safety',
-      Other: 'question-circle'
-    };
-    return icons[categoryId];
-  }
-
-  private getCategoryExamples(categoryId: IssueCategory): string[] {
-    const examples: { [key in IssueCategory]: string[] } = {
-      Infrastructure: ['Drum deteriorat', 'Trotuar stricat', 'Grop în carosabil'],
-      Environment: ['Poluare', 'Zgomot', 'Defrișări'],
-      Transportation: ['Semafor defect', 'Lipsă trecere pietoni', 'Transport public'],
-      PublicServices: ['Lipsă apă', 'Pane curent', 'Problemă gaze'],
-      Safety: ['Iluminat public', 'Zone nesigure', 'Câini fără stăpân'],
-      Other: ['Altă problemă', 'Nedefinită', 'Diverse']
-    };
-    return examples[categoryId];
-  }
 }

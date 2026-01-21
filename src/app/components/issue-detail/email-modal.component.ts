@@ -6,7 +6,8 @@ import { NgZorroModule } from '../../shared/ng-zorro.module';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
-import { IssueDetailResponse, ISSUE_CATEGORIES, URGENCY_LEVELS } from '../../types/civica-api.types';
+import { IssueDetailResponse, URGENCY_LEVELS } from '../../types/civica-api.types';
+import { CategoryService } from '../../services/category.service';
 
 export interface EmailModalData {
     issue: IssueDetailResponse;
@@ -32,6 +33,7 @@ export class EmailModalComponent implements OnInit {
     private _store = inject(Store<AppState>);
     private _message = inject(NzMessageService);
     private _modalRef = inject(NzModalRef);
+    private _categoryService = inject(CategoryService);
 
     issue: IssueDetailResponse;
     authority: string;
@@ -60,7 +62,7 @@ export class EmailModalComponent implements OnInit {
     private generateEmailTemplate(): void {
         if (!this.issue || !this.authority) return;
 
-        const categoryLabel = ISSUE_CATEGORIES[this.issue.category] || this.issue.category;
+        const categoryLabel = this._categoryService.getCategoryLabel(this.issue.category);
         const urgencyLabel = URGENCY_LEVELS[this.issue.urgency] || this.issue.urgency;
 
         const subject = `Problemă urgentă: ${this.issue.title}`;

@@ -23,6 +23,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { AuthorityListResponse } from '../../../types/civica-api.types';
 import { ApiService } from '../../../services/api.service';
+import { CategoryInfo } from '../../../services/category.service';
 import { DEFAULT_CITY } from '../../../data/romanian-locations';
 
 /**
@@ -50,14 +51,6 @@ interface LocationData {
   accuracy?: number;
   city?: string;
   district?: string;
-}
-
-interface IssueCategoryInfo {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  examples: string[];
 }
 
 @Component({
@@ -96,7 +89,7 @@ export class AuthoritySelectionComponent implements OnInit {
   private readonly loadTrigger$ = new Subject<string>();
 
   // Data from previous steps
-  selectedCategory: IssueCategoryInfo | null = null;
+  selectedCategory: CategoryInfo | null = null;
   currentLocation: LocationData | null = null;
 
   // Issue location for filtering authorities

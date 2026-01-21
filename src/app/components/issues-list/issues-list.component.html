@@ -90,7 +90,7 @@
               nzAllowClear
               nzSize="default"
               style="width: 100%">
-              <nz-option *ngFor="let c of categories" [nzValue]="c[0]" [nzLabel]="c[1]"></nz-option>
+              <nz-option *ngFor="let c of categories" [nzValue]="c.value" [nzLabel]="c.label"></nz-option>
             </nz-select>
           </nz-col>
 

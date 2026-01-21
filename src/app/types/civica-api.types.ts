@@ -98,6 +98,20 @@ export type LeaderboardCategory = 'points' | 'emails' | 'issues';
 export type Priority = 'Low' | 'Medium' | 'High' | 'Critical';
 
 // ============================================
+// Category Types
+// ============================================
+
+/**
+ * Category response from GET /api/categories
+ */
+export interface CategoryResponse {
+  /** English identifier (e.g., 'Infrastructure') */
+  value: string;
+  /** Romanian display label (e.g., 'Infrastructură') */
+  label: string;
+}
+
+// ============================================
 // Authority Types
 // ============================================
 
@@ -240,6 +254,31 @@ export interface EditUserIssueRequest {
 export interface BulkApproveRequest {
   issueIds: string[];
   adminNotes?: string;
+}
+
+// ============================================
+// AI Enhancement Types
+// ============================================
+
+/**
+ * Request payload for AI text enhancement
+ * POST /api/issues/enhance-text
+ */
+export interface EnhanceTextRequest {
+  description: string;
+  desiredOutcome: string;
+  communityImpact: string;
+  category: string;
+  location?: string;
+}
+
+/**
+ * Response from AI text enhancement
+ */
+export interface EnhanceTextResponse {
+  enhancedDescription: string;
+  enhancedDesiredOutcome: string;
+  enhancedCommunityImpact: string;
 }
 
 // ============================================
@@ -714,14 +753,8 @@ export interface FilterOptions {
 // Constants
 // ============================================
 
-export const ISSUE_CATEGORIES: Record<IssueCategory, string> = {
-  Infrastructure: 'Infrastructură',
-  Environment: 'Mediu',
-  Transportation: 'Transport',
-  PublicServices: 'Servicii Publice',
-  Safety: 'Siguranță',
-  Other: 'Altele'
-};
+// Note: Categories are loaded from backend via GET /api/categories
+// Use CategoryService for category labels
 
 export const URGENCY_LEVELS: Record<UrgencyLevel, string> = {
   Unspecified: 'Nespecificat',
@@ -756,6 +789,7 @@ export const API_ENDPOINTS = {
 
   // Endpoints
   HEALTH: '/api/health',
+  CATEGORIES: '/api/categories',
 
   // Auth
   AUTH_STATUS: '/api/auth/status',
@@ -771,6 +805,7 @@ export const API_ENDPOINTS = {
   ISSUES: '/api/issues',
   ISSUE_BY_ID: (id: string) => `/api/issues/${id}`,
   TRACK_EMAIL: (id: string) => `/api/issues/${id}/email-sent`,
+  ENHANCE_TEXT: '/api/issues/enhance-text',
 
   // User Issue Management
   USER_ISSUE_BY_ID: (id: string) => `/api/user/issues/${id}`,

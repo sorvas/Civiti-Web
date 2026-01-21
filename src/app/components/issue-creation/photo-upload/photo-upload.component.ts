@@ -33,16 +33,7 @@ import imageCompression from 'browser-image-compression';
 
 import { StorageService, UploadResult } from '../../../services/storage.service';
 import { SupabaseAuthService } from '../../../services/supabase-auth.service';
-import { IssueCategory } from '../../../types/civica-api.types';
-
-// Interface for category data from session storage
-interface IssueCategoryInfo {
-  id: IssueCategory;
-  name: string;
-  description: string;
-  icon: string;
-  examples: string[];
-}
+import { CategoryInfo } from '../../../services/category.service';
 
 // Keep local PhotoData interface for component
 interface PhotoData {
@@ -105,7 +96,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     initialQuality: 0.85,      // 85% quality - visually identical
   };
 
-  selectedCategory: IssueCategoryInfo | null = null;
+  selectedCategory: CategoryInfo | null = null;
   uploadedPhotos: PhotoData[] = [];
   isUploading = false;
   uploadProgress = 0;
@@ -260,7 +251,7 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadSelectedCategory(): void {
     const categoryData = sessionStorage.getItem('civica_selected_category');
     if (categoryData) {
-      this.selectedCategory = JSON.parse(categoryData) as IssueCategoryInfo;
+      this.selectedCategory = JSON.parse(categoryData) as CategoryInfo;
     } else {
       // No category selected, redirect back
       console.warn('[PHOTO UPLOAD] No category selected, redirecting...');

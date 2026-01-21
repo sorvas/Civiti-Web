@@ -33,7 +33,10 @@ import {
   PaginationParams,
   EditUserIssueRequest,
   AdminActivityLogEntry,
-  ActivityLogQueryParams
+  ActivityLogQueryParams,
+  EnhanceTextRequest,
+  EnhanceTextResponse,
+  CategoryResponse
 } from '../types/civica-api.types';
 
 @Injectable({
@@ -50,6 +53,18 @@ export class ApiService {
   
   getHealth(): Observable<HealthResponse> {
     return this.http.get<HealthResponse>(`${this.baseUrl}/health`);
+  }
+
+  // ============================================
+  // Categories
+  // ============================================
+
+  /**
+   * Get all issue categories
+   * GET /api/categories
+   */
+  getCategories(): Observable<CategoryResponse[]> {
+    return this.http.get<CategoryResponse[]>(`${this.baseUrl}/categories`);
   }
 
   // ============================================
@@ -125,6 +140,15 @@ export class ApiService {
 
   trackEmailSent(issueId: string, data: TrackEmailRequest): Observable<TrackEmailResponse> {
     return this.http.post<TrackEmailResponse>(`${this.baseUrl}/issues/${issueId}/email-sent`, data);
+  }
+
+  /**
+   * Enhance issue text using AI
+   * POST /api/issues/enhance-text
+   * Requires authentication
+   */
+  enhanceIssueText(data: EnhanceTextRequest): Observable<EnhanceTextResponse> {
+    return this.http.post<EnhanceTextResponse>(`${this.baseUrl}/issues/enhance-text`, data);
   }
 
   // ============================================

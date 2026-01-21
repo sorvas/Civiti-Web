@@ -25,7 +25,8 @@ import * as IssueActions from '../../store/issues/issue.actions';
 import * as IssueSelectors from '../../store/issues/issue.selectors';
 import { selectIsAuthenticated } from '../../store/auth/auth.selectors';
 import { selectCity } from '../../store/location/location.selectors';
-import { IssueItem, IssueCategory, ISSUE_CATEGORIES } from '../../types/civica-api.types';
+import { IssueItem, IssueCategory, CategoryResponse } from '../../types/civica-api.types';
+import { CategoryService } from '../../services/category.service';
 import { BUCHAREST_DISTRICTS, DEFAULT_CITY } from '../../data/romanian-locations';
 import { BUCHAREST_LOCATION_BIAS } from '../../types/location.types';
 import { StatusTextPipe, StatusColorPipe } from '../../pipes/status.pipe';
@@ -62,6 +63,7 @@ export class IssuesListComponent implements OnInit, OnDestroy {
   private _store = inject(Store<AppState>);
   private _modal = inject(NzModalService);
   private _platformId = inject(PLATFORM_ID);
+  private _categoryService = inject(CategoryService);
   private _destroy$ = new Subject<void>();
   private _imageErrorCount: Map<string, number> = new Map();
 
@@ -88,7 +90,7 @@ export class IssuesListComponent implements OnInit, OnDestroy {
   selectedCategory: IssueCategory | null = null;
   addressFilter: string | null = null;
   districts = BUCHAREST_DISTRICTS;
-  categories = Object.entries(ISSUE_CATEGORIES) as [IssueCategory, string][];
+  categories: CategoryResponse[] = [];
 
   // Google autocomplete for address search
   addressSearchControl = new FormControl('');
@@ -121,6 +123,13 @@ export class IssuesListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Load categories from backend
+    this._categoryService.getCategories()
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(categories => {
+        this.categories = categories;
+      });
+
     // Subscribe to city from location store
     this._store.select(selectCity)
       .pipe(takeUntil(this._destroy$))

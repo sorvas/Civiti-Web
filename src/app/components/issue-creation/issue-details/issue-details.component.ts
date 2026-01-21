@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 // NG-ZORRO imports
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -16,16 +17,9 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-import { IssueCategory } from '../../../types/civica-api.types';
-
-// Interface for category data from session storage
-interface IssueCategoryInfo {
-  id: IssueCategory;
-  name: string;
-  description: string;
-  icon: string;
-  examples: string[];
-}
+import { EnhanceTextRequest } from '../../../types/civica-api.types';
+import { ApiService } from '../../../services/api.service';
+import { CategoryInfo } from '../../../services/category.service';
 
 // Interface for photo data from session storage
 interface PhotoData {
@@ -71,7 +65,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   // Issue ID - generated once and reused across saves
   private issueId: string | null = null;
 
-  selectedCategory: IssueCategoryInfo | null = null;
+  selectedCategory: CategoryInfo | null = null;
   uploadedPhotos: PhotoData[] = [];
   currentLocation: { address: string; coordinates: { lat: number; lng: number }; district?: string } | null = null;
   detailsForm!: FormGroup;
@@ -81,7 +75,8 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private apiService: ApiService
   ) {
     this.initializeForm();
   }
@@ -188,30 +183,38 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const description = this.detailsForm.get('description')?.value;
-    const desiredOutcome = this.detailsForm.get('desiredOutcome')?.value;
-    const communityImpact = this.detailsForm.get('communityImpact')?.value;
+    const request: EnhanceTextRequest = {
+      description: this.detailsForm.get('description')?.value,
+      desiredOutcome: this.detailsForm.get('desiredOutcome')?.value,
+      communityImpact: this.detailsForm.get('communityImpact')?.value,
+      category: this.selectedCategory?.id || '',
+      location: this.currentLocation?.address
+    };
 
     console.log('[ISSUE DETAILS] Enhancing text with AI...');
     this.isEnhancingAI = true;
 
-    // TODO: Replace with actual API call when backend implements AI enhancement
-    setTimeout(() => {
-      // Simulate AI enhancement - in production this would call an AI service
-      this.detailsForm.patchValue({
-        description: `${description} Această situație necesită atenția imediată a autorităților competente pentru a preveni agravarea problemei și pentru a asigura siguranța cetățenilor.`,
-        desiredOutcome: `${desiredOutcome} Se solicită intervenția promptă și profesionistă a echipelor specializate, cu raportarea progresului către cetățenii afectați.`,
-        communityImpact: `${communityImpact} Rezolvarea acestei probleme va contribui semnificativ la îmbunătățirea calității vieții în comunitate și va demonstra angajamentul autorităților față de nevoile cetățenilor.`
+    this.apiService.enhanceIssueText(request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.detailsForm.patchValue({
+            description: response.enhancedDescription,
+            desiredOutcome: response.enhancedDesiredOutcome,
+            communityImpact: response.enhancedCommunityImpact
+          });
+          this.isEnhancingAI = false;
+          this.isAIEnhanced = true;
+          console.log('[ISSUE DETAILS] Text enhanced with AI');
+          this.message.success('Textul a fost îmbunătățit cu succes!');
+          this.saveFormToSession();
+        },
+        error: (error) => {
+          console.error('[ISSUE DETAILS] AI enhancement failed:', error);
+          this.isEnhancingAI = false;
+          this.message.error('Nu s-a putut îmbunătăți textul. Încercați din nou.');
+        }
       });
-
-      this.isEnhancingAI = false;
-      this.isAIEnhanced = true;
-      console.log('[ISSUE DETAILS] Text enhanced with AI');
-      this.message.success('Textul a fost îmbunătățit cu succes!');
-
-      // Save to session for back navigation support
-      this.saveFormToSession();
-    }, 1500);
   }
 
   continueToReview(): void {

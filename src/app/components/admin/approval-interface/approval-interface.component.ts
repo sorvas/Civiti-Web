@@ -31,7 +31,6 @@ import {
   ApproveIssueRequest,
   RejectIssueRequest,
   BulkApproveRequest,
-  IssueCategory,
   UrgencyLevel,
   IssueStatus
 } from '../../../types/civica-api.types';
