@@ -81,15 +81,13 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
 
     this.categoryService.getCategoriesWithInfo()
       .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (categories) => {
-          this.categories = categories;
-          this.isLoading = false;
-          console.log('[TIP PROBLEMĂ] Categorii încărcate:', this.categories.length);
-        },
-        error: (error) => {
-          console.error('[TIP PROBLEMĂ] Eroare la încărcarea categoriilor:', error);
-          this.isLoading = false;
+      .subscribe(categories => {
+        this.categories = categories;
+        this.isLoading = false;
+        if (categories.length === 0) {
+          console.warn('[TIP PROBLEMĂ] Nu s-au putut încărca categoriile');
+        } else {
+          console.log('[TIP PROBLEMĂ] Categorii încărcate:', categories.length);
         }
       });
   }
