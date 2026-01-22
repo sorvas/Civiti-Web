@@ -19,8 +19,7 @@ import { AppState } from '../../../store/app.state';
 import { selectIsAuthenticated } from '../../../store/auth/auth.selectors';
 import { CategoryService, CategoryInfo } from '../../../services/category.service';
 import { LocationPickerModalComponent } from '../../shared/location-picker-modal/location-picker-modal.component';
-import { LocationData, BUCHAREST_CENTER } from '../../../types/location.types';
-import { DEFAULT_CITY } from '../../../data/romanian-locations';
+import { LocationData } from '../../../types/location.types';
 
 @Component({
   selector: 'app-issue-type-selection',
@@ -112,13 +111,8 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Default location for București (no specific sector)
-    this.currentLocation = {
-      address: `${DEFAULT_CITY}, România`,
-      coordinates: BUCHAREST_CENTER,
-      city: DEFAULT_CITY,
-      district: undefined
-    };
+    // No default - user must explicitly select a location
+    this.currentLocation = null;
   }
 
   selectCategory(category: CategoryInfo): void {
@@ -127,16 +121,10 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if the current location is the default generic one (no specific address selected)
+   * Check if user has selected a valid location
    */
-  isLocationGeneric(): boolean {
-    if (!this.currentLocation) return true;
-
-    // Check if it's the default generic address without a district
-    const isDefaultAddress = this.currentLocation.address === `${DEFAULT_CITY}, România`;
-    const hasNoDistrict = !this.currentLocation.district;
-
-    return isDefaultAddress && hasNoDistrict;
+  hasValidLocation(): boolean {
+    return this.currentLocation !== null;
   }
 
   continueToPhotos(): void {
@@ -145,9 +133,9 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Validate that user has selected a specific location
-    if (this.isLocationGeneric()) {
-      this.locationError = 'Te rugăm să selectezi o adresă specifică pentru a continua';
+    // Validate that user has selected a location
+    if (!this.hasValidLocation()) {
+      this.locationError = 'Te rugăm să selectezi o locație pentru a continua';
       // Auto-open the location picker
       this.changeLocation();
       return;
@@ -196,10 +184,8 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
         // Save to session storage for persistence
         sessionStorage.setItem('civica_current_location', JSON.stringify(this.currentLocation));
 
-        // Clear location error if a valid location was selected
-        if (!this.isLocationGeneric()) {
-          this.locationError = null;
-        }
+        // Clear location error since a valid location was selected
+        this.locationError = null;
       }
     });
   }

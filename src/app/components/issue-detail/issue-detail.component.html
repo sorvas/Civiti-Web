@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background">
+<div class="bg-background">
   <div class="container mx-auto p-4 max-w-6xl">
     <!-- Loading State -->
     <div *ngIf="isLoading$ | async" class="text-center py-12">
@@ -17,16 +17,11 @@
             <nz-card>
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1">
-                  <h1 class="text-2xl font-bold text-oxford-blue mb-2">
+                  <h1 class="text-2xl font-bold text-oxford-blue">
                     <nz-tag *ngIf="getUrgencyLevel(issue) === 'urgent'" nzColor="error" class="mr-2">
                       URGENT
                     </nz-tag>{{ issue.title }}
                   </h1>
-                  <div class="flex items-center gap-3">
-                    <nz-tag [nzColor]="issue.status | statusColor">
-                      {{ issue.status | statusText }}
-                    </nz-tag>
-                  </div>
                 </div>
                 <div class="text-right">
                   <div class="text-xs text-oxford-blue opacity-60">Raportată acum</div>
@@ -36,10 +31,15 @@
                 </div>
               </div>
 
-              <!-- Location -->
-              <div class="flex items-center text-oxford-blue opacity-75 text-sm">
-                <i nz-icon nzType="environment" nzTheme="outline" class="mr-2"></i>
-                {{ issue.address }}
+              <!-- Location and Status -->
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center text-oxford-blue opacity-75">
+                  <i nz-icon nzType="environment" nzTheme="outline" class="mr-2"></i>
+                  {{ issue.address }}
+                </div>
+                <nz-tag [nzColor]="issue.status | statusColor" class="status-tag-no-margin">
+                  {{ issue.status | statusText }}
+                </nz-tag>
               </div>
             </nz-card>
 
@@ -157,31 +157,32 @@
 
             <!-- Authorities List -->
             <nz-card
-              *ngIf="issue.authorities && issue.authorities.length > 0">
+              *ngIf="issue.authorities && issue.authorities.length > 0"
+              nzSize="small">
               <nz-card-meta nzTitle="Autorități Responsabile" [nzAvatar]="authIcon">
               </nz-card-meta>
               <ng-template #authIcon>
                 <i nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
-              <div class="space-y-3 mt-4">
-                <div *ngFor="let authority of issue.authorities"
-                  class="p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-oxford-blue">{{ authority.name }}</h4>
-                    <nz-badge [nzCount]="0" [nzShowZero]="false">
-                      <i nz-icon [nzType]="authority.isPredefined ? 'bank' : 'user'"
-                        class="text-oxford-blue opacity-50 text-xl"></i>
-                    </nz-badge>
+              <div class="text-sm mt-4">
+                <ng-container *ngFor="let authority of issue.authorities; let last = last">
+                  <div class="flex justify-between items-center">
+                    <span class="text-oxford-blue">{{ authority.name }}</span>
+                    <i nz-icon [nzType]="authority.isPredefined ? 'bank' : 'user'" nzTheme="outline"
+                       class="text-oxford-blue opacity-50"></i>
                   </div>
-                  <p class="text-sm text-oxford-blue opacity-75 mb-3">{{ authority.email }}</p>
-                  <button nz-button nzType="primary" nzBlock
-                          [disabled]="isTerminalState(issue)"
-                          [nz-tooltip]="isTerminalState(issue) ? 'Problema a fost închisă' : ''"
-                          (click)="!isTerminalState(issue) && openEmailModalWithEmail(authority.email, issue)">
-                    <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
-                    {{ isTerminalState(issue) ? 'Închisă' : 'Trimite Email' }}
-                  </button>
-                </div>
+                  <nz-divider *ngIf="!last" class="my-2"></nz-divider>
+                </ng-container>
+              </div>
+              <!-- Single Email Campaign Button -->
+              <div class="mt-4">
+                <button nz-button nzType="primary" nzBlock
+                        [disabled]="isTerminalState(issue)"
+                        [nz-tooltip]="isTerminalState(issue) ? 'Problema a fost închisă' : ''"
+                        (click)="!isTerminalState(issue) && openEmailCampaignModal(issue)">
+                  <i nz-icon nzType="mail" nzTheme="outline" class="mr-2"></i>
+                  {{ isTerminalState(issue) ? 'Închisă' : 'Trimite Mail' }}
+                </button>
               </div>
             </nz-card>
 
@@ -202,37 +203,51 @@
             </nz-card>
 
             <!-- Share Section -->
-            <nz-card>
+            <nz-card nzSize="small">
               <nz-card-meta nzTitle="Distribuie Problema" [nzAvatar]="shareIcon">
               </nz-card-meta>
               <ng-template #shareIcon>
                 <i nz-icon nzType="share-alt" nzTheme="outline" class="text-oxford-blue"></i>
               </ng-template>
-              <p class="text-sm text-oxford-blue opacity-75 mb-4 mt-4">
-                Ajută la creșterea vizibilității acestei probleme distribuind-o pe rețelele sociale.
-              </p>
-              <nz-space nzAlign="center" class="w-full justify-center">
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
-                  nzTooltipTitle="În curând">
-                  <i nz-icon nzType="facebook" nzTheme="outline"></i>
-                </button>
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
-                  nzTooltipTitle="În curând">
-                  <i nz-icon nzType="twitter" nzTheme="outline"></i>
-                </button>
-                <button *nzSpaceItem nz-button nzShape="circle" nzSize="large" [disabled]="true" nz-tooltip
-                  nzTooltipTitle="În curând">
-                  <i nz-icon nzType="link" nzTheme="outline"></i>
-                </button>
-              </nz-space>
+              <div class="text-sm mt-4">
+                <p class="text-oxford-blue opacity-75 mb-4">
+                  Ajută la creșterea vizibilității acestei probleme distribuind-o pe rețelele sociale.
+                </p>
+                <nz-space nzAlign="center" class="w-full justify-center">
+                  <button *nzSpaceItem nz-button nzShape="circle" nzSize="large"
+                    nz-tooltip nzTooltipTitle="Distribuie pe Facebook"
+                    (click)="shareOnFacebook(issue)">
+                    <i nz-icon nzType="facebook" nzTheme="outline"></i>
+                  </button>
+                  <button *nzSpaceItem nz-button nzShape="circle" nzSize="large"
+                    nz-tooltip nzTooltipTitle="Distribuie pe X (Twitter)"
+                    (click)="shareOnTwitter(issue)">
+                    <i nz-icon nzType="twitter" nzTheme="outline"></i>
+                  </button>
+                  <button *nzSpaceItem nz-button nzShape="circle" nzSize="large"
+                    nz-tooltip nzTooltipTitle="Distribuie pe LinkedIn"
+                    (click)="shareOnLinkedIn(issue)">
+                    <i nz-icon nzType="linkedin" nzTheme="outline"></i>
+                  </button>
+                  <button *nzSpaceItem nz-button nzShape="circle" nzSize="large"
+                    nz-tooltip nzTooltipTitle="Copiază link"
+                    (click)="copyIssueLink(issue)">
+                    <i nz-icon nzType="link" nzTheme="outline"></i>
+                  </button>
+                </nz-space>
+              </div>
             </nz-card>
 
             <!-- Issue Info -->
             <nz-card nzSize="small">
-              <nz-card-meta nzTitle="Informații Problemă"></nz-card-meta>
+              <nz-card-meta nzTitle="Informații Problemă" [nzAvatar]="infoIcon">
+              </nz-card-meta>
+              <ng-template #infoIcon>
+                <i nz-icon nzType="info-circle" nzTheme="outline" class="text-oxford-blue"></i>
+              </ng-template>
               <div class="space-y-2 text-sm mt-4">
                 <div class="flex justify-between items-center">
-                  <span class="text-oxford-blue opacity-75">ID Problemă:</span>
+                  <span class="text-oxford-blue opacity-75">ID:</span>
                   <span class="font-mono text-oxford-blue">{{ issue.id }}</span>
                 </div>
                 <nz-divider class="my-2"></nz-divider>

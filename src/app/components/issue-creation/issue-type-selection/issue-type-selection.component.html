@@ -87,15 +87,10 @@
               <div class="category-examples">
                 <div class="examples-label">Exemple:</div>
                 <div class="examples-tags">
-                  <nz-tag 
-                    *ngFor="let example of category.examples.slice(0, 3)" 
+                  <nz-tag
+                    *ngFor="let example of category.examples"
                     class="example-tag">
                     {{ example }}
-                  </nz-tag>
-                  <nz-tag 
-                    *ngIf="category.examples.length > 3" 
-                    class="example-tag more-tag">
-                    +{{ category.examples.length - 3 }} altele
                   </nz-tag>
                 </div>
               </div>
@@ -114,27 +109,24 @@
     </div>
 
     <!-- Current Location Display -->
-    <div class="location-info" *ngIf="currentLocation">
-      <nz-card class="location-card" [class.location-error]="locationError" [class.location-generic]="isLocationGeneric()">
+    <div class="location-info">
+      <nz-card class="location-card" [class.location-error]="locationError" [class.location-empty]="!currentLocation">
         <div class="location-content">
-          <div class="location-icon-wrapper" [class.error]="locationError">
+          <div class="location-icon-wrapper" [class.empty]="!currentLocation" [class.error]="locationError">
             <span nz-icon nzType="environment" nzTheme="fill"></span>
           </div>
           <div class="location-details">
             <div class="location-label">Locație</div>
-            <div class="location-address">{{ currentLocation.address }}</div>
-            <div class="location-meta">
-              <nz-tag *ngIf="currentLocation.district" nzColor="processing">{{ currentLocation.district }}</nz-tag>
-              <span class="location-warning" *ngIf="isLocationGeneric()">
-                <span nz-icon nzType="info-circle" nzTheme="outline"></span>
-                Adresă generică
-              </span>
+            <div class="location-address" *ngIf="currentLocation">{{ currentLocation.address }}</div>
+            <div class="location-address location-placeholder" *ngIf="!currentLocation">Nicio locație selectată</div>
+            <div class="location-meta" *ngIf="currentLocation?.district">
+              <nz-tag nzColor="processing">{{ currentLocation?.district }}</nz-tag>
             </div>
           </div>
           <div class="location-action">
-            <button nz-button [nzType]="isLocationGeneric() ? 'primary' : 'default'" (click)="changeLocation()">
-              <span nz-icon nzType="edit" nzTheme="outline"></span>
-              {{ isLocationGeneric() ? 'Alege adresa' : 'Modifică' }}
+            <button nz-button nzType="primary" (click)="changeLocation()">
+              <span nz-icon [nzType]="currentLocation ? 'edit' : 'plus'" nzTheme="outline"></span>
+              {{ currentLocation ? 'Modifică' : 'Selectează locația' }}
             </button>
           </div>
         </div>

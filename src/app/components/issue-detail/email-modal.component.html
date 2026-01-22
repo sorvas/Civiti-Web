@@ -1,39 +1,27 @@
 <div class="email-modal-container copy-workflow">
-  <!-- Instructions Section -->
-  <nz-alert
-    nzType="info"
-    nzShowIcon
-    nzMessage="Cum să trimiți email-ul"
-    class="mb-4">
-    <ng-template #nzDescription>
-      <ol class="instructions-list">
-        <li>Copiază adresa de email a autorității</li>
-        <li>Copiază subiectul și mesajul</li>
-        <li>Deschide clientul tău de email și creează un mesaj nou</li>
-        <li>Lipește conținutul copiat</li>
-        <li>Înlocuiește textele marcate cu <span class="placeholder-example">[...]</span> cu datele tale</li>
-        <li>Trimite email-ul și confirmă aici</li>
-      </ol>
-    </ng-template>
-  </nz-alert>
-
-  <!-- Authority Email Section -->
+  <!-- Authority Email Section - List all authorities -->
   <nz-card class="mb-4 authority-card">
     <div class="section-row">
       <div class="section-label">
         <span nz-icon nzType="bank" nzTheme="outline" class="text-oxford-blue mr-2"></span>
         <strong class="text-oxford-blue">Către:</strong>
       </div>
-      <button
-        nz-button
-        [nzType]="copyStates.email ? 'primary' : 'default'"
-        (click)="copyAuthorityEmail()">
-        <span nz-icon [nzType]="copyStates.email ? 'check' : 'copy'" nzTheme="outline"></span>
-        {{ copyStates.email ? 'Copiat!' : 'Copiază' }}
-      </button>
     </div>
-    <div class="email-display">
-      {{ authority }}
+    <div class="authorities-list">
+      <div *ngFor="let authority of authorities; let i = index" class="authority-item">
+        <div class="authority-info">
+          <div class="authority-name">{{ authority.name }}</div>
+          <div class="authority-email">{{ authority.email }}</div>
+        </div>
+        <button
+          nz-button
+          nzSize="small"
+          [nzType]="emailCopyStates[i] ? 'primary' : 'default'"
+          (click)="copyAuthorityEmail(i)">
+          <span nz-icon [nzType]="emailCopyStates[i] ? 'check' : 'copy'" nzTheme="outline"></span>
+          {{ emailCopyStates[i] ? 'Copiat!' : 'Copiază' }}
+        </button>
+      </div>
     </div>
   </nz-card>
 
@@ -67,10 +55,11 @@
       </div>
       <button
         nz-button
+        nzSize="small"
         [nzType]="copyStates.body ? 'primary' : 'default'"
         (click)="copyBody()">
         <span nz-icon [nzType]="copyStates.body ? 'check' : 'copy'" nzTheme="outline"></span>
-        {{ copyStates.body ? 'Copiat!' : 'Copiază Mesaj' }}
+        {{ copyStates.body ? 'Copiat!' : 'Copiază' }}
       </button>
     </div>
     <div class="body-display">
@@ -78,20 +67,29 @@
     </div>
   </nz-card>
 
-  <!-- Placeholder Legend -->
-  <nz-alert
-    nzType="warning"
-    nzShowIcon
-    class="placeholder-legend">
-    <ng-template #nzMessage>
-      <strong>Important:</strong> Înlocuiește în clientul tău de email:
-    </ng-template>
-    <ng-template #nzDescription>
-      <ul class="placeholder-list">
-        <li><span class="placeholder-example">[NUMELE TĂU COMPLET]</span> → numele tău</li>
-        <li><span class="placeholder-example">[ADRESA TA DE EMAIL]</span> → email-ul tău</li>
-        <li><span class="placeholder-example">[SEMNĂTURA TA]</span> → numele pentru semnătură</li>
+  <!-- Collapsible Instructions -->
+  <nz-collapse class="instructions-collapse">
+    <nz-collapse-panel
+      [nzHeader]="instructionsHeader"
+      [nzActive]="false">
+      <ul class="hints-list">
+        <li>Trimite email-uri <strong>SEPARATE</strong> către fiecare autoritate - nu folosi CC/BCC</li>
+        <li>Personalizează mesajul pentru fiecare autoritate în parte</li>
+        <li>Descarcă și atașează fotografiile problemei sau adaugă un link către această pagină</li>
+        <li>Înlocuiește textele marcate:
+          <ul class="placeholder-list">
+            <li><span class="placeholder-example">[NUMELE TĂU COMPLET]</span> → numele tău</li>
+            <li><span class="placeholder-example">[ADRESA TA DE EMAIL]</span> → email-ul tău</li>
+            <li><span class="placeholder-example">[SEMNĂTURA TA]</span> → numele pentru semnătură</li>
+          </ul>
+        </li>
       </ul>
-    </ng-template>
-  </nz-alert>
+    </nz-collapse-panel>
+  </nz-collapse>
+  <ng-template #instructionsHeader>
+    <span class="instructions-header">
+      <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+      Instrucțiuni
+    </span>
+  </ng-template>
 </div>

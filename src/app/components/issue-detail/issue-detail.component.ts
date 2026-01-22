@@ -6,6 +6,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
@@ -59,6 +60,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     private _router = inject(Router);
     private _store = inject(Store<AppState>);
     private _modal = inject(NzModalService);
+    private _message = inject(NzMessageService);
     private _platformId = inject(PLATFORM_ID);
     private _cdr = inject(ChangeDetectorRef);
     private _imageErrorCount: Map<string, number> = new Map();
@@ -240,12 +242,13 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         }
     }
 
-    openEmailModalWithEmail(authorityEmail: string, issue: IssueDetailResponse): void {
-        const authorityName = this.getAuthorityName(authorityEmail);
+    openEmailCampaignModal(issue: IssueDetailResponse): void {
+        if (!issue.authorities || issue.authorities.length === 0) return;
+
         const modalRef: any = this._modal.create({
-            nzTitle: `Email către ${authorityName}`,
+            nzTitle: 'Trimite Mail',
             nzContent: EmailModalComponent,
-            nzData: { issue, authority: authorityEmail },
+            nzData: { issue, authorities: issue.authorities },
             nzWidth: 700,
             nzMaskClosable: true,
             nzFooter: [
@@ -310,35 +313,6 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         const diffTime = Math.abs(now.getTime() - new Date(date).getTime());
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDays.toString();
-    }
-
-    getAuthorityName(email: string): string {
-        // Extract a readable name from email
-        if (email.includes('primarie')) {
-            return 'Primărie';
-        } else if (email.includes('politie')) {
-            return 'Poliție Locală';
-        } else if (email.includes('administratie')) {
-            return 'Administrație';
-        } else if (email.includes('prefectura')) {
-            return 'Prefectură';
-        } else {
-            // Get domain name from email
-            const domain = email.split('@')[1]?.split('.')[0];
-            return domain ? domain.charAt(0).toUpperCase() + domain.slice(1) : 'Autoritate';
-        }
-    }
-
-    getAuthorityIcon(email: string): string {
-        if (email.includes('primarie')) {
-            return 'bank';
-        } else if (email.includes('politie')) {
-            return 'safety-certificate';
-        } else if (email.includes('administratie')) {
-            return 'apartment';
-        } else {
-            return 'team';
-        }
     }
 
     /**
@@ -592,5 +566,69 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             }
             this._cdr.detectChanges();
         });
+    }
+
+    // Social sharing methods
+    private getIssueUrl(issue: IssueDetailResponse): string {
+        if (!isPlatformBrowser(this._platformId)) {
+            return '';
+        }
+        return `${window.location.origin}/issue/${issue.id}`;
+    }
+
+    shareOnFacebook(issue: IssueDetailResponse): void {
+        if (!isPlatformBrowser(this._platformId)) return;
+
+        const url = encodeURIComponent(this.getIssueUrl(issue));
+        window.open(
+            `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+            '_blank',
+            'width=600,height=400'
+        );
+    }
+
+    shareOnTwitter(issue: IssueDetailResponse): void {
+        if (!isPlatformBrowser(this._platformId)) return;
+
+        const url = encodeURIComponent(this.getIssueUrl(issue));
+        const text = encodeURIComponent(`${issue.title} - Ajută-ne să rezolvăm această problemă!`);
+        window.open(
+            `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+            '_blank',
+            'width=600,height=400'
+        );
+    }
+
+    shareOnLinkedIn(issue: IssueDetailResponse): void {
+        if (!isPlatformBrowser(this._platformId)) return;
+
+        const url = encodeURIComponent(this.getIssueUrl(issue));
+        window.open(
+            `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+            '_blank',
+            'width=600,height=600'
+        );
+    }
+
+    async copyIssueLink(issue: IssueDetailResponse): Promise<void> {
+        if (!isPlatformBrowser(this._platformId)) return;
+
+        const url = this.getIssueUrl(issue);
+
+        try {
+            await navigator.clipboard.writeText(url);
+            this._message.success('Link copiat în clipboard!');
+        } catch {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = url;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            this._message.success('Link copiat în clipboard!');
+        }
     }
 }

@@ -95,3 +95,9 @@ button[mat-raised-button] {
 .group:hover .photo-overlay {
   background-color: rgba(0, 0, 0, 0.3);
 }
+
+// Remove default margin from status tag in location row
+:host ::ng-deep .status-tag-no-margin.ant-tag {
+  margin-inline-end: 0;
+}
+

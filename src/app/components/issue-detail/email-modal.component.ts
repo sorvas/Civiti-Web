@@ -6,12 +6,12 @@ import { NgZorroModule } from '../../shared/ng-zorro.module';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app.state';
 import * as IssueActions from '../../store/issues/issue.actions';
-import { IssueDetailResponse, URGENCY_LEVELS } from '../../types/civica-api.types';
+import { IssueDetailResponse, IssueAuthorityResponse, URGENCY_LEVELS } from '../../types/civica-api.types';
 import { CategoryService } from '../../services/category.service';
 
 export interface EmailModalData {
     issue: IssueDetailResponse;
-    authority: string; // Authority email address
+    authorities: IssueAuthorityResponse[];
 }
 
 interface EmailTemplate {
@@ -36,20 +36,23 @@ export class EmailModalComponent implements OnInit {
     private _categoryService = inject(CategoryService);
 
     issue: IssueDetailResponse;
-    authority: string;
+    authorities: IssueAuthorityResponse[];
 
     emailTemplate: EmailTemplate | null = null;
 
     // Copy state tracking for button feedback
     copyStates = {
-        email: false,
         subject: false,
         body: false
     };
 
+    // Per-authority copy state tracking
+    emailCopyStates: boolean[] = [];
+
     constructor(@Inject(NZ_MODAL_DATA) public data: EmailModalData) {
         this.issue = data.issue;
-        this.authority = data.authority;
+        this.authorities = data.authorities;
+        this.emailCopyStates = new Array(this.authorities.length).fill(false);
     }
 
     ngOnInit(): void {
@@ -60,7 +63,7 @@ export class EmailModalComponent implements OnInit {
      * Generate read-only email template with placeholders for user to fill in their email client
      */
     private generateEmailTemplate(): void {
-        if (!this.issue || !this.authority) return;
+        if (!this.issue || !this.authorities.length) return;
 
         const categoryLabel = this._categoryService.getCategoryLabel(this.issue.category);
         const urgencyLabel = URGENCY_LEVELS[this.issue.urgency] || this.issue.urgency;
@@ -93,10 +96,21 @@ Cu stimă,
     }
 
     /**
-     * Copy authority email to clipboard
+     * Copy specific authority email to clipboard
      */
-    copyAuthorityEmail(): void {
-        this.copyToClipboard(this.authority, 'email');
+    copyAuthorityEmail(index: number): void {
+        const authority = this.authorities[index];
+        if (!authority) return;
+
+        navigator.clipboard.writeText(authority.email).then(() => {
+            this._message.success(`Email copiat: ${authority.name}`);
+            this.emailCopyStates[index] = true;
+            setTimeout(() => {
+                this.emailCopyStates[index] = false;
+            }, 2000);
+        }).catch(() => {
+            this._message.error('Nu s-a putut copia în clipboard');
+        });
     }
 
     /**
@@ -118,7 +132,7 @@ Cu stimă,
     /**
      * Generic copy to clipboard with state feedback
      */
-    private copyToClipboard(text: string, type: 'email' | 'subject' | 'body'): void {
+    private copyToClipboard(text: string, type: 'subject' | 'body'): void {
         navigator.clipboard.writeText(text).then(() => {
             this._message.success('Copiat în clipboard!');
             this.copyStates[type] = true;
@@ -132,12 +146,16 @@ Cu stimă,
 
     /**
      * Called when user clicks "Am trimis email-ul" to confirm and track
+     * Dispatches tracking action for all authorities at once
      */
     confirmEmailSent(): void {
-        this._store.dispatch(IssueActions.trackEmailSent({
-            issueId: this.issue.id,
-            targetAuthority: this.authority
-        }));
+        // Track email sent for each authority
+        for (const authority of this.authorities) {
+            this._store.dispatch(IssueActions.trackEmailSent({
+                issueId: this.issue.id,
+                targetAuthority: authority.email
+            }));
+        }
 
         this._message.success('Mulțumim pentru contribuție!');
         this._modalRef.close(true);
@@ -148,20 +166,5 @@ Cu stimă,
      */
     onCancel(): void {
         this._modalRef.close(false);
-    }
-
-    /**
-     * Get readable authority name from email address
-     */
-    getAuthorityName(): string {
-        const email = this.authority.toLowerCase();
-        if (email.includes('primari')) return 'Primărie';
-        if (email.includes('politi')) return 'Poliție Locală';
-        if (email.includes('prefectur')) return 'Prefectură';
-        if (email.includes('administrat')) return 'Administrație';
-
-        // Extract domain name as fallback
-        const domain = this.authority.split('@')[1]?.split('.')[0];
-        return domain ? domain.charAt(0).toUpperCase() + domain.slice(1) : 'Autoritate';
     }
 }
