@@ -405,6 +405,13 @@ export interface BadgeResponse {
   requirementDescription?: string;
   earnedAt?: string;
   isEarned: boolean;
+
+  // Romanian translations (use these for display)
+  nameRo: string;
+  descriptionRo: string;
+  categoryRo: string;
+  rarityRo: string | null;
+  requirementDescriptionRo?: string;
 }
 
 export interface AchievementResponse {
@@ -415,6 +422,10 @@ export interface AchievementResponse {
   rewardPoints: number;
   rewardBadge?: BadgeResponse;
   achievementType: string;
+
+  // Romanian translations (use these for display)
+  titleRo: string;
+  descriptionRo: string;
 }
 
 export interface AchievementProgressResponse {
@@ -427,6 +438,10 @@ export interface AchievementProgressResponse {
   completed: boolean;
   completedAt?: string;
   percentageComplete: number;
+
+  // Romanian translations (use these for display)
+  titleRo: string;
+  descriptionRo: string;
 }
 
 export interface UserGamificationResponse {
