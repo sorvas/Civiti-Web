@@ -264,7 +264,7 @@
             <div
               *ngFor="let badge of badges"
               class="badge-item"
-              [title]="badge.description">
+              [title]="badge.descriptionRo">
               <div class="badge-icon" [ngClass]="'rarity-' + (badge.rarity?.toLowerCase() || 'common')">
                 <i nz-icon
                    [nzType]="getBadgeIcon(badge.category, badge.rarity)"
@@ -273,8 +273,8 @@
                 </i>
               </div>
               <div class="badge-info">
-                <h5>{{ badge.name }}</h5>
-                <nz-tag [nzColor]="getBadgeColor(badge.rarity)">{{ badge.rarity || 'Common' }}</nz-tag>
+                <h5>{{ badge.nameRo }}</h5>
+                <nz-tag [nzColor]="getBadgeColor(badge.rarity)">{{ badge.rarityRo || 'Comun' }}</nz-tag>
               </div>
             </div>
           </div>
@@ -289,12 +289,12 @@
         <!-- Achievements Progress -->
         <nz-card nzTitle="Realizări" class="achievements-card" *ngIf="incompleteAchievements$ | async as achievements">
           <div class="achievements-list" *ngIf="achievements.length > 0; else noAchievements">
-            <div 
-              *ngFor="let achievement of achievements.slice(0, 3)" 
+            <div
+              *ngFor="let achievement of achievements.slice(0, 3)"
               class="achievement-item">
               <div class="achievement-info">
-                <h5>{{ achievement.title }}</h5>
-                <p>{{ achievement.description }}</p>
+                <h5>{{ achievement.titleRo }}</h5>
+                <p>{{ achievement.descriptionRo }}</p>
               </div>
               <div class="achievement-progress">
                 <nz-progress 
