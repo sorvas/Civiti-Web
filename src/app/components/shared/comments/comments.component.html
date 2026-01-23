@@ -71,6 +71,7 @@
           [currentUserId]="(currentUserId$ | async)"
           [isAdmin]="(isAdmin$ | async) ?? false"
           [isAuthenticated]="(isAuthenticated$ | async) ?? false"
+          [canComment]="canComment"
           [editingCommentId]="(editingCommentId$ | async)"
           [replyingToCommentId]="(replyingToCommentId$ | async)"
           [submitting]="(submitting$ | async) ?? false"

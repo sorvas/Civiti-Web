@@ -30,6 +30,7 @@ export class CommentItemComponent {
   @Input() currentUserId: string | null = null;
   @Input() isAdmin = false;
   @Input() isAuthenticated = false;
+  @Input() canComment = false;
   @Input() editingCommentId: string | null = null;
   @Input() replyingToCommentId: string | null = null;
   @Input() submitting = false;

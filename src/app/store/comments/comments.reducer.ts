@@ -118,9 +118,10 @@ export const commentsReducer = createReducer(
   })),
 
   // Vote Helpful
+  // Idempotent: only increment count if not already voted (prevents race condition duplicates)
   on(CommentsActions.voteHelpfulSuccess, (state, { commentId }) => {
     const comment = state.entities[commentId];
-    if (!comment) return state;
+    if (!comment || comment.hasVoted) return state;
 
     return commentsAdapter.updateOne(
       {
@@ -135,9 +136,10 @@ export const commentsReducer = createReducer(
   }),
 
   // Remove Vote
+  // Idempotent: only decrement count if currently voted (prevents race condition duplicates)
   on(CommentsActions.removeVoteSuccess, (state, { commentId }) => {
     const comment = state.entities[commentId];
-    if (!comment) return state;
+    if (!comment || !comment.hasVoted) return state;
 
     return commentsAdapter.updateOne(
       {

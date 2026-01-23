@@ -63,8 +63,8 @@
         </span>
       </nz-comment-action>
 
-      <!-- Reply -->
-      <nz-comment-action *ngIf="isAuthenticated">
+      <!-- Reply (only for authenticated users on commentable issues) -->
+      <nz-comment-action *ngIf="isAuthenticated && canComment">
         <span
           class="action-btn"
           [class.active]="isReplying"
@@ -120,6 +120,7 @@
       [currentUserId]="currentUserId"
       [isAdmin]="isAdmin"
       [isAuthenticated]="isAuthenticated"
+      [canComment]="canComment"
       [editingCommentId]="editingCommentId"
       [replyingToCommentId]="replyingToCommentId"
       [submitting]="submitting"
