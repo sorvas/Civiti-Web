@@ -103,7 +103,8 @@ import {
   PercentageOutline,
   FieldTimeOutline,
   FlagOutline,
-  InboxOutline
+  InboxOutline,
+  DownloadOutline
 } from '@ant-design/icons-angular/icons';
 
 const icons: IconDefinition[] = [
@@ -170,7 +171,8 @@ const icons: IconDefinition[] = [
   PercentageOutline,
   FieldTimeOutline,
   FlagOutline,
-  InboxOutline
+  InboxOutline,
+  DownloadOutline
 ];
 
 const NgZorroModules = [

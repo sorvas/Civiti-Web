@@ -45,13 +45,32 @@
 
             <!-- Photos Gallery -->
             <nz-card *ngIf="issue.photos && issue.photos.length > 0">
-              <nz-card-meta nzTitle="Fotografii ({{ issue.photos.length }})" [nzAvatar]="photoIcon">
-              </nz-card-meta>
-              <ng-template #photoIcon>
-                <i nz-icon nzType="picture" nzTheme="outline" class="text-oxford-blue"></i>
-              </ng-template>
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <i nz-icon nzType="picture" nzTheme="outline" class="text-oxford-blue text-xl mr-2"></i>
+                  <span class="font-semibold text-oxford-blue">Fotografii ({{ issue.photos.length }})</span>
+                </div>
+                <button nz-button nzType="default" nzSize="small"
+                        [nzLoading]="isDownloading"
+                        nz-tooltip nzTooltipTitle="Descarcă toate fotografiile"
+                        (click)="downloadAllPhotos(issue)"
+                        class="inline-flex items-center gap-1">
+                  <i nz-icon nzType="download" nzTheme="outline"></i>
+                  <span>Descarcă</span>
+                </button>
+              </div>
+              <!-- Progress bar when downloading -->
+              <div *ngIf="downloadProgress && isDownloading" class="mb-4">
+                <nz-progress
+                  [nzPercent]="downloadProgress.percentage"
+                  [nzStatus]="downloadProgress.phase === 'error' ? 'exception' : 'active'"
+                  nzSize="small">
+                </nz-progress>
+                <p class="text-xs text-oxford-blue opacity-75 mt-1">{{ downloadProgress.message }}</p>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <a *ngFor="let photo of issue.photos; let i = index" [href]="photo.url"
+                  target="_blank"
                   class="photo-gallery-item relative cursor-pointer group block"
                   [attr.data-glightbox]="'title: Fotografie ' + (i + 1) + '; description: ' + (photo.description || issue.title)">
                   <img [src]="photo.url" [alt]="photo.description || 'Fotografie ' + (i + 1)"

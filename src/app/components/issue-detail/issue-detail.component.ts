@@ -15,6 +15,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { Store } from '@ngrx/store';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { take, filter, takeUntil } from 'rxjs/operators';
@@ -28,6 +29,7 @@ import { GoogleMap, MapMarker, MapInfoWindow } from '@angular/google-maps';
 import { GoogleMapsConfigService } from '../../services/google-maps-config.service';
 import { StatusTextPipe, StatusColorPipe } from '../../pipes/status.pipe';
 import { CommentsComponent } from '../shared/comments/comments.component';
+import { PhotoDownloadService, PhotoDownloadProgress } from '../../services/photo-download.service';
 
 @Component({
     selector: 'app-issue-detail',
@@ -47,6 +49,7 @@ import { CommentsComponent } from '../shared/comments/comments.component';
         NzDividerModule,
         NzTypographyModule,
         NzToolTipModule,
+        NzProgressModule,
         GoogleMap,
         MapMarker,
         MapInfoWindow,
@@ -65,6 +68,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     private _message = inject(NzMessageService);
     private _platformId = inject(PLATFORM_ID);
     private _cdr = inject(ChangeDetectorRef);
+    private _photoDownloadService = inject(PhotoDownloadService);
     private _imageErrorCount: Map<string, number> = new Map();
     private _lightbox: any;
     private _geocodedAddress: string | null = null;
@@ -82,6 +86,12 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     isLoading$!: Observable<boolean>;
     error$!: Observable<string | null>;
     isAdmin$!: Observable<boolean>;
+
+    // Photo download state
+    isDownloading = false;
+    downloadProgress: PhotoDownloadProgress | null = null;
+    private _currentDownloadId: string | null = null;
+    private _downloadComplete$ = new Subject<void>();
 
     // Google Maps properties
     mapOptions: any = {
@@ -632,5 +642,65 @@ export class IssueDetailComponent implements OnInit, OnDestroy, AfterViewInit {
             document.body.removeChild(textArea);
             this._message.success('Link copiat în clipboard!');
         }
+    }
+
+    downloadAllPhotos(issue: IssueDetailResponse): void {
+        if (!isPlatformBrowser(this._platformId)) return;
+        if (!issue.photos || issue.photos.length === 0) return;
+        if (this.isDownloading) return;
+
+        this.isDownloading = true;
+        this.downloadProgress = null;
+
+        // Generate unique ID for this download to filter progress from concurrent downloads
+        const downloadId = this._photoDownloadService.generateDownloadId();
+        this._currentDownloadId = downloadId;
+
+        // Subscribe to progress updates - filter by download ID and complete when done
+        this._photoDownloadService.progress$
+            .pipe(
+                filter(progress => progress.downloadId === this._currentDownloadId),
+                takeUntil(this._downloadComplete$),
+                takeUntil(this._destroy$)
+            )
+            .subscribe(progress => {
+                this.downloadProgress = progress;
+                this._cdr.detectChanges();
+            });
+
+        this._photoDownloadService
+            .downloadPhotosAsZip(issue.photos, issue.id, downloadId, issue.title)
+            .pipe(takeUntil(this._destroy$))
+            .subscribe({
+                next: result => {
+                    // Only process if this is still the current download
+                    if (result.downloadId === this._currentDownloadId) {
+                        this._downloadComplete$.next();
+                        this.isDownloading = false;
+                        this.downloadProgress = null;
+                        this._currentDownloadId = null;
+                        this._cdr.detectChanges();
+
+                        if (result.success) {
+                            if (result.failedCount > 0) {
+                                this._message.warning(result.message);
+                            } else {
+                                this._message.success(result.message);
+                            }
+                        } else {
+                            this._message.error(result.message);
+                        }
+                    }
+                },
+                error: error => {
+                    console.error('Photo download error:', error);
+                    this._downloadComplete$.next();
+                    this.isDownloading = false;
+                    this.downloadProgress = null;
+                    this._currentDownloadId = null;
+                    this._cdr.detectChanges();
+                    this._message.error('Eroare la descărcarea fotografiilor.');
+                }
+            });
     }
 }

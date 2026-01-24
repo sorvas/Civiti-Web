@@ -12,6 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 npm install
 
+# Build (development)
+npx ng build --configuration=development
+
 # Start development server (injects env vars automatically)
 npm run start:dev
 ```
