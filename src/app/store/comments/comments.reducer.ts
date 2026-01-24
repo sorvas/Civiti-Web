@@ -29,31 +29,23 @@ export const commentsReducer = createReducer(
   })),
 
   // Create Comment
-  on(CommentsActions.createComment, (state, { issueId }) => ({
+  on(CommentsActions.createComment, (state) => ({
     ...state,
     submitting: true,
-    submittingForIssueId: issueId,
+    pendingCreateCount: state.pendingCreateCount + 1,
     error: null
   })),
 
   on(CommentsActions.createCommentSuccess, (state, { comment }) => {
-    // Check if this response is for the current in-flight submission
-    const isCurrentSubmission = comment.issueId === state.submittingForIssueId;
-    // Check if this comment belongs to the currently viewed issue
+    const newPendingCount = state.pendingCreateCount - 1;
     const isCurrentIssue = comment.issueId === state.currentIssueId;
 
-    // Stale response from different issue - don't modify state at all
-    // (another submission for the current issue may still be pending)
-    if (!isCurrentSubmission) {
-      return state;
-    }
-
-    // Response is for current submission but user navigated away - only reset submission state
+    // Comment is for a different issue (user navigated away) - just decrement counter
     if (!isCurrentIssue) {
       return {
         ...state,
-        submitting: false,
-        submittingForIssueId: null,
+        pendingCreateCount: newPendingCount,
+        submitting: newPendingCount > 0,
         error: null
       };
     }
@@ -65,8 +57,8 @@ export const commentsReducer = createReducer(
     const shouldClearReplyForm = comment.parentCommentId === state.replyingToCommentId;
     return commentsAdapter.addOne(comment, {
       ...state,
-      submitting: false,
-      submittingForIssueId: null,
+      pendingCreateCount: newPendingCount,
+      submitting: newPendingCount > 0,
       error: null,
       replyingToCommentId: shouldClearReplyForm ? null : state.replyingToCommentId,
       totalCount: state.totalCount + 1,
@@ -75,16 +67,13 @@ export const commentsReducer = createReducer(
   }),
 
   on(CommentsActions.createCommentFailure, (state, { error, issueId }) => {
-    // Stale failure from different issue - don't modify state at all
-    if (issueId !== state.submittingForIssueId) {
-      return state;
-    }
+    const newPendingCount = state.pendingCreateCount - 1;
     // Only show error if user is still on the same issue
     const showError = issueId === state.currentIssueId;
     return {
       ...state,
-      submitting: false,
-      submittingForIssueId: null,
+      pendingCreateCount: newPendingCount,
+      submitting: newPendingCount > 0,
       error: showError ? error : null
     };
   }),

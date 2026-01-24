@@ -1,14 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { map, catchError, switchMap, concatMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap, concatMap, tap, withLatestFrom } from 'rxjs/operators';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ApiService } from '../../services/api.service';
 import * as CommentsActions from './comments.actions';
+import { selectCurrentIssueId } from './comments.selectors';
 
 @Injectable()
 export class CommentsEffects {
   private actions$ = inject(Actions);
+  private store = inject(Store);
   private apiService = inject(ApiService);
   private message = inject(NzMessageService);
 
@@ -147,7 +150,14 @@ export class CommentsEffects {
         CommentsActions.voteHelpfulFailure,
         CommentsActions.removeVoteFailure
       ),
-      tap((action) => this.message.error(action.error))
+      withLatestFrom(this.store.select(selectCurrentIssueId)),
+      tap(([action, currentIssueId]) => {
+        // For actions with issueId (e.g., createCommentFailure), suppress toast if user navigated away
+        if ('issueId' in action && action.issueId !== currentIssueId) {
+          return;
+        }
+        this.message.error(action.error);
+      })
     ),
     { dispatch: false }
   );
