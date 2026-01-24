@@ -32,20 +32,20 @@ export const commentsReducer = createReducer(
   on(CommentsActions.createComment, (state) => ({
     ...state,
     submitting: true,
-    pendingCreateCount: state.pendingCreateCount + 1,
+    pendingMutationCount: state.pendingMutationCount + 1,
     error: null
   })),
 
   on(CommentsActions.createCommentSuccess, (state, { comment }) => {
     // Use Math.max to prevent negative count if clearComments reset state while requests were in-flight
-    const newPendingCount = Math.max(0, state.pendingCreateCount - 1);
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
     const isCurrentIssue = comment.issueId === state.currentIssueId;
 
     // Comment is for a different issue (user navigated away) - just decrement counter
     if (!isCurrentIssue) {
       return {
         ...state,
-        pendingCreateCount: newPendingCount,
+        pendingMutationCount: newPendingCount,
         submitting: newPendingCount > 0,
         error: null
       };
@@ -58,7 +58,7 @@ export const commentsReducer = createReducer(
     const shouldClearReplyForm = comment.parentCommentId === state.replyingToCommentId;
     return commentsAdapter.addOne(comment, {
       ...state,
-      pendingCreateCount: newPendingCount,
+      pendingMutationCount: newPendingCount,
       submitting: newPendingCount > 0,
       error: null,
       replyingToCommentId: shouldClearReplyForm ? null : state.replyingToCommentId,
@@ -69,12 +69,12 @@ export const commentsReducer = createReducer(
 
   on(CommentsActions.createCommentFailure, (state, { error, issueId }) => {
     // Use Math.max to prevent negative count if clearComments reset state while requests were in-flight
-    const newPendingCount = Math.max(0, state.pendingCreateCount - 1);
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
     // Only show error if user is still on the same issue
     const showError = issueId === state.currentIssueId;
     return {
       ...state,
-      pendingCreateCount: newPendingCount,
+      pendingMutationCount: newPendingCount,
       submitting: newPendingCount > 0,
       error: showError ? error : null
     };
@@ -84,10 +84,13 @@ export const commentsReducer = createReducer(
   on(CommentsActions.updateComment, (state) => ({
     ...state,
     submitting: true,
+    pendingMutationCount: state.pendingMutationCount + 1,
     error: null
   })),
 
   on(CommentsActions.updateCommentSuccess, (state, { commentId, content, updatedAt }) => {
+    // Use Math.max to prevent negative count if clearComments reset state while requests were in-flight
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
     // Only clear editingCommentId if it matches the completed edit operation
     // Prevents closing a newly-opened edit form when a previous edit request completes
     const shouldClearEditForm = commentId === state.editingCommentId;
@@ -98,45 +101,57 @@ export const commentsReducer = createReducer(
       },
       {
         ...state,
-        submitting: false,
+        pendingMutationCount: newPendingCount,
+        submitting: newPendingCount > 0,
         error: null,
         editingCommentId: shouldClearEditForm ? null : state.editingCommentId
       }
     );
   }),
 
-  on(CommentsActions.updateCommentFailure, (state, { error }) => ({
-    ...state,
-    submitting: false,
-    error
-  })),
+  on(CommentsActions.updateCommentFailure, (state, { error }) => {
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
+    return {
+      ...state,
+      pendingMutationCount: newPendingCount,
+      submitting: newPendingCount > 0,
+      error
+    };
+  }),
 
   // Delete Comment
   on(CommentsActions.deleteComment, (state) => ({
     ...state,
     submitting: true,
+    pendingMutationCount: state.pendingMutationCount + 1,
     error: null
   })),
 
-  on(CommentsActions.deleteCommentSuccess, (state, { commentId }) =>
-    commentsAdapter.updateOne(
+  on(CommentsActions.deleteCommentSuccess, (state, { commentId }) => {
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
+    return commentsAdapter.updateOne(
       {
         id: commentId,
         changes: { isDeleted: true, content: '' }
       },
       {
         ...state,
-        submitting: false,
+        pendingMutationCount: newPendingCount,
+        submitting: newPendingCount > 0,
         error: null
       }
-    )
-  ),
+    );
+  }),
 
-  on(CommentsActions.deleteCommentFailure, (state, { error }) => ({
-    ...state,
-    submitting: false,
-    error
-  })),
+  on(CommentsActions.deleteCommentFailure, (state, { error }) => {
+    const newPendingCount = Math.max(0, state.pendingMutationCount - 1);
+    return {
+      ...state,
+      pendingMutationCount: newPendingCount,
+      submitting: newPendingCount > 0,
+      error
+    };
+  }),
 
   // Vote Helpful
   // Idempotent: only increment count if not already voted (prevents race condition duplicates)

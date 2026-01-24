@@ -4,8 +4,8 @@ import { CommentResponse } from '../../types/civica-api.types';
 export interface CommentsState extends EntityState<CommentResponse> {
   loading: boolean;
   submitting: boolean;
-  // Counts pending create requests (supports multiple queued submissions via concatMap)
-  pendingCreateCount: number;
+  // Counts pending mutation requests (create/update/delete) to support multiple queued operations via concatMap
+  pendingMutationCount: number;
   error: string | null;
   totalCount: number;
   currentPage: number;
@@ -26,7 +26,7 @@ export const commentsAdapter: EntityAdapter<CommentResponse> = createEntityAdapt
 export const initialCommentsState: CommentsState = commentsAdapter.getInitialState({
   loading: false,
   submitting: false,
-  pendingCreateCount: 0,
+  pendingMutationCount: 0,
   error: null,
   totalCount: 0,
   currentPage: 1,
