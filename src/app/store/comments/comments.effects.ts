@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
@@ -7,6 +8,45 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ApiService } from '../../services/api.service';
 import * as CommentsActions from './comments.actions';
 import { selectCurrentIssueId } from './comments.selectors';
+
+// Maps backend error messages to user-friendly Romanian messages
+const CREATE_COMMENT_ERROR_MAP: Record<string, string> = {
+  'Content violates community guidelines': 'Comentariul tău conține conținut nepotrivit și nu poate fi postat.',
+  'Comment content cannot be empty or whitespace only': 'Te rugăm să introduci un comentariu.',
+  'User not found': 'Te rugăm să îți completezi mai întâi profilul.',
+  'Cannot comment on non-active issues': 'Comentariile sunt dezactivate pentru această problemă.',
+  'Parent comment belongs to a different issue': 'Nu se poate răspunde la acest comentariu.',
+  'Issue not found': 'Problema nu a fost găsită.',
+  'Parent comment not found': 'Comentariul la care încerci să răspunzi nu mai există.',
+  'You have already posted this comment': 'Ai postat deja acest comentariu.',
+  'Please wait before posting another comment': 'Te rugăm să aștepți puțin înainte de a posta din nou.',
+};
+
+const UPDATE_COMMENT_ERROR_MAP: Record<string, string> = {
+  'Content violates community guidelines': 'Editarea conține conținut nepotrivit.',
+  'Comment content cannot be empty or whitespace only': 'Te rugăm să introduci un comentariu.',
+  'Comment not found': 'Comentariul nu a fost găsit.',
+};
+
+function mapCreateCommentError(error: HttpErrorResponse): string {
+  // Check for 403 Forbidden (user trying to do something unauthorized)
+  if (error.status === 403) {
+    return 'Nu ai permisiunea să efectuezi această acțiune.';
+  }
+
+  const backendMessage = error.error?.message || error.error?.error || error.message || '';
+  return CREATE_COMMENT_ERROR_MAP[backendMessage] || 'Eroare la adăugarea comentariului.';
+}
+
+function mapUpdateCommentError(error: HttpErrorResponse): string {
+  // 403 Forbidden means user is not the author
+  if (error.status === 403) {
+    return 'Poți edita doar propriile comentarii.';
+  }
+
+  const backendMessage = error.error?.message || error.error?.error || error.message || '';
+  return UPDATE_COMMENT_ERROR_MAP[backendMessage] || 'Eroare la actualizarea comentariului.';
+}
 
 @Injectable()
 export class CommentsEffects {
@@ -46,8 +86,8 @@ export class CommentsEffects {
         }).pipe(
           tap(() => this.message.success('Comentariu adăugat cu succes!')),
           map(comment => CommentsActions.createCommentSuccess({ comment })),
-          catchError(error => of(CommentsActions.createCommentFailure({
-            error: error.error?.message || error.message || 'Eroare la adăugarea comentariului',
+          catchError((error: HttpErrorResponse) => of(CommentsActions.createCommentFailure({
+            error: mapCreateCommentError(error),
             issueId: action.issueId
           })))
         )
@@ -66,8 +106,8 @@ export class CommentsEffects {
             content: action.content,
             updatedAt: new Date().toISOString()
           })),
-          catchError(error => of(CommentsActions.updateCommentFailure({
-            error: error.error?.message || error.message || 'Eroare la actualizarea comentariului'
+          catchError((error: HttpErrorResponse) => of(CommentsActions.updateCommentFailure({
+            error: mapUpdateCommentError(error)
           })))
         )
       )
