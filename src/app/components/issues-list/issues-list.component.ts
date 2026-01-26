@@ -30,6 +30,7 @@ import { CategoryService } from '../../services/category.service';
 import { BUCHAREST_DISTRICTS, DEFAULT_CITY } from '../../data/romanian-locations';
 import { BUCHAREST_LOCATION_BIAS } from '../../types/location.types';
 import { StatusTextPipe, StatusColorPipe } from '../../pipes/status.pipe';
+import { IsUrgentPipe } from '../../pipes/urgency.pipe';
 
 @Component({
   selector: 'app-issues-list',
@@ -53,6 +54,7 @@ import { StatusTextPipe, StatusColorPipe } from '../../pipes/status.pipe';
     NzInputModule,
     StatusTextPipe,
     StatusColorPipe,
+    IsUrgentPipe,
   ],
   templateUrl: './issues-list.component.html',
   styleUrl: './issues-list.component.scss'
@@ -89,8 +91,16 @@ export class IssuesListComponent implements OnInit, OnDestroy {
   selectedDistrict: string | null = null;
   selectedCategory: IssueCategory | null = null;
   addressFilter: string | null = null;
+  selectedStatus: string = 'Active';
   districts = BUCHAREST_DISTRICTS;
   categories: CategoryResponse[] = [];
+
+  // Status filter options
+  readonly statusOptions = [
+    { value: 'Active', label: 'Active' },
+    { value: 'Resolved', label: 'Rezolvate' },
+    { value: 'Active,Resolved', label: 'Toate' }
+  ];
 
   // Google autocomplete for address search
   addressSearchControl = new FormControl('');
@@ -172,7 +182,8 @@ export class IssuesListComponent implements OnInit, OnDestroy {
             sortBy: params['sortBy'] || 'date',
             district: params['district'] || null,
             category: params['category'] || null,
-            address: params['address'] || null
+            address: params['address'] || null,
+            status: params['status'] || 'Active'
           };
         }),
         distinctUntilChanged((prev, curr) =>
@@ -180,14 +191,16 @@ export class IssuesListComponent implements OnInit, OnDestroy {
           prev.sortBy === curr.sortBy &&
           prev.district === curr.district &&
           prev.category === curr.category &&
-          prev.address === curr.address
+          prev.address === curr.address &&
+          prev.status === curr.status
         )
       )
-      .subscribe(({ page, sortBy, district, category, address }) => {
+      .subscribe(({ page, sortBy, district, category, address, status }) => {
         // Sync filter state from URL
         this.selectedDistrict = district;
         this.selectedCategory = category as IssueCategory | null;
         this.addressFilter = address;
+        this.selectedStatus = status;
 
         // Sync address input with URL (only if different to avoid loops)
         const currentInputValue = this.addressSearchControl.value || '';
@@ -214,6 +227,7 @@ export class IssuesListComponent implements OnInit, OnDestroy {
             district: district || undefined,
             category: category as IssueCategory || undefined,
             address: address || undefined,
+            status: status || undefined,
             ...this.getSortParams(sortBy)
           }
         }));
@@ -237,7 +251,7 @@ export class IssuesListComponent implements OnInit, OnDestroy {
   private getSortParams(sortBy: string): { sortBy?: string; sortDescending?: boolean } {
     switch (sortBy) {
       case 'emails':
-        return { sortBy: 'emailsSent', sortDescending: true };
+        return { sortBy: 'emails', sortDescending: true };
       case 'urgency':
         return { sortBy: 'urgency', sortDescending: true };
       case 'date':
@@ -261,10 +275,6 @@ export class IssuesListComponent implements OnInit, OnDestroy {
       },
       queryParamsHandling: 'merge'
     });
-  }
-
-  getUrgencyLevel(issue: IssueItem): 'urgent' | 'normal' {
-    return (issue.emailsSent || 0) > 100 ? 'urgent' : 'normal';
   }
 
   getDaysSince(date: string | Date): string {
@@ -400,12 +410,15 @@ export class IssuesListComponent implements OnInit, OnDestroy {
     this.selectedDistrict = null;
     this.selectedCategory = null;
     this.addressFilter = null;
+    this.selectedStatus = 'Active';
     this.addressSearchControl.setValue('', { emitEvent: false });
     this.updateFiltersInUrl();
   }
 
   hasActiveFilters(): boolean {
-    return !!(this.selectedDistrict || this.selectedCategory || this.addressFilter);
+    // 'Active' is the default status, so don't count it as an active filter
+    const hasNonDefaultStatus = this.selectedStatus && this.selectedStatus !== 'Active';
+    return !!(this.selectedDistrict || this.selectedCategory || this.addressFilter || hasNonDefaultStatus);
   }
 
   private updateFiltersInUrl(): void {
@@ -415,10 +428,16 @@ export class IssuesListComponent implements OnInit, OnDestroy {
         page: 1, // Reset to page 1 when filters change
         district: this.selectedDistrict || null,
         category: this.selectedCategory || null,
-        address: this.addressFilter || null
+        address: this.addressFilter || null,
+        // Don't add status param for default 'Active' to keep URLs clean
+        status: this.selectedStatus && this.selectedStatus !== 'Active' ? this.selectedStatus : null
       },
       queryParamsHandling: 'merge'
     });
+  }
+
+  onStatusChange(): void {
+    this.updateFiltersInUrl();
   }
 
   // Google autocomplete methods

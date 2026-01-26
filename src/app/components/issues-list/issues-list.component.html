@@ -29,9 +29,9 @@
 
       <!-- Filters Row -->
       <div class="control-panel-filters">
-        <nz-row [nzGutter]="[12, 12]" nzAlign="middle">
+        <div class="filters-grid">
           <!-- Address Search -->
-          <nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <div class="filter-item filter-address">
             <div class="address-search-wrapper">
               <nz-input-group [nzPrefix]="searchIcon" [nzSuffix]="suffixIcon" nzSize="default">
                 <input
@@ -66,10 +66,10 @@
                 </div>
               </div>
             </div>
-          </nz-col>
+          </div>
 
           <!-- Sector Filter -->
-          <nz-col [nzXs]="12" [nzSm]="6" [nzMd]="5">
+          <div class="filter-item">
             <nz-select
               [(ngModel)]="selectedDistrict"
               (ngModelChange)="onDistrictChange()"
@@ -79,10 +79,10 @@
               style="width: 100%">
               <nz-option *ngFor="let d of districts" [nzValue]="d" [nzLabel]="d"></nz-option>
             </nz-select>
-          </nz-col>
+          </div>
 
           <!-- Category Filter -->
-          <nz-col [nzXs]="12" [nzSm]="6" [nzMd]="5">
+          <div class="filter-item">
             <nz-select
               [(ngModel)]="selectedCategory"
               (ngModelChange)="onCategoryChange()"
@@ -92,17 +92,28 @@
               style="width: 100%">
               <nz-option *ngFor="let c of categories" [nzValue]="c.value" [nzLabel]="c.label"></nz-option>
             </nz-select>
-          </nz-col>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="filter-item">
+            <nz-select
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="onStatusChange()"
+              nzPlaceHolder="Status"
+              nzSize="default"
+              style="width: 100%">
+              <nz-option *ngFor="let s of statusOptions" [nzValue]="s.value" [nzLabel]="s.label"></nz-option>
+            </nz-select>
+          </div>
 
           <!-- Clear Filters -->
-          <nz-col [nzXs]="24" [nzSm]="24" [nzMd]="6" class="clear-filters-col">
-            <button nz-button nzType="text" (click)="clearFilters()"
-                    *ngIf="hasActiveFilters()">
+          <div class="filter-item filter-clear" *ngIf="hasActiveFilters()">
+            <button nz-button nzType="text" (click)="clearFilters()">
               <span nz-icon nzType="close-circle"></span>
               Șterge filtrele
             </button>
-          </nz-col>
-        </nz-row>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -139,7 +150,7 @@
                 </nz-tag>
               </div>
               <!-- Urgency Badge -->
-              <div class="absolute top-3 right-3" *ngIf="getUrgencyLevel(issue) === 'urgent'">
+              <div class="absolute top-3 right-3" *ngIf="issue.urgency | isUrgent">
                 <nz-tag nzColor="error" class="font-bold">
                   URGENT
                 </nz-tag>

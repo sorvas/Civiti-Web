@@ -20,7 +20,7 @@ export type IssueCategory =
   | 'Safety'
   | 'Other';
 
-export type UrgencyLevel = 'Unspecified' | 'Low' | 'Medium' | 'High' | 'Urgent';
+export type UrgencyLevel = 'unspecified' | 'low' | 'medium' | 'high' | 'urgent';
 
 export type IssueStatus =
   | 'Unspecified'
@@ -692,7 +692,8 @@ export interface IssueQueryParams {
   city?: string;
   district?: string;
   address?: string;
-  status?: IssueStatus;
+  /** Status filter - can be single status or comma-separated (e.g., 'Active,Resolved') */
+  status?: IssueStatus | string;
   sortBy?: string;
   sortDescending?: boolean;
 }
@@ -772,11 +773,28 @@ export interface FilterOptions {
 // Use CategoryService for category labels
 
 export const URGENCY_LEVELS: Record<UrgencyLevel, string> = {
-  Unspecified: 'Nespecificat',
-  Low: 'Scăzută',
-  Medium: 'Medie',
-  High: 'Ridicată',
-  Urgent: 'Urgentă'
+  unspecified: 'Nespecificat',
+  low: 'Scăzută',
+  medium: 'Medie',
+  high: 'Ridicată',
+  urgent: 'Urgentă'
+};
+
+/** Urgency dropdown options for issue creation forms */
+export const URGENCY_OPTIONS: Array<{ value: UrgencyLevel; label: string; description: string }> = [
+  { value: 'low', label: 'Scăzută', description: 'Poate aștepta întreținerea de rutină' },
+  { value: 'medium', label: 'Medie', description: 'Ar trebui abordată curând' },
+  { value: 'high', label: 'Ridicată', description: 'Necesită atenție promptă' },
+  { value: 'urgent', label: 'Urgentă', description: 'Pericol de siguranță sau urgență' }
+];
+
+/** Tag colors for urgency levels */
+export const URGENCY_COLORS: Record<UrgencyLevel, string> = {
+  unspecified: 'default',
+  low: 'default',
+  medium: 'processing',
+  high: 'warning',
+  urgent: 'error'
 };
 
 export const ISSUE_STATUSES: Record<IssueStatus, string> = {

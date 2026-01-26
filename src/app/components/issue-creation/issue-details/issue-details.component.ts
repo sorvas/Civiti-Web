@@ -17,7 +17,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-import { EnhanceTextRequest } from '../../../types/civica-api.types';
+import { EnhanceTextRequest, URGENCY_OPTIONS } from '../../../types/civica-api.types';
 import { ApiService } from '../../../services/api.service';
 import { CategoryInfo } from '../../../services/category.service';
 
@@ -65,6 +65,9 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
   // Issue ID - generated once and reused across saves
   private issueId: string | null = null;
 
+  // Centralized urgency options for dropdown
+  readonly urgencyOptions = URGENCY_OPTIONS;
+
   selectedCategory: CategoryInfo | null = null;
   uploadedPhotos: PhotoData[] = [];
   currentLocation: { address: string; coordinates: { lat: number; lng: number }; district?: string } | null = null;
@@ -95,7 +98,7 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
       description: ['', [Validators.required, Validators.minLength(10)]],
       desiredOutcome: ['', [Validators.required, Validators.minLength(10)]],
       communityImpact: ['', [Validators.required, Validators.minLength(10)]],
-      urgency: ['Medium'],
+      urgency: ['medium'],
       whenOccurred: ['now']
     });
   }
@@ -264,16 +267,10 @@ export class IssueDetailsComponent implements OnInit, OnDestroy {
    */
   private normalizeUrgency(value: string | undefined): string {
     if (!value) {
-      return 'Medium';
+      return 'medium';
     }
-    // Map of valid urgency values (case-insensitive lookup)
-    const urgencyMap: Record<string, string> = {
-      'low': 'Low',
-      'medium': 'Medium',
-      'high': 'High',
-      'urgent': 'Urgent'
-    };
-    const normalized = urgencyMap[value.toLowerCase()];
-    return normalized || 'Medium';
+    const validValues = ['low', 'medium', 'high', 'urgent'];
+    const normalized = value.toLowerCase();
+    return validValues.includes(normalized) ? normalized : 'medium';
   }
 }
