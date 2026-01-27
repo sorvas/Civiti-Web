@@ -62,3 +62,19 @@ export class StatusColorPipe implements PipeTransform {
     }
   }
 }
+
+/**
+ * Pure pipe to check if issue status is 'active'.
+ * Cached by Angular - only recalculates when input changes.
+ */
+@Pipe({
+  name: 'isActive',
+  standalone: true,
+  pure: true
+})
+export class IsActivePipe implements PipeTransform {
+  transform(status: string | null | undefined): boolean {
+    if (!status) return false;
+    return status.toLowerCase() === 'active';
+  }
+}
