@@ -27,6 +27,15 @@ import { CategoryInfo } from '../../../services/category.service';
 import { DEFAULT_CITY } from '../../../data/romanian-locations';
 
 /**
+ * Grouped authorities for display
+ */
+interface AuthorityGroup {
+  label: string;
+  icon: string;
+  authorities: AuthorityListResponse[];
+}
+
+/**
  * Validate email format
  */
 function isValidEmail(email: string): boolean {
@@ -221,13 +230,6 @@ export class AuthoritySelectionComponent implements OnInit {
     this.loadTrigger$.next(this.searchTerm);
   }
 
-  /**
-   * Get display label for authority district
-   */
-  getDistrictLabel(authority: AuthorityListResponse): string {
-    return authority.district || 'Nivel municipal';
-  }
-
   isAuthoritySelected(authority: AuthorityListResponse): boolean {
     return this.selectedAuthorities.some(a => a.authorityId === authority.id || a.email === authority.email);
   }
@@ -322,6 +324,34 @@ export class AuthoritySelectionComponent implements OnInit {
 
   get remainingSlots(): number {
     return this.MAX_AUTHORITIES - this.selectedAuthorities.length;
+  }
+
+  /**
+   * Group filtered authorities into municipal and district-specific sections
+   */
+  get groupedAuthorities(): AuthorityGroup[] {
+    const municipal = this.filteredAuthorities.filter(a => !a.district);
+    const district = this.filteredAuthorities.filter(a => a.district);
+
+    const groups: AuthorityGroup[] = [];
+
+    if (municipal.length > 0) {
+      groups.push({
+        label: 'Autorități municipale',
+        icon: 'bank',
+        authorities: municipal
+      });
+    }
+
+    if (district.length > 0) {
+      groups.push({
+        label: `Autorități ${this.issueDistrict || 'locale'}`,
+        icon: 'home',
+        authorities: district
+      });
+    }
+
+    return groups;
   }
 
   continueToReview(): void {

@@ -30,8 +30,7 @@
   <!-- Loading State -->
   @if (loading$ | async) {
     <div class="loading-state">
-      <nz-spin nzSimple></nz-spin>
-      <p>Se încarcă comentariile...</p>
+      <nz-spin nzSimple nzTip="Se încarcă comentariile..."></nz-spin>
     </div>
   }
 

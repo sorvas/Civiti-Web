@@ -110,38 +110,48 @@
       </nz-alert>
 
       <nz-spin [nzSpinning]="isLoadingAuthorities || isSearching">
-        <div class="authorities-list" *ngIf="filteredAuthorities.length > 0">
-          <div
-            *ngFor="let authority of filteredAuthorities"
-            class="authority-item"
-            [class.selected]="isAuthoritySelected(authority)"
-            (click)="toggleAuthority(authority)">
+        @if (filteredAuthorities.length > 0) {
+          <div class="authorities-list">
+            @for (group of groupedAuthorities; track group.label) {
+              <div class="authority-group">
+                <div class="group-header">
+                  <span nz-icon [nzType]="group.icon" class="group-icon"></span>
+                  <span class="group-label">{{ group.label }}</span>
+                  <span class="group-count">({{ group.authorities.length }})</span>
+                </div>
 
-            <div class="authority-checkbox">
-              <label nz-checkbox [ngModel]="isAuthoritySelected(authority)" (ngModelChange)="toggleAuthority(authority)" (click)="$event.stopPropagation()"></label>
-            </div>
+                <div class="group-items">
+                  @for (authority of group.authorities; track authority.id) {
+                    <div
+                      class="authority-item"
+                      [class.selected]="isAuthoritySelected(authority)"
+                      (click)="toggleAuthority(authority)">
 
-            <div class="authority-icon">
-              <span nz-icon [nzType]="authority.district ? 'home' : 'bank'"></span>
-            </div>
+                      <div class="authority-checkbox">
+                        <label nz-checkbox [ngModel]="isAuthoritySelected(authority)" (ngModelChange)="toggleAuthority(authority)" (click)="$event.stopPropagation()"></label>
+                      </div>
 
-            <div class="authority-info">
-              <div class="authority-name">{{ authority.name }}</div>
-              <div class="authority-email">{{ authority.email }}</div>
-            </div>
+                      <div class="authority-icon">
+                        <span nz-icon [nzType]="authority.district ? 'home' : 'bank'"></span>
+                      </div>
 
-            <div class="authority-type-tag">
-              <nz-tag [nzColor]="authority.district ? 'cyan' : 'geekblue'">
-                {{ getDistrictLabel(authority) }}
-              </nz-tag>
-            </div>
+                      <div class="authority-info">
+                        <div class="authority-name">{{ authority.name }}</div>
+                        <div class="authority-email">{{ authority.email }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
 
-        <nz-empty
-          *ngIf="!isLoadingAuthorities && !isSearching && filteredAuthorities.length === 0"
-          nzNotFoundContent="Nu s-au găsit autorități pentru această locație. Poți adăuga una personalizată mai jos.">
-        </nz-empty>
+        @if (!isLoadingAuthorities && !isSearching && filteredAuthorities.length === 0) {
+          <nz-empty
+            nzNotFoundContent="Nu s-au găsit autorități pentru această locație. Poți adăuga una personalizată mai jos.">
+          </nz-empty>
+        }
       </nz-spin>
     </nz-card>
   </div>

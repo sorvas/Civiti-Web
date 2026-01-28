@@ -84,7 +84,7 @@ import {
 export const ngZorroConfig = provideNzConfig({
   theme: {
     primaryColor: '#FCA311',
-    infoColor: '#14213D',
+    infoColor: '#1890ff',
     successColor: '#28A745',
     warningColor: '#FCA311',
     errorColor: '#DC3545',

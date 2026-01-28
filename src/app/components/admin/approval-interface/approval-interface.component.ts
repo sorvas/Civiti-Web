@@ -384,10 +384,11 @@ export class ApprovalInterfaceComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           console.log('[ADMIN] Bulk approval completed:', response);
-          this.message.success(`${response.successCount} probleme aprobate cu succes`);
 
-          if (response.failedCount > 0) {
-            this.message.warning(`${response.failedCount} probleme nu au putut fi aprobate`);
+          this.message.success(`${response.successfullyApproved} probleme aprobate cu succes`);
+
+          if (response.failed > 0) {
+            this.message.warning(`${response.failed} probleme nu au putut fi aprobate`);
           }
 
           // Remove approved issues from the list
@@ -399,9 +400,9 @@ export class ApprovalInterfaceComponent implements OnInit, OnDestroy {
 
           // Update stats
           if (this.adminStats) {
-            this.adminStats.pendingReview -= response.successCount;
-            this.adminStats.reviewedToday += response.successCount;
-            this.adminStats.approved += response.successCount;
+            this.adminStats.pendingReview -= response.successfullyApproved;
+            this.adminStats.reviewedToday += response.successfullyApproved;
+            this.adminStats.approved += response.successfullyApproved;
           }
 
           // Clear selection

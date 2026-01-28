@@ -581,12 +581,14 @@ export interface IssueActionResponse {
 export interface BulkApproveResult {
   issueId: string;
   success: boolean;
-  message: string;
+  message?: string;
 }
 
 export interface BulkApproveResponse {
-  successCount: number;
-  failedCount: number;
+  totalRequested: number;
+  successfullyApproved: number;
+  failed: number;
+  message?: string;
   results: BulkApproveResult[];
 }
 
