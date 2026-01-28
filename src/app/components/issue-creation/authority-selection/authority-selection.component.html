@@ -98,7 +98,7 @@
       <ng-template #cardTitle>
         <div class="authorities-card-title">
           <span>Autorități pentru {{ issueCity }}</span>
-          <nz-tag *ngIf="issueDistrict" nzColor="blue">{{ issueDistrict }}</nz-tag>
+          <nz-tag *ngIf="issueDistrict()" nzColor="blue">{{ issueDistrict() }}</nz-tag>
         </div>
       </ng-template>
 

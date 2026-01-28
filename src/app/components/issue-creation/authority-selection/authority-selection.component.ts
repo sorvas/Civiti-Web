@@ -103,7 +103,7 @@ export class AuthoritySelectionComponent implements OnInit {
 
   // Issue location for filtering authorities
   issueCity = '';
-  issueDistrict = '';
+  issueDistrict = signal('');
 
   // Authority selection state
   availableAuthorities: AuthorityListResponse[] = [];
@@ -131,7 +131,7 @@ export class AuthoritySelectionComponent implements OnInit {
 
     if (district.length > 0) {
       groups.push({
-        label: `Autorități ${this.issueDistrict || 'locale'}`,
+        label: `Autorități ${this.issueDistrict() || 'locale'}`,
         icon: 'home',
         authorities: district
       });
@@ -181,7 +181,7 @@ export class AuthoritySelectionComponent implements OnInit {
         switchMap(search => {
           const params = {
             city: this.issueCity,
-            district: this.issueDistrict || undefined,
+            district: this.issueDistrict() || undefined,
             search: search.trim() || undefined
           };
           console.log('[AUTHORITY SELECTION] Loading authorities with params:', params);
@@ -224,8 +224,8 @@ export class AuthoritySelectionComponent implements OnInit {
       this.currentLocation = JSON.parse(locationData);
       // Extract city and district for authority filtering
       this.issueCity = this.currentLocation?.city || DEFAULT_CITY;
-      this.issueDistrict = this.currentLocation?.district || '';
-      console.log('[AUTHORITY SELECTION] Loaded location - city:', this.issueCity, 'district:', this.issueDistrict);
+      this.issueDistrict.set(this.currentLocation?.district || '');
+      console.log('[AUTHORITY SELECTION] Loaded location - city:', this.issueCity, 'district:', this.issueDistrict());
     }
 
     // Load previously selected authorities if returning to this step
