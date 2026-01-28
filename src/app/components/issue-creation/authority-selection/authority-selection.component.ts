@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -25,6 +25,15 @@ import { AuthorityListResponse } from '../../../types/civica-api.types';
 import { ApiService } from '../../../services/api.service';
 import { CategoryInfo } from '../../../services/category.service';
 import { DEFAULT_CITY } from '../../../data/romanian-locations';
+
+/**
+ * Grouped authorities for display
+ */
+interface AuthorityGroup {
+  label: string;
+  icon: string;
+  authorities: AuthorityListResponse[];
+}
 
 /**
  * Validate email format
@@ -94,15 +103,42 @@ export class AuthoritySelectionComponent implements OnInit {
 
   // Issue location for filtering authorities
   issueCity = '';
-  issueDistrict = '';
+  issueDistrict = signal('');
 
   // Authority selection state
   availableAuthorities: AuthorityListResponse[] = [];
-  filteredAuthorities: AuthorityListResponse[] = [];
+  filteredAuthorities = signal<AuthorityListResponse[]>([]);
   selectedAuthorities: SelectedAuthority[] = [];
   searchTerm = '';
   isLoadingAuthorities = false;
   isSearching = false;
+
+  /** Grouped authorities for display - computed from filteredAuthorities signal */
+  groupedAuthorities = computed<AuthorityGroup[]>(() => {
+    const filtered = this.filteredAuthorities();
+    const municipal = filtered.filter(a => !a.district);
+    const district = filtered.filter(a => a.district);
+
+    const groups: AuthorityGroup[] = [];
+
+    if (municipal.length > 0) {
+      groups.push({
+        label: 'Autorități municipale',
+        icon: 'bank',
+        authorities: municipal
+      });
+    }
+
+    if (district.length > 0) {
+      groups.push({
+        label: `Autorități ${this.issueDistrict() || 'locale'}`,
+        icon: 'home',
+        authorities: district
+      });
+    }
+
+    return groups;
+  });
 
   // Custom email form
   customEmailForm!: FormGroup;
@@ -145,7 +181,7 @@ export class AuthoritySelectionComponent implements OnInit {
         switchMap(search => {
           const params = {
             city: this.issueCity,
-            district: this.issueDistrict || undefined,
+            district: this.issueDistrict() || undefined,
             search: search.trim() || undefined
           };
           console.log('[AUTHORITY SELECTION] Loading authorities with params:', params);
@@ -162,7 +198,7 @@ export class AuthoritySelectionComponent implements OnInit {
       .subscribe(authorities => {
         console.log('[AUTHORITY SELECTION] Loaded authorities:', authorities);
         this.availableAuthorities = authorities;
-        this.filteredAuthorities = [...authorities];
+        this.filteredAuthorities.set([...authorities]);
         this.isLoadingAuthorities = false;
         this.isSearching = false;
       });
@@ -188,8 +224,8 @@ export class AuthoritySelectionComponent implements OnInit {
       this.currentLocation = JSON.parse(locationData);
       // Extract city and district for authority filtering
       this.issueCity = this.currentLocation?.city || DEFAULT_CITY;
-      this.issueDistrict = this.currentLocation?.district || '';
-      console.log('[AUTHORITY SELECTION] Loaded location - city:', this.issueCity, 'district:', this.issueDistrict);
+      this.issueDistrict.set(this.currentLocation?.district || '');
+      console.log('[AUTHORITY SELECTION] Loaded location - city:', this.issueCity, 'district:', this.issueDistrict());
     }
 
     // Load previously selected authorities if returning to this step
@@ -219,13 +255,6 @@ export class AuthoritySelectionComponent implements OnInit {
   filterAuthorities(): void {
     // Trigger search through unified stream
     this.loadTrigger$.next(this.searchTerm);
-  }
-
-  /**
-   * Get display label for authority district
-   */
-  getDistrictLabel(authority: AuthorityListResponse): string {
-    return authority.district || 'Nivel municipal';
   }
 
   isAuthoritySelected(authority: AuthorityListResponse): boolean {

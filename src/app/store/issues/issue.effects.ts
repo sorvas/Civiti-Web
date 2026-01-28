@@ -31,7 +31,7 @@ export class IssueEffects {
           catchError(error => {
             console.error('[Issues Effects] Failed to load issues:', error);
             return of(IssueActions.loadIssuesFailure({
-              error: error.message || 'Failed to load issues'
+              error: error.message || 'Nu s-au putut încărca problemele'
             }));
           })
         )
@@ -49,13 +49,13 @@ export class IssueEffects {
             if (issue) {
               return IssueActions.loadIssueSuccess({ issue });
             } else {
-              return IssueActions.loadIssueFailure({ error: 'Issue not found' });
+              return IssueActions.loadIssueFailure({ error: 'Problema nu a fost găsită' });
             }
           }),
           catchError(error => {
             console.error(`[Issues Effects] Failed to load issue ${id}:`, error);
             return of(IssueActions.loadIssueFailure({ 
-              error: error.message || 'Failed to load issue details' 
+              error: error.message || 'Nu s-au putut încărca detaliile problemei' 
             }));
           })
         )
@@ -85,7 +85,7 @@ export class IssueEffects {
               this.message.error('Eroare la înregistrarea email-ului');
             }
             return of(IssueActions.trackEmailSentFailure({
-              error: error.message || 'Failed to track email'
+              error: error.message || 'Eroare la înregistrarea email-ului'
             }));
           })
         )
@@ -110,7 +110,7 @@ export class IssueEffects {
             console.error('[Issues Effects] Failed to create issue:', error);
             this.message.error('Eroare la crearea problemei. Vă rugăm încercați din nou.');
             return of(IssueActions.createIssueFailure({ 
-              error: error.message || 'Failed to create issue' 
+              error: error.message || 'Eroare la crearea problemei' 
             }));
           })
         )
@@ -187,7 +187,7 @@ export class IssueEffects {
             this.message.error('Eroare la retragerea votului');
             return of(IssueActions.removeVoteFromIssueFailure({
               issueId,
-              error: error.message || 'Failed to remove vote'
+              error: error.message || 'Eroare la retragerea votului'
             }));
           })
         )

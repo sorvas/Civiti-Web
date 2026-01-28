@@ -27,7 +27,7 @@ export class UserEffects {
             gamification: profile.gamification
           })),
           catchError(error => of(UserActions.loadUserProfileFailure({
-            error: error.message || 'Failed to load user profile'
+            error: error.message || 'Nu s-a putut încărca profilul'
           })))
         )
       )
@@ -45,7 +45,7 @@ export class UserEffects {
             gamification: profile.gamification
           })),
           catchError(error => of(UserActions.updateUserProfileFailure({
-            error: error.message || 'Failed to update user profile'
+            error: error.message || 'Nu s-a putut actualiza profilul'
           })))
         )
       )
@@ -63,7 +63,7 @@ export class UserEffects {
         this.apiService.getGamification().pipe(
           map(gamification => UserActions.loadGamificationDataSuccess({ gamification })),
           catchError(error => of(UserActions.loadGamificationDataFailure({
-            error: error.message || 'Failed to load gamification data'
+            error: error.message || 'Nu s-au putut încărca datele de gamificare'
           })))
         )
       )
@@ -86,13 +86,13 @@ export class UserEffects {
     this.actions$.pipe(
       ofType(UserActions.awardBadge),
       switchMap(({ badgeId, reason }) => {
-        this.message.success(`🏆 New badge earned! ${reason}`, { nzDuration: 5000 });
+        this.message.success(`🏆 Insignă nouă obținută! ${reason}`, { nzDuration: 5000 });
 
         // Refresh gamification data after badge award
         return this.apiService.getGamification().pipe(
           map(gamification => UserActions.awardBadgeSuccess({ gamification })),
           catchError(error => {
-            this.message.error('Failed to award badge');
+            this.message.error('Eroare la acordarea insignei');
             return of({ type: '[User] Award Badge Error' });
           })
         );
@@ -126,7 +126,7 @@ export class UserEffects {
       ofType(UserActions.updateUserPreferences),
       switchMap(({ preferences }) => {
         // For now, simulate preferences update since backend may not have this endpoint yet
-        this.message.success('Preferences updated successfully');
+        this.message.success('Preferințele au fost actualizate');
 
         return of(UserActions.updateUserPreferencesSuccess({
           preferences: {
@@ -146,7 +146,7 @@ export class UserEffects {
     this.actions$.pipe(
       ofType(UserActions.updateUserProfileSuccess),
       tap(() => {
-        this.message.success('Profile updated successfully');
+        this.message.success('Profilul a fost actualizat');
       })
     ),
     { dispatch: false }

@@ -32,11 +32,11 @@ export class AuthEffects {
             // Handle OAuth redirect case
             if (error.type === 'oauth_redirect') {
               // This is expected for OAuth flows
-              this.message.info('Redirecting to Google for authentication...');
+              this.message.info('Redirecționare către Google pentru autentificare...');
               return of({ type: '[Auth] OAuth Redirect' });
             }
             return of(AuthActions.loginWithGoogleFailure({ 
-              error: error.message || 'Google login failed' 
+              error: error.message || 'Autentificarea cu Google a eșuat' 
             }));
           })
         )
@@ -76,7 +76,7 @@ export class AuthEffects {
             );
           }),
           catchError(error => of(AuthActions.loginWithEmailFailure({ 
-            error: error.message || 'Email login failed' 
+            error: error.message || 'Autentificarea cu email a eșuat' 
           })))
         )
       )
@@ -149,7 +149,7 @@ export class AuthEffects {
             );
           }),
           catchError(error => of(AuthActions.registerWithEmailFailure({
-            error: error.message || 'Registration failed'
+            error: error.message || 'Înregistrarea a eșuat'
           })))
         )
       )
@@ -178,7 +178,7 @@ export class AuthEffects {
             refreshToken: response.refreshToken
           })),
           catchError(error => of(AuthActions.refreshTokenFailure({ 
-            error: error.message || 'Token refresh failed' 
+            error: error.message || 'Reîmprospătarea sesiunii a eșuat' 
           })))
         )
       )
@@ -285,7 +285,7 @@ export class AuthEffects {
           catchError(error => {
             console.error('Load user error:', error);
             return of(AuthActions.loadUserFromStorageFailure({ 
-              error: error.message || 'Failed to load user from storage' 
+              error: error.message || 'Nu s-au putut încărca datele utilizatorului' 
             }));
           })
         )
