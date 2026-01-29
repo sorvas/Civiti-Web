@@ -3,7 +3,10 @@
   [nzBackIcon]="showBackButton ? 'arrow-left' : null"
   (nzBack)="showBackButton ? onBack() : null">
 
-  <nz-page-header-title>{{ title }}</nz-page-header-title>
+  <nz-page-header-title>
+    <span class="header-title-text">{{ title }}</span>
+    <span class="header-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
+  </nz-page-header-title>
 
   <nz-page-header-extra>
     <!-- Auth buttons for unauthenticated users -->
@@ -46,7 +49,7 @@
         <nz-avatar
           [nzSrc]="(user$ | async)?.photoUrl || undefined"
           [nzText]="(displayName$ | async)?.charAt(0)"
-          [nzSize]="36"
+          [nzSize]="42"
           class="cursor-pointer">
         </nz-avatar>
         <i nz-icon nzType="caret-down" nzTheme="fill" class="dropdown-arrow"></i>

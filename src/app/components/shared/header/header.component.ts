@@ -42,6 +42,7 @@ export class HeaderComponent {
   @Input() title = 'Civiti';
   @Input() showBackButton = false;
   @Input() backUrl: string | null = null;
+  @Input() subtitle: string | null = null;
 
   // Event emitter for custom back navigation
   @Output() back = new EventEmitter<void>();

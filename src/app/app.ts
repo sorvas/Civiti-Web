@@ -12,6 +12,7 @@ interface RouteConfig {
   showBackButton: boolean;
   backUrl: string | null;
   hideHeader: boolean;
+  subtitle: string | null;
 }
 
 @Component({
@@ -22,7 +23,8 @@ interface RouteConfig {
       *ngIf="!routeConfig.hideHeader"
       [title]="routeConfig.title"
       [showBackButton]="routeConfig.showBackButton"
-      [backUrl]="routeConfig.backUrl">
+      [backUrl]="routeConfig.backUrl"
+      [subtitle]="routeConfig.subtitle">
     </app-header>
     <router-outlet />
   `,
@@ -41,7 +43,8 @@ export class App implements OnInit {
     title: 'Civiti',
     showBackButton: false,
     backUrl: null,
-    hideHeader: true
+    hideHeader: true,
+    subtitle: null
   };
 
   constructor() {
@@ -71,7 +74,8 @@ export class App implements OnInit {
       title: data['headerTitle'] || 'Civiti',
       showBackButton: data['showBackButton'] ?? false,
       backUrl: data['backUrl'] || null,
-      hideHeader: data['hideHeader'] ?? false
+      hideHeader: data['hideHeader'] ?? false,
+      subtitle: data['headerSubtitle'] || null
     };
   }
 }

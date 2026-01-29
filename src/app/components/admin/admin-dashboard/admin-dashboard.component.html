@@ -1,24 +1,6 @@
 <nz-spin [nzSpinning]="isLoading">
   <div class="admin-dashboard-container">
 
-    <!-- Header Section -->
-    <div class="admin-header">
-      <div class="header-content">
-        <div class="admin-welcome">
-          <nz-avatar
-            [nzSrc]="(user$ | async)?.photoUrl || undefined"
-            [nzText]="(displayName$ | async)?.charAt(0)"
-            nzSize="large"
-            class="admin-avatar">
-          </nz-avatar>
-          <div class="welcome-text">
-            <h1>Panou de Administrare</h1>
-            <p>Bine ai venit, {{ displayName$ | async }}!</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Quick Stats -->
     <div class="stats-section" *ngIf="statistics$ | async as stats">
       <div nz-row [nzGutter]="[16, 16]">

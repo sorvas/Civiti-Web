@@ -1,58 +1,6 @@
 <nz-spin [nzSpinning]="(isLoading$ | async) || false">
   <div class="dashboard-container">
   
-  <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <div class="user-welcome">
-        <nz-avatar
-          [nzSrc]="(user$ | async)?.photoUrl || undefined"
-          [nzText]="(displayName$ | async)?.charAt(0)"
-          nzSize="large"
-          class="user-avatar">
-        </nz-avatar>
-        <div class="welcome-text">
-          <h1>Bună, {{ displayName$ | async }}!</h1>
-          <p>Bine ai revenit la panoul civic</p>
-        </div>
-      </div>
-      
-      <div class="header-actions">
-        <button 
-          nz-button 
-          nzType="default" 
-          nzSize="small"
-          (click)="navigateToIssues()"
-          class="issues-nav-button"
-        >
-          <i nz-icon nzType="unordered-list" nzTheme="outline" class="mr-1"></i>
-          Vezi Probleme
-        </button>
-        <button nz-button nzType="text" nzSize="large" nz-dropdown [nzDropdownMenu]="userMenu" nzTrigger="click">
-          <span nz-icon nzType="user"></span>
-          <span nz-icon nzType="down"></span>
-        </button>
-        <nz-dropdown-menu #userMenu="nzDropdownMenu">
-          <ul nz-menu>
-            <li nz-menu-item>
-              <span nz-icon nzType="setting"></span>
-              Setări profil
-            </li>
-            <li nz-menu-item>
-              <span nz-icon nzType="notification"></span>
-              Notificări
-            </li>
-            <li nz-menu-divider></li>
-            <li nz-menu-item (click)="logout()">
-              <span nz-icon nzType="logout"></span>
-              Deconectare
-            </li>
-          </ul>
-        </nz-dropdown-menu>
-      </div>
-    </div>
-  </div>
-
   <!-- Gamification Progress Section -->
   <div class="gamification-section" *ngIf="levelProgress$ | async as progress">
     <nz-card nzTitle="Impactul tău civic" class="impact-card">
