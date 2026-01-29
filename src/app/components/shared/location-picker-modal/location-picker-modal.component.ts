@@ -6,7 +6,7 @@ import {
   inject,
   Inject,
   PLATFORM_ID,
-  ViewChild,
+  viewChild,
   ElementRef,
   ChangeDetectorRef
 } from '@angular/core';
@@ -68,7 +68,7 @@ export class LocationPickerModalComponent implements OnInit, AfterViewInit, OnDe
   private _destroy$ = new Subject<void>();
   private _isDestroyed = false;
 
-  @ViewChild('addressInput') addressInputRef!: ElementRef<HTMLInputElement>;
+  addressInputRef = viewChild<ElementRef<HTMLInputElement>>('addressInput');
 
   // Form control for address input
   addressControl = new FormControl('');
