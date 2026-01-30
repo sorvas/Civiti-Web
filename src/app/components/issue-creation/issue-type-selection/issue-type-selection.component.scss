@@ -1,3 +1,8 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
 .issue-type-container {
   flex: 1;
   background: var(--platinum);
