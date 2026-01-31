@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
@@ -14,6 +15,8 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 import { AppState } from '../../../store/app.state';
 import { selectIsAuthenticated } from '../../../store/auth/auth.selectors';
@@ -26,6 +29,7 @@ import { LocationData } from '../../../types/location.types';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     NzCardModule,
     NzButtonModule,
@@ -35,7 +39,9 @@ import { LocationData } from '../../../types/location.types';
     NzTypographyModule,
     NzAlertModule,
     NzTagModule,
-    NzModalModule
+    NzModalModule,
+    NzInputModule,
+    NzToolTipModule
   ],
   templateUrl: './issue-type-selection.component.html',
   styleUrls: ['./issue-type-selection.component.scss']
@@ -53,6 +59,9 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
     district?: string;
   } | null = null;
 
+  issueTitle = '';
+  isTitleCustomized = false;
+
   locationError: string | null = null;
   isAuthenticated$!: Observable<boolean>;
 
@@ -68,6 +77,7 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadCategories();
     this.loadCurrentLocation();
+    this.loadSavedTitle();
   }
 
   ngOnDestroy(): void {
@@ -118,6 +128,9 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
   selectCategory(category: CategoryInfo): void {
     this.selectedCategory = category;
     console.log('[TIP PROBLEMĂ] Categorie selectată:', category.name);
+    if (!this.isTitleCustomized) {
+      this.issueTitle = this.generateDefaultTitle();
+    }
   }
 
   /**
@@ -146,11 +159,37 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
 
     console.log('[TIP PROBLEMĂ] Se continuă cu fotografiile pentru categoria:', this.selectedCategory.name);
 
-    // Store selected category in session storage for the creation flow
+    // Store selected category and title in session storage for the creation flow
     sessionStorage.setItem('civica_selected_category', JSON.stringify(this.selectedCategory));
     sessionStorage.setItem('civica_current_location', JSON.stringify(this.currentLocation));
+    if (this.issueTitle) {
+      sessionStorage.setItem('civica_issue_title', this.issueTitle);
+    }
 
     this.router.navigate(['/create-issue/photo']);
+  }
+
+  onTitleChange(): void {
+    this.isTitleCustomized = true;
+  }
+
+  resetTitle(): void {
+    this.isTitleCustomized = false;
+    this.issueTitle = this.generateDefaultTitle();
+  }
+
+  private generateDefaultTitle(): string {
+    const category = this.selectedCategory?.name || '';
+    const location = this.currentLocation?.address.split(',')[0] || '';
+    return `Problemă de ${category} pe ${location}`;
+  }
+
+  private loadSavedTitle(): void {
+    const savedTitle = sessionStorage.getItem('civica_issue_title');
+    if (savedTitle) {
+      this.issueTitle = savedTitle;
+      this.isTitleCustomized = true;
+    }
   }
 
   changeLocation(): void {
@@ -186,6 +225,11 @@ export class IssueTypeSelectionComponent implements OnInit, OnDestroy {
 
         // Clear location error since a valid location was selected
         this.locationError = null;
+
+        // Regenerate title if not customized
+        if (!this.isTitleCustomized) {
+          this.issueTitle = this.generateDefaultTitle();
+        }
       }
     });
   }

@@ -328,6 +328,51 @@
   font-weight: 500;
 }
 
+.title-section {
+  margin-bottom: 2rem;
+}
+
+.title-card {
+  max-width: 600px;
+  margin: 0 auto;
+  border-radius: 12px;
+  border: 1px solid var(--platinum);
+}
+
+.title-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.title-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--oxford-blue);
+}
+
+.title-hint {
+  font-size: 0.75rem;
+  color: rgba(20, 33, 61, 0.5);
+}
+
+.reset-icon {
+  cursor: pointer;
+  color: rgba(20, 33, 61, 0.45);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--orange-web);
+  }
+}
+
+:host ::ng-deep .title-card .ant-input:focus,
+:host ::ng-deep .title-card .ant-input-focused {
+  border-color: var(--orange-web);
+  box-shadow: 0 0 0 2px rgba(252, 163, 17, 0.15);
+}
+
 .navigation-section {
   max-width: 1200px;
   margin: 0 auto;

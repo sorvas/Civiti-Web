@@ -65,7 +65,7 @@
           <div class="upload-text">
             <h4>Fă sau încarcă fotografii</h4>
             <p>Fă clic pentru a deschide camera sau selectează din galerie</p>
-            <p class="upload-note">Maxim 8 fotografii, până la 10MB fiecare</p>
+            <p class="upload-note">Maxim {{ maxPhotos }} fotografii, până la 10MB fiecare</p>
           </div>
         </div>
 
@@ -85,7 +85,7 @@
       @if (uploadedPhotos.length > 0) {
         <div class="photo-grid">
           <div class="photo-count">
-            <span>{{ uploadedPhotos.length }}/8 fotografii încărcate</span>
+            <span>{{ uploadedPhotos.length }}/{{ maxPhotos }} fotografii încărcate</span>
           </div>
 
           <div nz-row [nzGutter]="[16, 16]">

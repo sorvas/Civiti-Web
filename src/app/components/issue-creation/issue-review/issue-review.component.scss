@@ -181,6 +181,20 @@
   margin-bottom: 1rem;
 }
 
+.issue-title-display {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.issue-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--oxford-blue);
+  margin: 0;
+  line-height: 1.4;
+}
+
 .overview-header {
   display: flex;
   justify-content: space-between;
