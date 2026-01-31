@@ -13,7 +13,6 @@ import {
   IssueItem,
   IssueDetailResponse,
   TrackEmailRequest,
-  TrackEmailResponse,
   LeaderboardResponse,
   AdminIssueListItem,
   AdminIssueDetailResponse,
@@ -144,8 +143,8 @@ export class ApiService {
     return this.http.post<CreateIssueResponse>(`${this.baseUrl}/issues`, data);
   }
 
-  trackEmailSent(issueId: string, data: TrackEmailRequest): Observable<TrackEmailResponse> {
-    return this.http.post<TrackEmailResponse>(`${this.baseUrl}/issues/${issueId}/email-sent`, data);
+  trackEmailSent(issueId: string, data: TrackEmailRequest): Observable<string> {
+    return this.http.post(`${this.baseUrl}/issues/${issueId}/email-sent`, data, { responseType: 'text' });
   }
 
   /**

@@ -64,8 +64,17 @@ export class AuthService {
     );
   }
 
-  registerWithEmail(email: string, password: string, displayName: string): Observable<AuthResponse> {
-    return this.supabaseAuthService.signUpWithEmail(email, password, displayName).pipe(
+  registerWithEmail(email: string, password: string, displayName: string, profileData?: {
+    county: string;
+    city: string;
+    district?: string;
+    residence_type: string;
+    issue_updates_enabled?: boolean;
+    community_news_enabled?: boolean;
+    monthly_digest_enabled?: boolean;
+    achievements_enabled?: boolean;
+  }): Observable<AuthResponse> {
+    return this.supabaseAuthService.signUpWithEmail(email, password, displayName, profileData).pipe(
       map(this.mapSupabaseToAuthResponse),
       catchError(error => {
         throw new Error(error.message || 'Registration failed');

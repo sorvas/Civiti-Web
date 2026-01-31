@@ -41,6 +41,10 @@ export const registerWithEmail = createAction(
     city: string;
     district?: string;
     residenceType: 'Apartment' | 'House' | 'Business';
+    issueUpdatesEnabled?: boolean;
+    communityNewsEnabled?: boolean;
+    monthlyDigestEnabled?: boolean;
+    achievementsEnabled?: boolean;
   }>()
 );
 

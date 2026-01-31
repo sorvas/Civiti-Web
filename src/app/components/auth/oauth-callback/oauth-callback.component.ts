@@ -18,7 +18,8 @@ import { DEFAULT_CITY } from '../../../data/romanian-locations';
         <nz-spin nzSize="large" nzTip="Se procesează autentificarea..."></nz-spin>
       </div>
     </div>
-  `
+  `,
+  styles: [`:host { display: flex; flex-direction: column; flex: 1; }`]
 })
 export class OauthCallbackComponent implements OnInit {
   constructor(

@@ -83,7 +83,13 @@
 }
 
 .preferences-group {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 2rem;
+}
+
+:deep(.preferences-group .ant-checkbox-wrapper + .ant-checkbox-wrapper) {
+  margin-inline-start: 0;
 }
 
 .preference-item {

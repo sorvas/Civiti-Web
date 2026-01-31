@@ -66,9 +66,13 @@ export const issueReducer = createReducer(
   
   // Track Email Sent
   on(IssueActions.trackEmailSentSuccess, (state, { issueId, newTotalEmails }) => {
+    // Skip store update if backend didn't return the new count (empty response).
+    // The loadIssue refresh will provide the actual value.
+    if (!newTotalEmails) return state;
+
     const issue = state.entities[issueId];
     let newState = state;
-    
+
     // Update the list item if it exists
     if (issue) {
       newState = issueAdapter.updateOne({
@@ -76,7 +80,7 @@ export const issueReducer = createReducer(
         changes: { emailsSent: newTotalEmails }
       }, state);
     }
-    
+
     // Also update the detailed issue if it's the selected one
     if (state.selectedIssueDetail && state.selectedIssueDetail.id === issueId) {
       newState = {
@@ -87,7 +91,7 @@ export const issueReducer = createReducer(
         }
       };
     }
-    
+
     return newState;
   }),
   

@@ -87,33 +87,24 @@ export class AuthEffects {
   registerWithEmail$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.registerWithEmail),
-      switchMap(({ email, password, displayName, county, city, district, residenceType }) =>
-        this.authService.registerWithEmail(email, password, displayName).pipe(
+      switchMap(({ email, password, displayName, county, city, district, residenceType, issueUpdatesEnabled, communityNewsEnabled, monthlyDigestEnabled, achievementsEnabled }) =>
+        this.authService.registerWithEmail(email, password, displayName, {
+          county,
+          city,
+          district,
+          residence_type: residenceType,
+          issue_updates_enabled: issueUpdatesEnabled,
+          community_news_enabled: communityNewsEnabled,
+          monthly_digest_enabled: monthlyDigestEnabled,
+          achievements_enabled: achievementsEnabled
+        }).pipe(
           switchMap(response => {
             // Check if email confirmation is required (no token returned)
             if (!response.token) {
-              // Email confirmation is required - don't log user in
-              // Still create user profile in backend for when they confirm
-              return this.apiService.createUserProfile({
-                supabaseUserId: response.user.id,
-                email: response.user.email || email,
-                displayName: displayName || email.split('@')[0],
-                county,
-                city,
-                district,
-                residenceType
-              }).pipe(
-                map(() => AuthActions.registerWithEmailPendingConfirmation({ email })),
-                catchError((error) => {
-                  // Profile creation failed but Supabase auth succeeded
-                  // Log error with context so it can be investigated
-                  console.error('[Registration] Profile creation failed:', error);
-                  console.error('[Registration] Lost profile data:', { county, city, district, residenceType });
-                  // Show warning toast - profile can be completed after login
-                  this.message.warning('Contul a fost creat, dar profilul nu a putut fi salvat. Poți completa profilul după autentificare.');
-                  return of(AuthActions.registerWithEmailPendingConfirmation({ email }));
-                })
-              );
+              // Email confirmation required - profile data is stored in Supabase user_metadata.
+              // On first login after confirmation, getUserProfile() triggers backend auto-creation
+              // which reads user_metadata to populate the profile.
+              return of(AuthActions.registerWithEmailPendingConfirmation({ email }));
             }
 
             // Email confirmation not required - user is logged in immediately
@@ -124,7 +115,11 @@ export class AuthEffects {
               county,
               city,
               district,
-              residenceType
+              residenceType,
+              issueUpdatesEnabled,
+              communityNewsEnabled,
+              monthlyDigestEnabled,
+              achievementsEnabled
             }).pipe(
               map(profile => AuthActions.registerWithEmailSuccess({
                 user: {

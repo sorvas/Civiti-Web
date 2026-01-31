@@ -186,6 +186,10 @@ export interface CreateUserProfileRequest {
   city: string;
   district?: string;
   residenceType: ResidenceType;
+  issueUpdatesEnabled?: boolean;
+  communityNewsEnabled?: boolean;
+  monthlyDigestEnabled?: boolean;
+  achievementsEnabled?: boolean;
 }
 
 export interface UpdateUserProfileRequest {

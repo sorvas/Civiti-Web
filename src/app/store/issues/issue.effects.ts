@@ -69,12 +69,12 @@ export class IssueEffects {
       ofType(IssueActions.trackEmailSent),
       mergeMap(({ issueId, targetAuthority }) =>
         this.apiService.trackEmailSent(issueId, { targetAuthority }).pipe(
-          map(response => {
-            this.message.success(`Email trimis! +${response.pointsEarned} puncte câștigate!`);
+          map(() => {
+            this.message.success('Contribuția ta a fost înregistrată!');
             return IssueActions.trackEmailSentSuccess({
               issueId,
-              pointsEarned: response.pointsEarned,
-              newTotalEmails: response.newTotalEmails
+              pointsEarned: 0,
+              newTotalEmails: 0
             });
           }),
           catchError(error => {

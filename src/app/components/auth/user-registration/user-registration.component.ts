@@ -269,7 +269,11 @@ export class UserRegistrationComponent implements OnInit, OnDestroy {
         county: selectedCounty?.name || formValue.county,
         city: formValue.city,
         district: formValue.district || undefined,
-        residenceType: formValue.residenceType
+        residenceType: formValue.residenceType,
+        issueUpdatesEnabled: formValue.issueUpdates,
+        communityNewsEnabled: formValue.communityNews,
+        monthlyDigestEnabled: formValue.monthlyDigest,
+        achievementsEnabled: formValue.achievements
       }));
     } else {
       // Mark all fields as touched to show validation errors
