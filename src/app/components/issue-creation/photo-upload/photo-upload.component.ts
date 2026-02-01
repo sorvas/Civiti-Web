@@ -87,6 +87,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
   private _galleryInitPromise: Promise<void> | null = null;
   private _galleryNeedsRefresh = false;
 
+  readonly maxPhotos = 8;
+
   // Compression settings for optimal storage/quality balance
   private readonly compressionOptions = {
     maxSizeMB: 1,              // Target max 1MB per image
@@ -324,8 +326,8 @@ export class PhotoUploadComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!files || files.length === 0) return;
 
     // Check if adding these files would exceed the limit
-    if (this.uploadedPhotos.length + files.length > 5) {
-      this.message.warning('Maxim 5 fotografii permise. Vă rugăm să ștergeți câteva fotografii mai întâi.');
+    if (this.uploadedPhotos.length + files.length > this.maxPhotos) {
+      this.message.warning(`Maxim ${this.maxPhotos} fotografii permise. Vă rugăm să ștergeți câteva fotografii mai întâi.`);
       target.value = '';  // Reset to allow re-selection
       return;
     }

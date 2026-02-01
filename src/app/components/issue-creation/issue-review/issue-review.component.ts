@@ -28,6 +28,8 @@ import {
   URGENCY_LEVELS,
   URGENCY_COLORS
 } from '../../../types/civica-api.types';
+import { generateIssueTitle } from '../issue-title.util';
+import { clearIssueCreationSession } from '../issue-session.util';
 
 interface SelectedAuthority {
   /** Server authority ID (only for predefined authorities) */
@@ -63,6 +65,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
   selectedAuthorities: SelectedAuthority[] = [];
   isSubmitting = false;
   isSubmitted = false;
+  issueTitle = '';
 
   constructor(
     private router: Router,
@@ -84,6 +87,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
     const issueDataString = sessionStorage.getItem('civica_complete_issue_data');
     if (issueDataString) {
       this.issueData = JSON.parse(issueDataString);
+      this.issueTitle = this.resolveIssueTitle();
       console.log('[ISSUE REVIEW] Loaded complete issue data:', this.issueData);
     } else {
       console.warn('[ISSUE REVIEW] No complete issue data found, redirecting...');
@@ -168,7 +172,7 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
 
     // Prepare issue data for submission using the API format
     const issueToSubmit: CreateIssueRequest = {
-      title: this.generateIssueTitle(),
+      title: this.issueTitle,
       description: this.issueData.description,
       category: this.issueData.category.id as IssueCategory,
       address: this.issueData.location.address,
@@ -215,18 +219,18 @@ export class IssueReviewComponent implements OnInit, OnDestroy {
       });
   }
 
-  private generateIssueTitle(): string {
-    const category = this.issueData.category.name;
-    const location = this.issueData.location.address.split(',')[0]; // Get street name
-    return `Problemă de ${category} pe ${location}`;
+  private resolveIssueTitle(): string {
+    const savedTitle = sessionStorage.getItem('civica_issue_title');
+    if (savedTitle) return savedTitle;
+
+    return generateIssueTitle(
+      this.issueData.category.name,
+      this.issueData.location.address
+    );
   }
 
   private clearSessionData(): void {
-    sessionStorage.removeItem('civica_selected_category');
-    sessionStorage.removeItem('civica_uploaded_photos');
-    sessionStorage.removeItem('civica_current_location');
-    sessionStorage.removeItem('civica_complete_issue_data');
-    sessionStorage.removeItem('civica_selected_authorities');
+    clearIssueCreationSession();
   }
 
   createAnotherIssue(): void {

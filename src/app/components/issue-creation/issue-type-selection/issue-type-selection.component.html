@@ -148,6 +148,30 @@
       }
     </div>
 
+    <!-- Issue Title -->
+    @if (selectedCategory && currentLocation) {
+      <div class="title-section">
+        <nz-card class="title-card">
+          <div class="title-header">
+            <label class="title-label">Titlul sesizării</label>
+            <span class="title-hint">Generat automat — poți personaliza</span>
+          </div>
+          <nz-input-group [nzSuffix]="resetBtnTpl">
+            <input nz-input
+              [(ngModel)]="issueTitle"
+              (ngModelChange)="onTitleChange()"
+              placeholder="Titlul problemei..."
+              maxlength="150" />
+          </nz-input-group>
+          <ng-template #resetBtnTpl>
+            @if (isTitleCustomized) {
+              <span nz-icon nzType="undo" nz-tooltip nzTooltipTitle="Resetează titlul" class="reset-icon" (click)="resetTitle()"></span>
+            }
+          </ng-template>
+        </nz-card>
+      </div>
+    }
+
     <!-- Navigation -->
     <div class="navigation-section">
       <div class="nav-buttons">

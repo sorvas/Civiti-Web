@@ -94,7 +94,11 @@
     <!-- Issue Overview -->
     <nz-card nzTitle="Prezentare generală a problemei" class="review-card">
       <div class="issue-overview">
-        
+
+        <div class="issue-title-display">
+          <h2 class="issue-title">{{ issueTitle }}</h2>
+        </div>
+
         <div class="overview-header">
           <div class="category-display">
             <span class="category-icon" nz-icon [nzType]="issueData.category.icon" nzTheme="outline"></span>
