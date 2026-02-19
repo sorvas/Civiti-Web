@@ -433,6 +433,10 @@
   max-width: 600px;
   margin: 0 auto 2rem;
 
+  nz-select {
+    width: 100%;
+  }
+
   .category-description-mobile {
     margin-top: 0.5rem;
     color: rgba(20, 33, 61, 0.7);

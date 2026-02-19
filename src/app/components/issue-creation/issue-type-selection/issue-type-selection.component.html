@@ -65,8 +65,7 @@
         nzPlaceHolder="Selectează categoria"
         [ngModel]="selectedCategory?.name"
         (ngModelChange)="onMobileCategorySelect($event)"
-        nzSize="large"
-        style="width: 100%">
+        nzSize="large">
         @for (cat of categories; track cat.name) {
           <nz-option [nzValue]="cat.name" [nzLabel]="cat.name" />
         }

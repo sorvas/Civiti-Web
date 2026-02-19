@@ -54,6 +54,7 @@ All backend calls go through `ApiService` (`src/app/services/api.service.ts`). T
 
 ### CSS/Styling
 - **NEVER use `!important`** - Use higher specificity instead
+- **NEVER use inline styles in templates** - All styling must go in the component's SCSS file
 - Use CSS custom properties for theming
 - Target NG-ZORRO classes alongside custom classes (e.g., `button.auth-button.ant-btn`)
 
