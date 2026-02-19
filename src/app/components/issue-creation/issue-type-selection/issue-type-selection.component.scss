@@ -432,6 +432,12 @@
   display: none;
   max-width: 600px;
   margin: 0 auto 2rem;
+
+  .category-description-mobile {
+    margin-top: 0.5rem;
+    color: rgba(20, 33, 61, 0.7);
+    font-size: 0.9rem;
+  }
 }
 
 // Mobile responsiveness
