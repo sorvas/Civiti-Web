@@ -14,7 +14,7 @@ interface SeoConfig {
 const DEFAULTS = {
   title: 'Civiti — Participare Civică',
   description: 'Civiti — Platformă de participare civică din România. Raportează probleme locale și presează autoritățile prin campanii coordonate email.',
-  ogImage: '/images/logo/civiti-logo.svg', // TODO: replace with a 1200x630 PNG for better OG/Twitter compatibility
+  ogImage: '/images/logo/civiti-og-image.png',
   ogType: 'website',
 } as const;
 
