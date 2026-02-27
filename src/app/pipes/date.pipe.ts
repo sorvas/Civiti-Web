@@ -1,9 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+// These pipes use new Date() internally, making them technically impure.
+// Kept pure intentionally: inputs are immutable timestamps, values are
+// correct at render time, and pure: false would run on every change
+// detection cycle — negating the performance benefit over method calls.
+
 @Pipe({
   name: 'daysSince',
-  standalone: true,
-  pure: true
+  standalone: true
 })
 export class DaysSincePipe implements PipeTransform {
   transform(date: string | Date | null | undefined): number {
@@ -16,8 +20,7 @@ export class DaysSincePipe implements PipeTransform {
 
 @Pipe({
   name: 'timeAgo',
-  standalone: true,
-  pure: true
+  standalone: true
 })
 export class TimeAgoPipe implements PipeTransform {
   transform(date: string | null | undefined): string {
@@ -36,8 +39,7 @@ export class TimeAgoPipe implements PipeTransform {
 
 @Pipe({
   name: 'formatDateTime',
-  standalone: true,
-  pure: true
+  standalone: true
 })
 export class FormatDateTimePipe implements PipeTransform {
   transform(dateStr: string | null | undefined): string {
