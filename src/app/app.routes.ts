@@ -117,6 +117,11 @@ export const routes: Routes = [
         data: { animation: 'AdminApprovalPage', headerTitle: 'Aprobare Probleme', showBackButton: true, backUrl: '/admin/dashboard', headerSubtitle: 'Revizuiește și aprobă sesizările comunității' }
       },
       {
+        path: 'issue/:id',
+        loadComponent: () => import('./components/admin/admin-issue-detail/admin-issue-detail.component').then(m => m.AdminIssueDetailComponent),
+        data: { animation: 'AdminIssueDetailPage', headerTitle: 'Înapoi', showBackButton: true, backUrl: '/admin/approval' }
+      },
+      {
         path: 'activity',
         loadComponent: () => import('./components/admin/activity-log/activity-log.component').then(m => m.ActivityLogComponent),
         data: { animation: 'AdminActivityPage', headerTitle: 'Jurnal Activitate', showBackButton: true, backUrl: '/admin/dashboard' }

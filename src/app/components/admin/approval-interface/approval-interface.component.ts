@@ -167,7 +167,7 @@ export class ApprovalInterfaceComponent implements OnInit {
 
   viewIssueDetails(issue: AdminIssueListItem): void {
     console.log('[ADMIN] View issue details:', issue.id);
-    this.router.navigate(['/issue', issue.id]);
+    this.router.navigate(['/admin/issue', issue.id]);
   }
 
   openApprovalModal(issue: AdminIssueListItem): void {
