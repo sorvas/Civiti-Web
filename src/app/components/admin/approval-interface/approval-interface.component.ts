@@ -32,9 +32,7 @@ import {
   AdminStatisticsResponse,
   ApproveIssueRequest,
   RejectIssueRequest,
-  BulkApproveRequest,
-  UrgencyLevel,
-  IssueStatus
+  BulkApproveRequest
 } from '../../../types/civica-api.types';
 
 @Component({
@@ -167,7 +165,7 @@ export class ApprovalInterfaceComponent implements OnInit {
 
   viewIssueDetails(issue: AdminIssueListItem): void {
     console.log('[ADMIN] View issue details:', issue.id);
-    this.router.navigate(['/issue', issue.id]);
+    this.router.navigate(['/admin/issue', issue.id]);
   }
 
   openApprovalModal(issue: AdminIssueListItem): void {
@@ -191,7 +189,7 @@ export class ApprovalInterfaceComponent implements OnInit {
   viewPhoto(photoUrl: string): void {
     console.log('[ADMIN] View photo:', photoUrl);
     // Open photo in new tab/window
-    window.open(photoUrl, '_blank');
+    window.open(photoUrl, '_blank', 'noopener,noreferrer');
   }
 
   submitDecision(): void {

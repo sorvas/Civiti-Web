@@ -13,6 +13,18 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+
+  button.ant-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    span[nz-icon] {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+    }
+  }
 }
 
 .bulk-approval-content {
