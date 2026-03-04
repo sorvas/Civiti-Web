@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { switchMap, catchError, EMPTY } from 'rxjs';
 
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -104,34 +105,30 @@ export class AdminIssueDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(params => {
-        const issueId = params.get('id');
-        if (issueId) {
-          this.loadIssue(issueId);
-        } else {
-          this.error = 'ID-ul problemei lipsește';
-          this.isLoading = false;
-        }
-      });
-  }
-
-  private loadIssue(id: string): void {
-    this.isLoading = true;
-    this.error = null;
-
-    this.apiService.getAdminIssueDetail(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (issue) => {
-          this.issue = issue;
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('[ADMIN] Failed to load issue detail:', err);
-          this.error = err.error?.message || 'Nu s-au putut încărca detaliile problemei';
-          this.isLoading = false;
-        }
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(params => {
+          const issueId = params.get('id');
+          if (!issueId) {
+            this.error = 'ID-ul problemei lipsește';
+            this.isLoading = false;
+            return EMPTY;
+          }
+          this.isLoading = true;
+          this.error = null;
+          return this.apiService.getAdminIssueDetail(issueId).pipe(
+            catchError(err => {
+              console.error('[ADMIN] Failed to load issue detail:', err);
+              this.error = err.error?.message || 'Nu s-au putut încărca detaliile problemei';
+              this.isLoading = false;
+              return EMPTY;
+            })
+          );
+        })
+      )
+      .subscribe(issue => {
+        this.issue = issue;
+        this.isLoading = false;
       });
   }
 
