@@ -293,13 +293,13 @@
           </nz-form-item>
 
           <nz-form-item>
-            <nz-form-label [nzSpan]="24">Notite</nz-form-label>
-            <nz-form-control [nzSpan]="24">
+            <nz-form-label [nzSpan]="24" [nzRequired]="decisionForm.get('decision')?.value === 'reject'">Notițe</nz-form-label>
+            <nz-form-control [nzSpan]="24" nzErrorTip="Motivul respingerii este obligatoriu">
               <textarea
                 nz-input
                 formControlName="notes"
                 rows="4"
-                placeholder="Adauga notite sau feedback...">
+                placeholder="Adaugă notițe sau feedback...">
               </textarea>
             </nz-form-control>
           </nz-form-item>

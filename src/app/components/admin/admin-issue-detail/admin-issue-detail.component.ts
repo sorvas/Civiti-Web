@@ -11,7 +11,6 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -20,8 +19,6 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-
 import { ApiService } from '../../../services/api.service';
 import { CategoryColorPipe } from '../../../pipes/category.pipe';
 import { UrgencyStatusPipe } from '../../../pipes/urgency.pipe';
@@ -48,7 +45,6 @@ import {
     NzSpinModule,
     NzGridModule,
     NzDividerModule,
-    NzDescriptionsModule,
     NzTimelineModule,
     NzModalModule,
     NzFormModule,
@@ -56,7 +52,6 @@ import {
     NzRadioModule,
     NzBadgeModule,
     NzTabsModule,
-    NzToolTipModule,
     CategoryColorPipe,
     UrgencyStatusPipe,
     StatusTextPipe,
@@ -90,6 +85,16 @@ export class AdminIssueDetailComponent implements OnInit {
     this.decisionForm = this.fb.group({
       decision: ['', [Validators.required]],
       notes: ['']
+    });
+
+    this.decisionForm.get('decision')?.valueChanges.subscribe(val => {
+      const notesControl = this.decisionForm.get('notes');
+      if (val === 'reject') {
+        notesControl?.setValidators([Validators.required]);
+      } else {
+        notesControl?.clearValidators();
+      }
+      notesControl?.updateValueAndValidity();
     });
   }
 
