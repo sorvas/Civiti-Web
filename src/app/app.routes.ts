@@ -164,6 +164,31 @@ export const routes: Routes = [
       // SEO tags for issue detail are set dynamically by the component via SeoService
     }
   },
+  // Legal pages - public, no auth required (linked from mobile app for App Store review)
+  {
+    path: 'privacy',
+    loadComponent: () => import('./components/legal/privacy-policy/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+    data: {
+      animation: 'PrivacyPage',
+      hideHeader: true,
+      seo: {
+        title: 'Politica de Confidențialitate — Civiti',
+        description: 'Politica de confidențialitate a platformei Civiti. Află cum colectăm, utilizăm și protejăm datele tale personale.'
+      }
+    }
+  },
+  {
+    path: 'terms',
+    loadComponent: () => import('./components/legal/terms/terms.component').then(m => m.TermsComponent),
+    data: {
+      animation: 'TermsPage',
+      hideHeader: true,
+      seo: {
+        title: 'Termeni și Condiții — Civiti',
+        description: 'Termenii și condițiile de utilizare a platformei Civiti pentru cetățeni și comunități.'
+      }
+    }
+  },
   // Fallback route
   {
     path: '**',
