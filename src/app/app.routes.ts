@@ -172,7 +172,7 @@ export const routes: Routes = [
       animation: 'PrivacyPage',
       hideHeader: true,
       seo: {
-        title: 'Politica de Confidențialitate — Civiti',
+        title: 'Politica de Confidențialitate',
         description: 'Politica de confidențialitate a platformei Civiti. Află cum colectăm, utilizăm și protejăm datele tale personale.'
       }
     }
@@ -184,7 +184,7 @@ export const routes: Routes = [
       animation: 'TermsPage',
       hideHeader: true,
       seo: {
-        title: 'Termeni și Condiții — Civiti',
+        title: 'Termeni și Condiții',
         description: 'Termenii și condițiile de utilizare a platformei Civiti pentru cetățeni și comunități.'
       }
     }
