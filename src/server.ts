@@ -23,7 +23,15 @@ const angularApp = new AngularNodeAppEngine();
 // ============================================================================
 
 const SITE_URL = 'https://civiti.ro';
-const SITEMAP_ISSUE_PAGE_SIZE = 1000;
+// The backend clamps `pageSize` to a maximum of 100 (verified in
+// IssueEndpoints.cs), so requesting more just gets silently reduced. We
+// match the cap exactly and paginate to get everything.
+const SITEMAP_ISSUE_PAGE_SIZE = 100;
+// Hard safety cap on pagination iterations. At 100 issues per page this is
+// 10,000 public issues — far more than the Bucuresti pilot needs. If the
+// platform ever approaches this, switch to a dedicated /api/issues/sitemap
+// lightweight endpoint instead of paginating the full listing.
+const SITEMAP_MAX_PAGES = 100;
 const SITEMAP_FETCH_TIMEOUT_MS = 5000;
 
 interface SitemapIssue {
@@ -54,20 +62,46 @@ function xmlEscape(value: string): string {
 }
 
 async function fetchPublicIssues(): Promise<SitemapIssue[]> {
-  const url = `${environment.apiUrl}/issues?pageSize=${SITEMAP_ISSUE_PAGE_SIZE}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(SITEMAP_FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) {
-    throw new Error(`Issues API returned ${res.status}`);
+  // One global timeout for the entire pagination loop — if the whole
+  // operation doesn't finish in SITEMAP_FETCH_TIMEOUT_MS, abort and fall
+  // back to the static-only sitemap. This prevents a slow backend from
+  // eating unbounded function time one page at a time.
+  const signal = AbortSignal.timeout(SITEMAP_FETCH_TIMEOUT_MS);
+
+  // `status=Active,Resolved` includes resolved issues, whose detail pages
+  // remain publicly viewable and are high-value long-tail SEO content
+  // ("success story" pages). Without this the endpoint defaults to Active
+  // only and every resolved issue is invisible to Google.
+  const baseQuery = `pageSize=${SITEMAP_ISSUE_PAGE_SIZE}&status=Active,Resolved&sortBy=date`;
+
+  const all: SitemapIssue[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  while (page <= SITEMAP_MAX_PAGES) {
+    const url = `${environment.apiUrl}/issues?page=${page}&${baseQuery}`;
+    const res = await fetch(url, { signal });
+    if (!res.ok) {
+      throw new Error(`Issues API returned ${res.status} on page ${page}`);
+    }
+    const data = (await res.json()) as PagedIssuesResponse;
+    all.push(...(data.items ?? []));
+    totalPages = data.totalPages ?? 1;
+    if (page >= totalPages) {
+      break;
+    }
+    page++;
   }
-  const data = (await res.json()) as PagedIssuesResponse;
-  if (data.totalPages > 1) {
+
+  if (page >= SITEMAP_MAX_PAGES && totalPages > SITEMAP_MAX_PAGES) {
     console.warn(
-      `[sitemap] Indexed ${data.items?.length ?? 0} of ${data.totalItems} issues (pageSize cap at ${SITEMAP_ISSUE_PAGE_SIZE}). Add pagination before this becomes load-bearing for SEO.`,
+      `[sitemap] Hit SITEMAP_MAX_PAGES=${SITEMAP_MAX_PAGES} safety cap. ` +
+        `Backend reported totalPages=${totalPages} — the sitemap is incomplete. ` +
+        `Switch to a dedicated lightweight endpoint before this matters for SEO.`,
     );
   }
-  return data.items ?? [];
+
+  return all;
 }
 
 function buildSitemapXml(issues: SitemapIssue[]): string {
