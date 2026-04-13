@@ -60,6 +60,10 @@ export const appConfig: ApplicationConfig = {
     // `withEventReplay()` was removed: it installs event listeners before
     // hydration completes and has known interactions with NG-ZORRO's CDK
     // overlays that can cause a post-hydration style flash.
+    // HTTP transfer cache is included by default since Angular 17 — GET
+    // responses made during SSR are serialized into the HTML and replayed
+    // on the client, so NgRx effects that re-dispatch on hydration hit
+    // the cache instead of the network.
     provideClientHydration(),
     provideAnimations(),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),

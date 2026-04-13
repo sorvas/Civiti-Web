@@ -1,12 +1,17 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, mergeMap, concatMap, catchError, tap } from 'rxjs/operators';
+import { map, mergeMap, concatMap, catchError, tap, timeout } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { ApiService } from '../../services/api.service';
 import * as IssueActions from './issue.actions';
+
+// SSR requests must resolve before Vercel's function timeout (default 10 s).
+// 5 s matches the sitemap route's AbortSignal.timeout and leaves headroom.
+const SSR_TIMEOUT_MS = 5_000;
 
 @Injectable()
 export class IssueEffects {
@@ -14,13 +19,18 @@ export class IssueEffects {
   private apiService = inject(ApiService);
   private router = inject(Router);
   private message = inject(NzMessageService);
+  private platformId = inject(PLATFORM_ID);
 
   // Load Issues Effect
   loadIssues$ = createEffect(() =>
     this.actions$.pipe(
       ofType(IssueActions.loadIssues),
-      mergeMap(({ params }) =>
-        this.apiService.getIssues(params).pipe(
+      mergeMap(({ params }) => {
+        let source$ = this.apiService.getIssues(params);
+        if (isPlatformServer(this.platformId)) {
+          source$ = source$.pipe(timeout(SSR_TIMEOUT_MS));
+        }
+        return source$.pipe(
           map(response => IssueActions.loadIssuesSuccess({
             issues: response.items,
             totalItems: response.totalItems,
@@ -34,8 +44,8 @@ export class IssueEffects {
               error: error.message || 'Nu s-au putut încărca problemele'
             }));
           })
-        )
-      )
+        );
+      })
     )
   );
 
@@ -43,8 +53,12 @@ export class IssueEffects {
   loadIssue$ = createEffect(() =>
     this.actions$.pipe(
       ofType(IssueActions.loadIssue),
-      mergeMap(({ id }) =>
-        this.apiService.getIssueById(id).pipe(
+      mergeMap(({ id }) => {
+        let source$ = this.apiService.getIssueById(id);
+        if (isPlatformServer(this.platformId)) {
+          source$ = source$.pipe(timeout(SSR_TIMEOUT_MS));
+        }
+        return source$.pipe(
           map(issue => {
             if (issue) {
               return IssueActions.loadIssueSuccess({ issue });
@@ -54,12 +68,12 @@ export class IssueEffects {
           }),
           catchError(error => {
             console.error(`[Issues Effects] Failed to load issue ${id}:`, error);
-            return of(IssueActions.loadIssueFailure({ 
-              error: error.message || 'Nu s-au putut încărca detaliile problemei' 
+            return of(IssueActions.loadIssueFailure({
+              error: error.message || 'Nu s-au putut încărca detaliile problemei'
             }));
           })
-        )
-      )
+        );
+      })
     )
   );
 

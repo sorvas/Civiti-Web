@@ -79,6 +79,18 @@ The app uses Romanian locale (`ro`). Component text should be in Romanian.
 - Prefer pure pipes for transformations (memoized, only recalculate when inputs change)
 - For computed values, use signals or move logic to pipes
 
+### SSR / Hydration
+- Routes rendered on the server (`RenderMode.Server`) must not call browser-only APIs — see `app.routes.server.ts` for the render-mode map
+- NgRx effects that fire during SSR must include a `timeout()` (5 s) guarded by `isPlatformServer()` so a slow backend doesn't hang the Vercel function
+- **nz-button + icon hydration rule**: when an `nz-button` contains both an icon (`<span nz-icon>`) and text, **always wrap the text in an explicit `<span>`**. Without it, NG-ZORRO's `ContentObserver` wraps the text node at runtime, creating a DOM mismatch that triggers an `NG0500` hydration error loop:
+  ```html
+  <!-- WRONG — causes NG0500 on SSR-hydrated routes -->
+  <button nz-button><span nz-icon nzType="mail"></span>Trimite</button>
+
+  <!-- CORRECT -->
+  <button nz-button><span nz-icon nzType="mail"></span><span>Trimite</span></button>
+  ```
+
 ### Angular 19+ Patterns
 - **Use `inject()` over constructor injection** - Cleaner, works in functions
 - Use standalone components (no NgModules)
