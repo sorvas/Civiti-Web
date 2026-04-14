@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AppState } from './store/app.state';
 import * as AuthActions from './store/auth/auth.actions';
 import { HeaderComponent } from './components/shared/header/header.component';
+import { FooterComponent } from './components/shared/footer/footer.component';
 import { SeoService } from './services/seo.service';
 
 interface RouteConfig {
@@ -13,12 +14,13 @@ interface RouteConfig {
   showBackButton: boolean;
   backUrl: string | null;
   hideHeader: boolean;
+  showFooter: boolean;
   subtitle: string | null;
 }
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent],
   template: `
     @if (!routeConfig.hideHeader) {
       <app-header
@@ -30,6 +32,9 @@ interface RouteConfig {
     <main>
       <router-outlet />
     </main>
+    @if (routeConfig.showFooter) {
+      <app-footer />
+    }
   `,
   styleUrl: './app.scss',
   standalone: true
@@ -47,6 +52,7 @@ export class App implements OnInit {
     showBackButton: false,
     backUrl: null,
     hideHeader: true,
+    showFooter: false,
     subtitle: null
   };
 
@@ -79,6 +85,7 @@ export class App implements OnInit {
       showBackButton: data['showBackButton'] ?? false,
       backUrl: data['backUrl'] || null,
       hideHeader: data['hideHeader'] ?? false,
+      showFooter: data['showFooter'] ?? false,
       subtitle: data['headerSubtitle'] || null
     };
 

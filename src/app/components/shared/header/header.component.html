@@ -10,7 +10,10 @@
     </nz-page-header-title>
 
     <nz-page-header-extra>
-      <app-auth-buttons [showAdminLink]="true" [showIssuesLink]="true" />
+      <div class="header-nav">
+        <a routerLink="/ghid" class="nav-link">Ghid</a>
+        <app-auth-buttons [showAdminLink]="true" [showIssuesLink]="true" />
+      </div>
     </nz-page-header-extra>
   </nz-page-header>
 </nav>

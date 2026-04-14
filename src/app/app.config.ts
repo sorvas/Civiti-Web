@@ -4,7 +4,7 @@ import {
   isDevMode,
   importProvidersFrom,
 } from '@angular/core';
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { provideRouter, withPreloading, withInMemoryScrolling, PreloadAllModules } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
@@ -42,6 +42,7 @@ export const appConfig: ApplicationConfig = {
     // stable state.
     provideRouter(
       routes,
+      withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
       ...(isBrowserEnv ? [withPreloading(PreloadAllModules)] : [])
     ),
     provideStore(reducers),

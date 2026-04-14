@@ -1,0 +1,37 @@
+<footer class="site-footer">
+  <div class="footer-container">
+    <div class="footer-grid">
+      <div class="footer-column">
+        <h3 class="footer-heading">Orașe</h3>
+        <ul class="footer-links">
+          <li><a routerLink="/bucuresti">București</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">Ghid Civic</h3>
+        <ul class="footer-links">
+          @for (article of guideArticles; track article.slug) {
+            <li><a [routerLink]="['/ghid', article.slug]">{{ article.title }}</a></li>
+          }
+          <li><a routerLink="/ghid" class="view-all">Toate articolele →</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h3 class="footer-heading">Legal</h3>
+        <ul class="footer-links">
+          <li><a routerLink="/privacy">Confidențialitate</a></li>
+          <li><a routerLink="/terms">Termeni și Condiții</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-bottom-inner">
+      <span class="footer-brand">Civiti</span>
+      <span class="footer-copy">Participare Civică pentru România · {{ currentYear }}</span>
+    </div>
+  </div>
+</footer>

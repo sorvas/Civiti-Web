@@ -7,8 +7,12 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'privacy', renderMode: RenderMode.Prerender },
   { path: 'terms', renderMode: RenderMode.Prerender },
 
+  // Guide listing — static content, prerendered at build time
+  { path: 'ghid', renderMode: RenderMode.Prerender },
+
   // Dynamic public pages — server-rendered on demand for freshness
-  { path: 'issues', renderMode: RenderMode.Server },
+  { path: 'bucuresti', renderMode: RenderMode.Server },
+  { path: 'ghid/:slug', renderMode: RenderMode.Server },
   { path: 'issue/:id', renderMode: RenderMode.Server },
 
   // Auth pages — client-side only (no SEO value)

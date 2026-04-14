@@ -58,5 +58,8 @@ src/environments/google-maps-config.ts
 src/environments/environment.ts
 src/environments/environment.prod.ts
 
+# Auto-generated guide data
+src/app/generated/guide-data.ts
+
 .vercel
 .env*.local

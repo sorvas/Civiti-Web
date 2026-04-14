@@ -1,5 +1,5 @@
 import { Component, inject, input } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -11,6 +11,7 @@ import { AuthButtonsComponent } from '../auth-buttons/auth-buttons.component';
   selector: 'app-header',
   standalone: true,
   imports: [
+    RouterLink,
     NzPageHeaderModule,
     NzButtonModule,
     NzIconModule,
