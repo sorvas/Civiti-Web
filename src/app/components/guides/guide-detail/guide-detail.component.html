@@ -1,0 +1,43 @@
+@if (article) {
+  <div class="guide-page">
+    <div class="guide-container">
+      <div class="guide-header">
+        <div class="guide-breadcrumb">
+          <a routerLink="/ghid">Ghid Civic</a>
+          <span class="separator">/</span>
+          <span class="current">{{ categoryLabel(article.category) }}</span>
+        </div>
+        <h1 class="guide-title">{{ article.title }}</h1>
+        <p class="guide-description">{{ article.description }}</p>
+        <div class="guide-meta">
+          <span>{{ article.readingTime }}</span>
+          <span class="dot"></span>
+          <span>{{ article.publishedAt }}</span>
+        </div>
+      </div>
+
+      <div class="guide-content" [innerHTML]="article.htmlContent | trustedHtml"></div>
+
+      <div class="guide-cta">
+        <h3 class="cta-title">Ai o problemă în cartierul tău?</h3>
+        <p class="cta-text">Raportează problema pe Civiti și noi te ajutăm să trimiți petiția direct către autoritățile responsabile.</p>
+        <a routerLink="/bucuresti" class="cta-button">Raportează o problemă</a>
+      </div>
+
+      @if (relatedArticles.length > 0) {
+        <div class="guide-related">
+          <h3 class="related-heading">Articole similare</h3>
+          <div class="related-grid">
+            @for (related of relatedArticles; track related.slug) {
+              <a [routerLink]="['/ghid', related.slug]" class="related-card">
+                <span class="related-category">{{ categoryLabel(related.category) }}</span>
+                <span class="related-title">{{ related.title }}</span>
+                <span class="related-meta">{{ related.readingTime }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

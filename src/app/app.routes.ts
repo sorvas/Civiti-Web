@@ -50,7 +50,7 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./components/user/dashboard/dashboard.component').then(m => m.DashboardComponent),
     canActivate: [authGuard],
-    data: { animation: 'DashboardPage', headerTitle: 'Panou de Control', showBackButton: true, backUrl: '/issues' }
+    data: { animation: 'DashboardPage', headerTitle: 'Panou de Control', showBackButton: true, backUrl: '/bucuresti' }
   },
   {
     path: 'my-issues',
@@ -72,7 +72,7 @@ export const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./components/issue-creation/issue-type-selection/issue-type-selection.component').then(m => m.IssueTypeSelectionComponent),
-        data: { animation: 'CreateIssuePage', headerTitle: 'Raportează o Problemă', showBackButton: true, backUrl: '/issues' }
+        data: { animation: 'CreateIssuePage', headerTitle: 'Raportează o Problemă', showBackButton: true, backUrl: '/bucuresti' }
       },
       {
         path: 'photo',
@@ -109,7 +109,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./components/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
-        data: { animation: 'AdminDashboardPage', headerTitle: 'Panou de Administrare', showBackButton: true, backUrl: '/issues' }
+        data: { animation: 'AdminDashboardPage', headerTitle: 'Panou de Administrare', showBackButton: true, backUrl: '/bucuresti' }
       },
       {
         path: 'approval',
@@ -135,6 +135,7 @@ export const routes: Routes = [
     data: {
       animation: 'LocationPage',
       hideHeader: true,
+      showFooter: true,
       seo: {
         title: 'Selectează Localitatea',
         description: 'Alege orașul tău pentru a vedea și raporta probleme locale. Platforma de participare civică pentru cetățenii din România.',
@@ -143,15 +144,50 @@ export const routes: Routes = [
   },
   {
     path: 'issues',
-    loadComponent: () => import('./components/issues-list/issues-list.component').then(m => m.IssuesListComponent),
+    redirectTo: '/bucuresti',
+    pathMatch: 'full'
+  },
+  {
+    path: 'bucuresti',
+    loadComponent: () => import('./components/city-hub/city-hub.component').then(m => m.CityHubComponent),
     data: {
-      animation: 'IssuesPage',
+      animation: 'CityHubPage',
       headerTitle: 'Probleme Active',
+      showFooter: true,
       seo: {
-        title: 'Probleme Active',
-        description: 'Vezi toate problemele raportate de cetățeni. Infrastructură, mediu, siguranță publică și multe altele.',
+        title: 'Probleme Civice în București',
+        description: 'Vezi și raportează probleme locale în București. Infrastructură, mediu, siguranță publică și alte probleme raportate de cetățeni.',
       }
     }
+  },
+  {
+    path: 'ghid',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./components/guides/guide-list/guide-list.component').then(m => m.GuideListComponent),
+        data: {
+          animation: 'GuideListPage',
+          headerTitle: 'Ghid Civic',
+          showFooter: true,
+          seo: {
+            title: 'Ghid Civic',
+            description: 'Ghid de participare civică. Află-ți drepturile și cum poți raporta probleme în comunitatea ta.',
+          }
+        }
+      },
+      {
+        path: ':slug',
+        loadComponent: () => import('./components/guides/guide-detail/guide-detail.component').then(m => m.GuideDetailComponent),
+        data: {
+          animation: 'GuideDetailPage',
+          headerTitle: 'Ghid Civic',
+          showBackButton: true,
+          backUrl: '/ghid',
+          showFooter: true,
+        }
+      }
+    ]
   },
   {
     path: 'issue/:id',
@@ -160,8 +196,7 @@ export const routes: Routes = [
       animation: 'DetailPage',
       headerTitle: 'Detalii Problemă',
       showBackButton: true,
-      backUrl: '/issues',
-      // SEO tags for issue detail are set dynamically by the component via SeoService
+      backUrl: '/bucuresti',
     }
   },
   // Legal pages - public, no auth required (linked from mobile app for App Store review)
@@ -171,6 +206,7 @@ export const routes: Routes = [
     data: {
       animation: 'PrivacyPage',
       hideHeader: true,
+      showFooter: true,
       seo: {
         title: 'Politica de Confidențialitate',
         description: 'Politica de confidențialitate a platformei Civiti. Află cum colectăm, utilizăm și protejăm datele tale personale.'
@@ -183,6 +219,7 @@ export const routes: Routes = [
     data: {
       animation: 'TermsPage',
       hideHeader: true,
+      showFooter: true,
       seo: {
         title: 'Termeni și Condiții',
         description: 'Termenii și condițiile de utilizare a platformei Civiti pentru cetățeni și comunități.'

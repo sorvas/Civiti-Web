@@ -76,6 +76,6 @@ export class LocationSelectionComponent implements OnInit {
     console.log('Location data:', selectedLocation);
 
     this._store.dispatch(LocationActions.setLocation(selectedLocation));
-    this._router.navigate(['/issues']);
+    this._router.navigate(['/bucuresti']);
   }
 }

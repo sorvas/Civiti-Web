@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "prestart": "node scripts/inject-env-vars.js",
+    "prestart": "node scripts/inject-env-vars.js && node scripts/build-guides.js",
     "start": "ng serve",
     "start:dev": "node scripts/set-env.js --dev && node scripts/inject-env-vars.js && ng serve",
     "restore-placeholder": "node scripts/set-env.js --restore",
-    "prebuild": "node scripts/inject-env-vars.js && node scripts/inject-api-key-simple.js",
+    "prebuild": "node scripts/inject-env-vars.js && node scripts/inject-api-key-simple.js && node scripts/build-guides.js",
+    "build:guides": "node scripts/build-guides.js",
     "build": "ng build",
     "postbuild": "node scripts/inject-api-key-html.js",
     "watch": "ng build --watch --configuration development",
@@ -61,6 +62,7 @@
     "@types/jasmine": "~5.1.4",
     "@types/node": "^22.10.2",
     "dotenv": "^17.2.1",
+    "gray-matter": "^4.0.3",
     "jasmine-core": "~5.7.0",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.2.0",
@@ -68,6 +70,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "less": "^4.4.0",
+    "marked": "^18.0.0",
     "typescript": "~5.6.3"
   },
   "overrides": {

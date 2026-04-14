@@ -1,0 +1,61 @@
+<div class="guide-list-page">
+  <div class="guide-list-container">
+    <div class="page-header">
+      <h1 class="page-title">Ghid Civic</h1>
+      <p class="page-description">Informații practice despre drepturile tale civice, cum să interacționezi cu autoritățile locale și povești despre schimbările reale din comunitățile din România.</p>
+      <div class="category-filters">
+        @for (cat of categories; track cat.value) {
+          <button
+            class="filter-tab"
+            [class.active]="selectedCategory() === cat.value"
+            (click)="selectCategory(cat.value)">
+            {{ cat.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (featuredArticle(); as featured) {
+      <a [routerLink]="['/ghid', featured.slug]" class="featured-article">
+        @if (featured.image) {
+          <img [src]="featured.image" [alt]="featured.title" class="featured-image">
+        } @else {
+          <div class="featured-image featured-image--placeholder"></div>
+        }
+        <div class="featured-content">
+          <span class="article-category">{{ categoryLabel(featured.category) }}</span>
+          <h2 class="featured-title">{{ featured.title }}</h2>
+          <p class="featured-description">{{ featured.description }}</p>
+          <div class="article-meta">
+            <span>{{ featured.readingTime }}</span>
+            <span class="dot"></span>
+            <span>{{ featured.publishedAt }}</span>
+          </div>
+          <span class="read-link">Citește ghidul →</span>
+        </div>
+      </a>
+    }
+
+    <div class="article-grid">
+      @for (article of regularArticles(); track article.slug) {
+        <a [routerLink]="['/ghid', article.slug]" class="article-card">
+          @if (article.image) {
+            <img [src]="article.image" [alt]="article.title" class="card-image">
+          } @else {
+            <div class="card-image card-image--placeholder"></div>
+          }
+          <div class="card-body">
+            <span class="article-category">{{ categoryLabel(article.category) }}</span>
+            <h3 class="card-title">{{ article.title }}</h3>
+            <p class="card-description">{{ article.description }}</p>
+            <div class="article-meta">
+              <span>{{ article.readingTime }}</span>
+              <span class="dot"></span>
+              <span>{{ article.publishedAt }}</span>
+            </div>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
+</div>

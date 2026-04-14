@@ -61,7 +61,7 @@ export class AuthButtonsComponent {
   }
 
   navigateToIssues(): void {
-    this._router.navigate(['/issues']);
+    this._router.navigate(['/bucuresti']);
   }
 
   navigateToAdmin(): void {
