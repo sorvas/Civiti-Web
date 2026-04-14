@@ -5,7 +5,7 @@
         <div class="guide-breadcrumb">
           <a routerLink="/ghid">Ghid Civic</a>
           <span class="separator">/</span>
-          <span class="current">{{ categoryLabels[article.category] }}</span>
+          <span class="current">{{ categoryLabels[article.category] ?? article.category }}</span>
         </div>
         <h1 class="guide-title">{{ article.title }}</h1>
         <p class="guide-description">{{ article.description }}</p>
@@ -30,7 +30,7 @@
           <div class="related-grid">
             @for (related of relatedArticles; track related.slug) {
               <a [routerLink]="['/ghid', related.slug]" class="related-card">
-                <span class="related-category">{{ categoryLabels[related.category] }}</span>
+                <span class="related-category">{{ categoryLabels[related.category] ?? related.category }}</span>
                 <span class="related-title">{{ related.title }}</span>
                 <span class="related-meta">{{ related.readingTime }}</span>
               </a>

@@ -24,7 +24,7 @@ export class GuideListComponent {
 
   selectedCategory = signal('all');
 
-  readonly categoryLabels: Record<string, string> = {
+  readonly categoryLabels: Readonly<Partial<Record<string, string>>> = {
     'ghid-practic': 'Ghid practic',
     'drepturi': 'Drepturi',
   };

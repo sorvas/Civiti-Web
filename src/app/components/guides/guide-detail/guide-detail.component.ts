@@ -21,7 +21,7 @@ export class GuideDetailComponent implements OnInit {
   article: GuideArticle | undefined;
   relatedArticles: GuideArticle[] = [];
 
-  readonly categoryLabels: Record<string, string> = {
+  readonly categoryLabels: Readonly<Partial<Record<string, string>>> = {
     'ghid-practic': 'Ghid practic',
     'drepturi': 'Drepturi',
   };

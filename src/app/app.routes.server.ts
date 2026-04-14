@@ -13,7 +13,6 @@ export const serverRoutes: ServerRoute[] = [
   // Dynamic public pages — server-rendered on demand for freshness
   { path: 'bucuresti', renderMode: RenderMode.Server },
   { path: 'ghid/:slug', renderMode: RenderMode.Server },
-  { path: 'issues', renderMode: RenderMode.Server },
   { path: 'issue/:id', renderMode: RenderMode.Server },
 
   // Auth pages — client-side only (no SEO value)

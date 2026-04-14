@@ -23,7 +23,7 @@
           <div class="featured-image featured-image--placeholder"></div>
         }
         <div class="featured-content">
-          <span class="article-category">{{ categoryLabels[featured.category] }}</span>
+          <span class="article-category">{{ categoryLabels[featured.category] ?? featured.category }}</span>
           <h2 class="featured-title">{{ featured.title }}</h2>
           <p class="featured-description">{{ featured.description }}</p>
           <div class="article-meta">
@@ -45,7 +45,7 @@
             <div class="card-image card-image--placeholder"></div>
           }
           <div class="card-body">
-            <span class="article-category">{{ categoryLabels[article.category] }}</span>
+            <span class="article-category">{{ categoryLabels[article.category] ?? article.category }}</span>
             <h3 class="card-title">{{ article.title }}</h3>
             <p class="card-description">{{ article.description }}</p>
             <div class="article-meta">
