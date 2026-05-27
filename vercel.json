@@ -5,7 +5,7 @@
   ],
   "functions": {
     "api/index.mjs": {
-      "includeFiles": "dist/Civica/**"
+      "includeFiles": "dist/Civica/server/**"
     }
   }
 }
